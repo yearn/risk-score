@@ -98,7 +98,7 @@ Explain what the protocol does, its usage, and yield sources.
 
 ### Token Mint Authority
 
-Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#mint-authority-enumeration-workflow).
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#permission-and-mint-authority-enumeration-workflow).
 
 **Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
 
@@ -152,9 +152,37 @@ See `reports/report/mezo-musd.md` for a worked example.
 ### Governance
 
 - Are the contracts upgradable? Define the owner, multisig, or timelock.
-- Multisig threshold (N/M)? Timelock delay? Who are the signers (known entities, anon)? Don't validate onchain multisig signers, just check docs.
+- Multisig threshold (N/M)? Timelock delay? Read Safe threshold and owners
+  onchain; use public sources to identify known or anonymous signers. Check
+  owner overlap between Safes presented as independent.
 - Are there privileged roles capable of causing serious harm to token holders?
 - Can governance pause, freeze, or seize user funds?
+
+### Critical Permission Paths and Weakest Link
+
+Inventory every permissioned role on contracts in the assessed fund and control
+paths, including token, vault, strategy, custody, redemption, oracle, bridge,
+proxy, access manager, and critical dependencies. For each material capability,
+trace both direct callers and indirect controllers who can grant the role,
+change its constraints, or upgrade the implementation. Follow the
+[onchain verification procedure](../.agents/skills/verifying-onchain-data/SKILL.md#permission-and-mint-authority-enumeration-workflow).
+
+| Capability and target | Current holder / control path | Safeguards | Assets or function exposed |
+|-----------------------|-------------------------------|------------|----------------------------|
+| [e.g. withdraw collateral via `Contract.function`] | [linked EOA, Safe, or contract; role admin and upgrade path] | [threshold, delay, caps, allowlist, or none] | [asset and verified amount, or `TODO` with getter] |
+
+**Weakest credible path to material loss:** [Name the holder and the exact
+direct or indirect action; explain why its effective approval threshold,
+timelock, and code-enforced limits make it the least protected material path.
+State the assets at risk or exit function affected, with links to source and
+onchain evidence. Name comparably weak paths if needed. If the inventory is
+incomplete, mark the missing contracts or role history `TODO`; do not claim
+that no weaker path exists.]
+
+An EOA or low-threshold Safe that can move funds, mint unbacked tokens, change
+an oracle, block redemption, or acquire those powers must be called out here
+and in Key or Critical Risks as warranted. A low-impact role does not become a
+critical risk solely because an EOA holds it.
 
 ### Programmability
 
@@ -292,7 +320,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
 
 - **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
-- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. Score this subcategory on who can change the protocol itself.
+- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. An unbounded path to move funds or change those constraints is a governance risk regardless of the role's name. Score this subcategory on the weakest material control path, including who can change the protocol itself.
 
 **Subcategory B: Programmability**
 

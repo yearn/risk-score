@@ -21,13 +21,21 @@ record each separately. Never reuse a block number across chains. If an API only
 serves current data or historical reads fail, label the different timestamp or
 unverified check; do not present mixed states as one snapshot.
 
-## Mint-authority enumeration workflow
+## Permission and mint-authority enumeration workflow
 
-Use these steps for the report's Token Mint Authority section and other
-privileged roles, including timelock proposer/executor/canceller/admin roles.
+Use these steps for every permissioned role on contracts in the assessed fund
+and control paths: token, vault, strategy, custody, redemption, oracle, bridge,
+proxy, access manager, and critical dependency contracts. Include timelock
+proposer/executor/canceller/admin roles. Inventory each role and its holders,
+then identify which capabilities can cause a material loss or block exits.
 
-1. Read verified source for each mint/burn entrypoint and its access checks.
-   Resolve role constants from source or getters; commonly
+1. Read verified source for each privileged entrypoint and its access checks.
+   Map direct transfers or withdrawals, unbacked minting, strategy or collateral
+   changes, oracle or accounting changes, pausing or redemption blocks, fee
+   changes, role grants, and upgrades. Include custom access managers, owner
+   checks, whitelists, and delegated or module execution paths; a role name
+   alone does not establish its effective power. Resolve role constants from
+   source or getters; commonly
    `cast keccak "MINTER_ROLE"`. `DEFAULT_ADMIN_ROLE` is zero bytes32.
 2. Enumerate every holder using the contract's actual mechanism:
    - **AccessControlEnumerable:** `getRoleMemberCount(role)`, then
@@ -41,12 +49,26 @@ privileged roles, including timelock proposer/executor/canceller/admin roles.
    - **Ownable:** read `owner()` and verify its protected functions. Ownership
      alone does not imply mint authority.
 3. Resolve `getRoleAdmin(role)` and enumerate its holders using the same steps
-   to identify who can grant or revoke authority. For timelocks, read
-   `getMinDelay()` too.
+   to identify who can grant or revoke authority. Follow ownership, proxy
+   admin, upgrade, and timelock paths to the ultimate controller. For timelocks,
+   read `getMinDelay()` and verify whether the specific action must pass through
+   it or has a faster path.
 4. Classify holders as EOA, Safe, or identified contract using verified source
    and public attribution. Apply the [multisig standard](references/governance.md).
+   For each material power, record the target contract and function, current
+   holder, effective approval threshold, delay, caps or allowlists, and assets
+   exposed. Distinguish a direct ability to move funds from an indirect ability
+   to obtain it through role changes or upgrades. Do not infer unlimited access
+   when code-enforced restrictions exist.
 5. Reconcile each privileged minter with a `mints` edge in
    `reports/graph/<slug>.yaml`.
+
+Compare the material paths by potential loss and enforceable barriers. Identify
+the weakest credible path, including an EOA or low-threshold Safe that can move
+funds or acquire that power, even if another path has a stronger timelock. Show
+the concrete call/control chain and evidence. If multiple paths are comparably
+weak, name them. If source, events, or historical reads cannot establish a
+complete role inventory, mark the gap `TODO` and do not claim exclusivity.
 
 ## Contract verification status
 
