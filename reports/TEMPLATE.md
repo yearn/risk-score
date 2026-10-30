@@ -98,7 +98,7 @@ Explain what the protocol does, its usage, and yield sources.
 
 ### Token Mint Authority
 
-Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#mint-authority-enumeration-workflow).
+Enumerate every address that can mint the assessed token, and the mechanism that gates them. Treat any address with mint authority as part of the trust surface even if it is intended only for a narrow purpose. Onchain enumeration procedure: see [onchain verification](../.agents/skills/verifying-onchain-data/SKILL.md#permission-and-mint-authority-enumeration-workflow).
 
 **Mint mechanism:** [Open mint via collateral deposit / Role-gated AccessControl / Whitelist mapping / Ownable / Custodial bridge / Other — describe]
 
@@ -152,9 +152,40 @@ See `reports/report/mezo-musd.md` for a worked example.
 ### Governance
 
 - Are the contracts upgradable? Define the owner, multisig, or timelock.
-- Multisig threshold (N/M)? Timelock delay? Who are the signers (known entities, anon)? Don't validate onchain multisig signers, just check docs.
+- Multisig threshold (N/M)? Timelock delay? Don't validate onchain multisig signers, just check docs.
 - Are there privileged roles capable of causing serious harm to token holders?
 - Can governance pause, freeze, or seize user funds?
+
+### Critical Permission Paths and Weakest Link
+
+A **material loss** is a loss of the collateral or main asset that users
+deposited. Inventory every permissioned role on contracts that hold, account
+for, or can move those deposits, including token, vault, strategy, custody,
+redemption, oracle, bridge, proxy, access manager, and critical dependencies.
+For each capability that can cause a material loss, trace both direct callers
+and indirect controllers who can grant the role, change its constraints, or
+upgrade the implementation. Follow the
+[onchain verification procedure](../.agents/skills/verifying-onchain-data/SKILL.md#permission-and-mint-authority-enumeration-workflow).
+
+| Capability and target | Current holder / control path | Safeguards | Assets exposed |
+|-----------------------|-------------------------------|------------|----------------|
+| [e.g. withdraw collateral via `Contract.function`] | [linked EOA, Safe, or contract; role admin and upgrade path] | [threshold, delay, caps, allowlist, or none] | [asset and verified amount, or `TODO` with getter] |
+
+**Weakest credible path to material loss:** [Name the holder and the exact
+direct or indirect action; explain why its effective approval threshold,
+timelock, and code-enforced limits make it the least protected material path.
+State the deposited assets at risk, with links to source and onchain evidence.
+Name comparably weak paths if needed. If the inventory is incomplete, mark the
+missing contracts or role history `TODO`; do not claim that no weaker path
+exists.]
+
+An EOA or low-threshold Safe that can move funds, mint unbacked tokens, change
+an oracle, set loss-causing parameters (slippage tolerance, swap or recipient
+allowlists, fees, strategy approvals), or acquire those powers must be called
+out here and in Key or Critical Risks as warranted. An EOA may hold a
+pause-only role: list it for liquidity and monitoring, but it cannot cause a
+material loss and does not set the weakest link. A low-impact role does not
+become a critical risk solely because an EOA holds it.
 
 ### Programmability
 
@@ -292,7 +323,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
 
 - **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
-- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. Score this subcategory on who can change the protocol itself.
+- Operational roles (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability** only when the bounded-role checks show their cumulative loss stays immaterial. Cumulative loss is immaterial only when code bounds it: a rate limit, cooldown, cumulative or per-period loss cap, or an oracle-based slippage reference the caller cannot set. Unbounded repeated calls are a material path. An EOA may hold a pause-only role without triggering the critical gate. Score this subcategory on the weakest path to a material loss (see Critical Permission Paths and Weakest Link): who can change the protocol itself, move deposited funds outside those constraints, set the constraints (slippage tolerance, swap or recipient allowlists, oracles, fees, strategy approvals), or cause material cumulative loss through repeated in-bounds calls. If an EOA or fewer than 3 signers hold such a path, apply the critical gate.
 
 **Subcategory B: Programmability**
 
