@@ -27,7 +27,9 @@ for corrections. Follow [AGENTS.md](../../../AGENTS.md).
   exposed. Flag a material EOA or low-threshold Safe path omitted from the
   conclusion, but not an EOA pause-only role; distinguish verified absence from
   incomplete enumeration. Check that bounded roles were tested for setter
-  control, price manipulation, and repeated-call losses.
+  control, price manipulation, and repeated-call losses. If an existing
+  report lacks the Critical Permission Paths and Weakest Link section, note it
+  for the next reassessment rather than failing the review.
 - Required sections, critical gates, exception status, category scores, weighted
   total, and tier against the [template](../../../reports/TEMPLATE.md) and
   [scoring framework](../../../reports/README.md).

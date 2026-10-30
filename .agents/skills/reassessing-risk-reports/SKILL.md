@@ -15,11 +15,14 @@ triggers. Verify:
 
 - Privileged roles and holders, timelock delays, proxy implementations/admins,
   and mint-authority paths with [onchain verification](../verifying-onchain-data/SKILL.md).
-- The full material permission inventory and weakest-link conclusion: recheck
+- The material permission inventory and weakest-link conclusion: recheck
   direct fund-moving powers, role-admin and upgrade paths, effective Safe
   thresholds, timelock bypasses, caps, and assets exposed. Update the conclusion
   when a holder, control path, or enforceable limit changes; mark incomplete
-  re-enumeration `TODO` rather than treating old holders as current.
+  re-enumeration `TODO` rather than treating old holders as current. If the
+  report lacks the template's Critical Permission Paths and Weakest Link
+  section, add it, covering only permissions that can cause a material loss;
+  mark contracts you could not enumerate `TODO`.
 - Multisig changes using the [governance standard](../verifying-onchain-data/references/governance.md).
 - TVL and trend: `uv run reports/scripts/fetch_defillama_tvl.py <slug> --days 30`.
 - Strategy/farm/collateral allocations and report-specific monitoring values:
