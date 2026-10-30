@@ -152,9 +152,7 @@ See `reports/report/mezo-musd.md` for a worked example.
 ### Governance
 
 - Are the contracts upgradable? Define the owner, multisig, or timelock.
-- Multisig threshold (N/M)? Timelock delay? Read Safe threshold and owners
-  onchain; use public sources to identify known or anonymous signers. Check
-  owner overlap between Safes presented as independent.
+- Multisig threshold (N/M)? Timelock delay? Don't validate onchain multisig signers, just check docs.
 - Are there privileged roles capable of causing serious harm to token holders?
 - Can governance pause, freeze, or seize user funds?
 
@@ -325,7 +323,7 @@ If ANY gate is triggered, the protocol automatically receives a score of **5** (
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
 
 - **Timelock** is measured on the path that can change the protocol - upgrades, role changes, and parameter authority - end-to-end from proposal to execution. A 48h delay clears the score-1 bar on its own; there is no extra credit above it.
-- Operational roles bounded by governance-approved constraints (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability**, not here. An EOA may hold a pause-only role without triggering the critical gate. Score this subcategory on the weakest path to a material loss (see Critical Permission Paths and Weakest Link): who can change the protocol itself, move deposited funds outside those constraints, or set the constraints, such as slippage tolerance, swap or recipient allowlists, oracles, fees, or strategy approvals. If an EOA or fewer than 3 signers hold such a path, apply the critical gate.
+- Operational roles (moving funds between already-approved strategies, pausing, keeper calls such as rebase or harvest) are scored in **Subcategory B: Programmability** only when the bounded-role checks show their cumulative loss stays immaterial. Cumulative loss is immaterial only when code bounds it: a rate limit, cooldown, cumulative or per-period loss cap, or an oracle-based slippage reference the caller cannot set. Unbounded repeated calls are a material path. An EOA may hold a pause-only role without triggering the critical gate. Score this subcategory on the weakest path to a material loss (see Critical Permission Paths and Weakest Link): who can change the protocol itself, move deposited funds outside those constraints, set the constraints (slippage tolerance, swap or recipient allowlists, oracles, fees, strategy approvals), or cause material cumulative loss through repeated in-bounds calls. If an EOA or fewer than 3 signers hold such a path, apply the critical gate.
 
 **Subcategory B: Programmability**
 

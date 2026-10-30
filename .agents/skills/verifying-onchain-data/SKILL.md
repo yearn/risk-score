@@ -73,8 +73,10 @@ exits but cannot cause a material loss; record them and accept EOA holders.
    - Can an allowlisted router, solver, or target execute arbitrary calldata,
      or can the caller pick a counterparty it controls?
    - Do approvals or residual balances outlive the call?
-   Record a bounded role as low-impact only when these checks show its
-   cumulative loss stays immaterial; cite the code that enforces each bound.
+   Record a bounded role as low-impact only when code bounds its cumulative
+   loss (rate limit, cooldown, cumulative or per-period loss cap, or an
+   oracle-based slippage reference the caller cannot set); cite the code that
+   enforces each bound. Unbounded repeated calls are a material path.
 5. Reconcile each privileged minter with a `mints` edge in
    `reports/graph/<slug>.yaml`.
 
