@@ -1,0 +1,221 @@
+slug: royco-day
+title: Royco Day Senior Tranche (sr-reUSDe) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Market
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Token ===
+  - id: sr-reusde
+    label: sr-reUSDe (Senior Tranche)
+    address: "0x01Fe8a0d76D056393d24CC1402f7f852cdaFbAD0"
+    category: vault
+    note: >-
+      Beacon proxy. 0% minimum coverage (no Junior buffer), 15% minimum liquidity.
+      ST NAV $18.92 at block 26229366; 87.5% held by the deployer EOA.
+  - id: lp-reusde
+    label: lp-reUSDe (SLP tranche)
+    address: "0xeabDEFd6E1BB1201284a29F2CCE1013ae227Ea6C"
+    category: vault
+    note: Liquidity Provider Tranche; raw NAV $3.00 (counts both pool legs)
+
+  # === Market infra ===
+  - id: kernel
+    label: Kernel (sr-reUSDe)
+    address: "0xD0d180384e2e53b8CB8d40e4e7F629B905359932"
+    category: infra
+    note: >-
+      Holds 13.2041 reUSDe collateral and the pool BPT; sole minter of ST shares;
+      pause freezes all ST transfers.
+  - id: accountant
+    label: Accountant (sr-reUSDe)
+    address: "0x58e6a1EF68ed7b787eE90E93e5377533bf752950"
+    category: infra
+    note: Coverage/liquidity, NAV and premium accounting; parameters admin-settable (3-day delay)
+  - id: entrypoint
+    label: RoycoDayEntryPoint
+    address: "0xaf55a0c251690d9322b5F94b7e50EE895750262c"
+    category: infra
+    note: Async deposit/redeem gateway; ST redemption T+1 and oracle-gated
+  - id: oracle-adapter
+    label: Collateral oracle adapter (immutable)
+    address: "0xF8aAd4D54E31EE811Fdc545C7A54D3D624840084"
+    category: infra
+    note: >-
+      Not source-published on Etherscan; bytecode matches audited ChainlinkPriceOracle
+      (commit 92f05aed). Reads Re NAVFeedProxy with a 36h staleness limit.
+  - id: factory
+    label: RoycoFactory (UUPS)
+    address: "0xaAAaaAAAaE46cA12Bf3810DF8C13c5E8A4400812"
+    category: infra
+    note: executeMarketDeployment is PUBLIC
+  - id: st-beacon
+    label: SeniorTranche beacon
+    address: "0xB6862ADa846003E66e2BC2dE1E1ACc4687F2Ccb3"
+    category: infra
+    note: Upgrades every Day Senior tranche at once; owned by the AccessManager
+
+  # === Exit venue ===
+  - id: exit-pool
+    label: Balancer V3 Gyro E-CLP (sr-reUSDe/sUSDe)
+    address: "0x469967348F006B2a4FDFb6e0761386670910c389"
+    category: strategy
+    note: >-
+      Live balances 0.31 ST-value / 2.70 sUSDe (USD-value); price bounds 0.85–1.0025.
+      Instant exit ≈ $2.70 (~14% of ST NAV).
+
+  # === Governance ===
+  - id: access-manager
+    label: RoycoAccessManager
+    address: "0x82EecE4a736db0767370d2DfFdE9BDF6e38AaeB8"
+    category: governance
+    note: Authority for all Day contracts; 3-day execution delays; 5-day minSetback
+  - id: root-safe
+    label: Root ADMIN Safe (3-of-4)
+    address: "0x7c405bbD131e42af506d14e752f2e59B19D49997"
+    category: governance
+    note: ADMIN (3-day delay), GUARDIAN, ADMIN_UNPAUSER, ADMIN_ORACLE, ADMIN_FACTORY
+  - id: admin-safe
+    label: Protocol-admin Safe (3-of-4)
+    address: "0x84d37A25e46029CE161111420E07cEb78880119e"
+    category: governance
+    note: >-
+      ADMIN_UPGRADER, ADMIN_ORACLE, ADMIN_ACCOUNTANT, ADMIN_MARKET_OPS, ADMIN_KERNEL
+      (3-day delay); ADMIN_ENTRY_POINT (1-day delay)
+  - id: pauser-safe
+    label: Pauser Safe (1-of-4, no delay)
+    address: "0xC7605B1891B449B0051d55D083B49D6b46D164bb"
+    category: governance
+    note: ADMIN_PAUSER; any one signer can pause kernel, tranches, EntryPoint, and Factory
+  - id: fee-safe
+    label: Protocol fee recipient Safe (2-of-3)
+    address: "0x05ea95aE815809D77153Ed3500Ad6d936712b639"
+    category: governance
+
+  # === Underlying / external ===
+  - id: reusde
+    label: Re reUSDe (mezzanine tranche)
+    address: "0xdDC0f880ff6e4e22E4B74632fBb43Ce4DF6cCC5a"
+    category: dependency
+    note: Quarterly redemption; see re-reusd report. 100% pass-through to ST (no coverage).
+  - id: re-nav-feed
+    label: Re NAVFeedProxy (reUSDe NAV)
+    address: "0x0B2A5b2765cf964988c59897E4d888DE7035D7B0"
+    category: dependency
+    note: Admin-pushed NAV; 1.4332 at snapshot
+  - id: susde
+    label: Ethena sUSDe (pool quote)
+    address: "0x9D39A5DE30e57443BfF2A8307A4256c8797A3497"
+    category: dependency
+  - id: balancer-vault
+    label: Balancer V3 Vault
+    address: "0xbA1333333333a1BA1108E8412f11850A5C319bA9"
+    category: dependency
+
+edges:
+  # === Capital flow ===
+  - from: entrypoint
+    to: sr-reusde
+    kind: routes-through
+    label: async deposit/redeem
+  - from: sr-reusde
+    to: kernel
+    kind: deposits-into
+    label: 100% collateral
+  - from: kernel
+    to: reusde
+    kind: deposits-into
+    label: 13.2041 reUSDe (100%)
+  - from: lp-reusde
+    to: exit-pool
+    kind: deposits-into
+    label: BPT (held by kernel)
+  - from: exit-pool
+    to: balancer-vault
+    kind: routes-through
+  - from: exit-pool
+    to: susde
+    kind: deposits-into
+    label: quote leg
+
+  # === Mint authority ===
+  - from: kernel
+    to: sr-reusde
+    kind: mints
+    label: onlyKernel (deposits, liquidity premium, fees)
+  - from: kernel
+    to: lp-reusde
+    kind: mints
+    label: onlyKernel
+
+  # === Pricing ===
+  - from: oracle-adapter
+    to: kernel
+    kind: manages
+    label: collateral price
+  - from: re-nav-feed
+    to: oracle-adapter
+    kind: routes-through
+    label: reUSDe NAV
+  - from: kernel
+    to: accountant
+    kind: routes-through
+    label: NAV sync
+
+  # === Governance ===
+  - from: access-manager
+    to: st-beacon
+    kind: controls
+    label: owner (upgradeTo via ADMIN_UPGRADER)
+  - from: st-beacon
+    to: sr-reusde
+    kind: manages
+    label: beacon implementation
+  - from: access-manager
+    to: factory
+    kind: controls
+  - from: factory
+    to: kernel
+    kind: deploys
+  - from: admin-safe
+    to: access-manager
+    kind: holds-role
+    label: ADMIN_UPGRADER / ADMIN_ORACLE / ADMIN_ACCOUNTANT (3d)
+  - from: root-safe
+    to: access-manager
+    kind: holds-role
+    label: ADMIN (3d) / GUARDIAN / ADMIN_UNPAUSER
+  - from: pauser-safe
+    to: kernel
+    kind: holds-role
+    label: ADMIN_PAUSER (no delay)
+  - from: admin-safe
+    to: kernel
+    kind: controls
+    label: setCollateralAssetOracle (3d)
+  - from: admin-safe
+    to: exit-pool
+    kind: controls
+    label: setStaticSwapFeePercentage (no delay)
+  - from: pauser-safe
+    to: exit-pool
+    kind: holds-role
+    label: pausePool (no delay)
+  - from: admin-safe
+    to: accountant
+    kind: controls
+    label: setMinLiquidity / setMinCoverage (3d)
+  - from: kernel
+    to: fee-safe
+    kind: routes-fees-to
+    label: 5% of JT/LPT yield share
