@@ -5,7 +5,7 @@
 - **Chain:** Ethereum Mainnet
 - **Token Address:** [`0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86`](https://etherscan.io/address/0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86)
 - **Snapshot:** Ethereum block 26322936 (November 1, 2026); Base and HyperEVM read at the same time
-- **Final Score: 2.30/5.0**
+- **Final Score: 2.12/5.0**
 
 ## Overview + Links
 
@@ -412,13 +412,12 @@ No single dependency failure stops the protocol. The surface is still wider and 
 
 **Score: (1.0 + 2.0) / 2 = 1.5**
 
-#### Category 2: Centralization & Control Risks (Weight: 30%): **2.5**
+#### Category 2: Centralization & Control Risks (Weight: 30%): **2.17**
 
-**Subcategory A: Governance: 2.0**
+**Subcategory A: Governance: 1.0**
 - **Mainnet upgrades are DAO-gated end to end.** `upgradeTo` / `upgradeToAndCall` are `onlyGovernor` on the token and vault proxies, and `governor()` on the OUSD token, the vault, and all four mainnet strategies is the Timelock [`0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F`](https://etherscan.io/address/0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F). PROPOSER and EXECUTOR are held solely by Origin DeFi Governance; `getMinDelay()` = 48h, `votingDelay` 7,200 blocks + `votingPeriod` 14,416 blocks give **5.00 days** from proposal to execution.
-- **The weakest material paths are not DAO-gated.** The Base remote strategy (~16.6% of TVL) is upgradeable by an Origin 5-of-8 Safe through a 48h Timelock with no independent canceller. The Morpho curation path over ~70% of TVL starts with a 2-of-3 curator Safe and is held back by a 72-hour timelock that the Origin guardian and the Yearn owner can veto. The HyperEVM remote strategy's governor has only a 60-second delay; it holds dust today, but the strategist can re-fund it without governance.
-- No EOA or sub-3-signer holder can cause a material loss without a ≥48h timelock, so the critical gate does not apply. Multisig thresholds of 5/8 with 48h delays sit between the rubric's score-1 (DAO, 48h+) and score-3 (5/9 multisig with timelock) rows, which gives **2.0**.
-- Rescored under the weakest-link governance rule (previously 1.0). The Base and HyperEVM remote governors and the Morpho curator paths existed at the August 2026 assessment; the HyperEVM Morpho configuration has since been tightened.
+- **The weakest material paths sit outside the DAO but are still multisig-gated and timelocked.** The Base remote strategy (~16.6% of TVL) is upgradeable by an Origin 5-of-8 Safe through a 48h Timelock with no independent canceller. The Morpho curation path over ~70% of TVL starts with a 2-of-3 curator Safe and is held back by a 72-hour timelock that the Origin guardian and the Yearn owner can veto. The HyperEVM remote strategy's governor has only a 60-second delay; it holds dust today, but the strategist can re-fund it without governance.
+- No EOA or sub-3-signer holder can cause a material loss without a ≥48h timelock, so the critical gate does not apply. The material remote path is a 5-of-8 Safe behind a 48h timelock. That meets the rubric's score-1 timelock and privileged-role rows (48h+, multisig above 3/5), and the curator path is vetoable during its 72h window. The 60-second HyperEVM path governs dust and is tracked as a reassessment trigger, so Governance stays at **1.0**.
 
 **Subcategory B: Programmability: 2.5**
 - Minting, `requestWithdrawal`, `claimWithdrawal`, `allocate`, and `addWithdrawalQueueLiquidity` are permissionless; rebase is algorithmic, rate-capped, and can only ratchet supply upward within `totalValue()`
@@ -432,24 +431,24 @@ No single dependency failure stops the protocol. The surface is still wider and 
 - High: Curve (AMO yield plus the only meaningful on-Ethereum DEX exit, 99.9% AMO-owned), Circle CCTP (asset transport *and* the accounting message bus for the Base leg), Chainlink (prices the OETH/superOETHb markets). Low: CoW Protocol (reward swaps)
 - Winding down the HyperEVM leg removed RedStone and a third chain, but concentration in Origin-issued collateral rose from ~54% to ~80% of TVL, so the score stays at 3.0
 
-**Score: (2.0 + 2.5 + 3.0) / 3 = 2.50**
+**Score: (1.0 + 2.5 + 3.0) / 3 = 2.17**
 
-#### Category 3: Funds Management (Weight: 30%): **2.5**
+#### Category 3: Funds Management (Weight: 30%): **2.25**
 
-**Subcategory A: Collateralization: 3.0**
+**Subcategory A: Collateralization: 2.5**
 - 100% onchain backing, ratio 100.15%, single high-quality asset (USDC)
 - But the backing is deployed as lending claims rather than held: ~86.5% of TVL is USDC supplied to Morpho Blue and ~13.5% is an AMO LP position. The collateral behind those claims is concentrated in a single issuer: Origin's own OETH/superOETHb back ~79.9% of TVL at an assumed 1:1 ETH peg, and the remainder is mostly cbXRP (~6.4%)
 - Borrower concentration: one EOA holds 71% of the Ethereum OETH market's debt (health factor ~1.50); OUSD supplies 45% of that market and 94% of the Base superOETHb market
 - AMO can create unbacked OUSD only up to the 99.8% solvency floor
 - `vaultBuffer` = 0; raw idle USDC is below the queue reserve
-- Raised from 2.5 because Origin-collateral concentration rose from ~54% to ~80% of TVL after the HyperEVM funds moved into the Ethereum OETH market
+- Every loan is over-collateralized by LSTs or blue-chip assets, which sits in the rubric's score-2 collateral-quality row. Single-issuer concentration (up from ~54% to ~80% of TVL after the HyperEVM funds moved into the Ethereum OETH market) and the hard-peg oracles keep the score at 2.5
 
 **Subcategory B: Provability: 2.0**
 - Everything is onchain and permissionlessly readable, with no offchain attestation anywhere
 - Reconstruction is involved: `totalValue()` nets out the queue reserve, and the cross-chain leg requires walking a master strategy, a remote strategy, two Morpho vault layers, and the underlying markets on Base
 - ~16.6% of reported TVL is a **cached** `remoteStrategyBalance` refreshed by CCTP messages and accepted up to a day old. It tracked the remote side to within ~$158 at the snapshot
 
-**Score: (3.0 + 2.0) / 2 = 2.5**
+**Score: (2.5 + 2.0) / 2 = 2.25**
 
 #### Category 4: Liquidity Risk (Weight: 15%): **3.0**
 
@@ -471,19 +470,20 @@ No single dependency failure stops the protocol. The surface is still wider and 
 
 ```
 Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Liquidity × 0.15) + (Operational × 0.05)
-            = (1.5 × 0.20) + (2.5 × 0.30) + (2.5 × 0.30) + (3.0 × 0.15) + (1.0 × 0.05)
-            = 0.300 + 0.750 + 0.750 + 0.450 + 0.050
-            = 2.300
+            = (1.5 × 0.20) + (2.17 × 0.30) + (2.25 × 0.30) + (3.0 × 0.15) + (1.0 × 0.05)
+            = 0.300 + 0.650 + 0.675 + 0.450 + 0.050
+            = 2.125
+            → 2.12 (two decimals, rounded down)
 ```
 
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.300 |
-| Centralization & Control | 2.5 | 30% | 0.750 |
-| Funds Management | 2.5 | 30% | 0.750 |
+| Centralization & Control | 2.17 | 30% | 0.650 |
+| Funds Management | 2.25 | 30% | 0.675 |
 | Liquidity Risk | 3.0 | 15% | 0.450 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **2.30 / 5.0** |
+| **Final Score** | | | **2.12 / 5.0** |
 
 ### Risk Tier
 
@@ -520,7 +520,7 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 |------|-------|-------|
 | [June 25, 2026](https://github.com/yearn/risk-score/pull/136) | 1.85 | Initial assessment |
 | [August 31, 2026](https://github.com/yearn/risk-score/pull/434) | 2.05 | TVL $6.24M (−16%). Traced the Morpho legs three vault layers deep across Ethereum, Base, and HyperEVM: ~80% of TVL now sits in Morpho Blue markets, and ~54% of TVL is USDC lent against Origin's own OETH / superOETHb in markets whose oracles assume a 1:1 ETH peg with no LST feed. Morpho curation on all three chains is Yearn's own, so it is treated as an internal counterparty rather than an external dependency; the HyperEVM leg is configured more loosely (EOA key, no guardian, `timelock()` = 0) and is called out for monitoring. Corrected the withdrawal-queue reading: `queued` / `claimable` are lifetime counters, so outstanding demand is 14 USDC, not the ~$1.68M implied previously. Vault uses no oracle (`_deprecated_priceProvider`) and rebase is permissioned and rate-capped. Bug bounty reconfirmed live at $1M. Governance, roles, thresholds, proxies, and the mint whitelist unchanged. Dependencies 2.5 → 3.0, Collateralization 2.0 → 2.5, Provability 1.5 → 2.0. |
-| [November 1, 2026](https://github.com/yearn/risk-score/pull/571) | 2.30 | Onchain TVL $6.45M. HyperEVM leg wound down to ~$28 (September 28 to October 1, 2026), and the Ethereum Morpho leg grew to 70% of TVL in the OETH/USDC market, so Origin-LST collateral rose from ~54% to ~80% of TVL. One EOA holds 71% of that market's debt, and instantly reachable liquidity fell to ~20% of TVL. HyperEVM Morpho vaults moved from an EOA to a 4/7 Safe with a 3-day timelock, and the Origin Strategist Safe became guardian / sentinel on all six vaults. Trustee changed to a non-upgradeable FeeSplitter (100% of fees to OGN buyback). Added the Critical Permission Paths section; enumerated the Base (48h) and HyperEVM (60s) remote-strategy Timelocks, both driven by an Origin 5/8 Safe. Mainnet governance, proxies, strategist, operator, and mint whitelist unchanged. Governance 1.0 → 2.0 (rescored under the weakest-link governance rule; no onchain change in those paths), Collateralization 2.5 → 3.0, Liquidity 2.5 → 3.0. |
+| [November 1, 2026](https://github.com/yearn/risk-score/pull/571) | 2.12 | Onchain TVL $6.45M. HyperEVM leg wound down to ~$28 (September 28 to October 1, 2026), and the Ethereum Morpho leg grew to 70% of TVL in the OETH/USDC market, so Origin-LST collateral rose from ~54% to ~80% of TVL. One EOA holds 71% of that market's debt, and instantly reachable liquidity fell to ~20% of TVL. HyperEVM Morpho vaults moved from an EOA to a 4/7 Safe with a 3-day timelock, and the Origin Strategist Safe became guardian / sentinel on all six vaults. Trustee changed to a non-upgradeable FeeSplitter (100% of fees to OGN buyback). Added the Critical Permission Paths section; enumerated the Base (48h) and HyperEVM (60s) remote-strategy Timelocks, both driven by an Origin 5/8 Safe. Mainnet governance, proxies, strategist, operator, and mint whitelist unchanged. Governance (1.0) and Collateralization (2.5) held after review under the weakest-link rule; Liquidity 2.5 → 3.0. |
 
 ---
 
