@@ -23,11 +23,15 @@ Create `reports/report/<slug>.md`.
    custody locations, actual undercollateralization, or unavailable offchain
    evidence: establish which, or mark the gap `TODO`. Do not assume all deficits
    are undiscovered collateral.
-3. **Enumerate mint authority and control.** Follow
-   [onchain verification](../verifying-onchain-data/SKILL.md). Trace every mint
-   entrypoint and caller-side restriction, including who can grant roles or
-   upgrade implementations. Explain mint/redemption backing requirements and atomicity.
-   Apply the [multisig standard](../verifying-onchain-data/references/governance.md).
+3. **Enumerate permissions and control.** Follow
+   [onchain verification](../verifying-onchain-data/SKILL.md) across the full
+   assessed fund and control paths. Trace every mint entrypoint and caller-side
+   restriction, including who can grant roles or upgrade implementations.
+   Explain mint/redemption backing requirements and atomicity. Apply the
+   [multisig standard](../verifying-onchain-data/references/governance.md).
+   Complete the template's Critical Permission Paths and Weakest Link section;
+   do not bury a fund-moving EOA or low-threshold Safe in a generic governance
+   description.
 4. **Investigate cross-chain exposure** using the
    [bridge skill](../assessing-bridge-dependencies/SKILL.md) when the asset or
    its underlying dependencies cross chains.
