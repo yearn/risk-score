@@ -76,7 +76,7 @@ Collateral was simplified from multi-stablecoin (USDT, DAI, USDC) to **USDC-only
 | Contract | Address | Role / Key facts |
 |----------|---------|------------------|
 | Cross-Chain Remote Strategy | [`0xB1d624fc40824683e2bFBEfd19eB208DbBE00866`](https://basescan.org/address/0xB1d624fc40824683e2bFBEfd19eB208DbBE00866) | Same address as the mainnet master; implementation [`0xaa8af8db4b6a827b51786334d26349eb03569731`](https://basescan.org/address/0xaa8af8db4b6a827b51786334d26349eb03569731) (`CrossChainRemoteStrategy`); `governor()` = Base Timelock |
-| Base Timelock | [`0xf817cb3092179083c48c014688D98B72fB61464f`](https://basescan.org/address/0xf817cb3092179083c48c014688D98B72fB61464f) | `getMinDelay()` = 172,800s (48h); PROPOSER + EXECUTOR + CANCELLER = Origin Base Safe; EXECUTOR also held by the Strategist Safe; TIMELOCK_ADMIN_ROLE held only by itself |
+| Base Timelock | [`0xf817cb3092179083c48c014688D98B72fB61464f`](https://basescan.org/address/0xf817cb3092179083c48c014688D98B72fB61464f) | `getMinDelay()` = 172,800s (48h); PROPOSER + EXECUTOR + CANCELLER = Origin Base Safe; EXECUTOR also held by the Strategist Safe; TIMELOCK_ADMIN_ROLE held only by itself (the deployer's admin role was renounced at block 19592753). Full role history checked: an earlier executor Safe [`0x28bce2eE5775B652D92bB7c2891A89F036619703`](https://basescan.org/address/0x28bce2eE5775B652D92bB7c2891A89F036619703) was replaced by the Strategist Safe at block 24827166 |
 | Origin Base / HyperEVM Safe (5/8) | [`0x92A19381444A001d62cE67BaFF066fA1111d7202`](https://basescan.org/address/0x92A19381444A001d62cE67BaFF066fA1111d7202) | Same eight signers as the mainnet GOV multisig; proposer on both remote-chain Timelocks |
 | OUSD Vault V2 (Morpho Vault V2) | [`0x2Ba14b2e1E7D2189D3550b708DFCA01f899f33c1`](https://basescan.org/address/0x2Ba14b2e1E7D2189D3550b708DFCA01f899f33c1) | `OUSDb-V2`; owner [`0xFEaE2F855250c36A77b8C68dB07C4dD9711fE36F`](https://basescan.org/address/0xFEaE2F855250c36A77b8C68dB07C4dD9711fE36F) (4/7, six of seven signers shared with Yearn Security), curator [`0x90D0f26025571295D18a6c041E47450B81886B51`](https://basescan.org/address/0x90D0f26025571295D18a6c041E47450B81886B51) (2/3); Origin Strategist Safe is a sentinel; `addAdapter` / cap increases on a ~3-day timelock |
 | Morpho Vault V1 Adapter | [`0xFE4ccb1f0d9634F3191cA45B7f3413c4ca85086E`](https://basescan.org/address/0xFE4ccb1f0d9634F3191cA45B7f3413c4ca85086E) | Sole adapter; forwards 100% into `OUSDb-V1` |
@@ -115,7 +115,7 @@ The February 2026 Sigma Prime review is the one that matters for the current arc
 
 Origin Protocol maintains 30+ audit reports across all products in their [security repository](https://github.com/OriginProtocol/security). They have a continuous auditing agreement with OpenZeppelin to review 100% of smart contract changes.
 
-The non-upgradeable `FeeSplitter` that became the trustee in October 2026 only routes performance fees. It is not listed in the security repository: `TODO`, audit coverage of `contracts/harvest/FeeSplitter.sol`.
+The non-upgradeable `FeeSplitter` that became the trustee in October 2026 only routes performance fees and never holds user deposits. It has no external audit in the security repository. It shipped through [origin-dollar PR #2988](https://github.com/OriginProtocol/origin-dollar/pull/2988) with internal Origin review and unit and fuzz tests, and was deployed in [PR #3008](https://github.com/OriginProtocol/origin-dollar/pull/3008).
 
 **Smart Contract Complexity:** High. The system uses an upgradeable proxy pattern (EIP-1967), a rebasing token with non-standard ERC-20 behavior, AMO minting, and four approved strategies, including two cross-chain legs driven by CCTP messaging. Each Morpho leg nests three vault layers deep (strategy → Morpho Vault V2 → adapter → MetaMorpho → Morpho Blue markets).
 
@@ -125,7 +125,7 @@ The non-upgradeable `FeeSplitter` that became the trustee in October 2026 only r
 - **Maximum Payout:** $1,000,000 for a critical smart-contract report, capped at 10% of directly affected funds. Payouts are made directly by Origin.
 - **Scope:** OUSD Token and OUSD Vault explicitly in scope (64 assets in scope)
 - **Track record:** 40 paid reports totalling $139.2K
-- **Safe Harbor:** The program page has a Safe Harbor section with the reward listed as "TBD". `TODO`: confirm SEAL Safe Harbor enrollment. KYC not required for payout.
+- **Safe Harbor:** Offered through Immunefi's [Safe Harbor page](https://immunefi.com/bug-bounty/originprotocol/safe-harbor/) under the Security Alliance (SEAL) Safe Harbor Agreement. Recovered funds go to the program vault [`0x82e0cE4255597cbA08273E0305de40C318F5117E`](https://etherscan.io/address/0x82e0cE4255597cbA08273E0305de40C318F5117E) (a 1/1 Safe) within six hours. The Safe Harbor reward is still listed as "TBD". KYC not required for bug-bounty payouts.
 - **Link:** https://immunefi.com/bug-bounty/originprotocol/information/
 
 ## Historical Track Record
@@ -276,7 +276,7 @@ A material loss here means loss of the USDC backing OUSD. The inventory covers t
 | Capability and target | Current holder / control path | Safeguards | Assets exposed |
 |-----------------------|-------------------------------|------------|----------------|
 | `upgradeTo` on OUSD token, vault, and the four mainnet strategy proxies; `approveStrategy`, `addStrategyToMintWhitelist`, `setStrategistAddr` | Timelock [`0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F`](https://etherscan.io/address/0x35918cDE7233F2dD33fA41ae3Cb6aE0e42E0e69F) ← Origin DeFi Governance (xOGN) | 24h voting delay + 48h vote + 48h Timelock (5 days); GOV Multisig 5/8 can cancel | All ~$6.45M |
-| `upgradeTo` on the Base remote strategy proxy [`0xB1d624fc40824683e2bFBEfd19eB208DbBE00866`](https://basescan.org/address/0xB1d624fc40824683e2bFBEfd19eB208DbBE00866) | Base Timelock [`0xf817cb3092179083c48c014688D98B72fB61464f`](https://basescan.org/address/0xf817cb3092179083c48c014688D98B72fB61464f) ← Origin 5/8 Safe [`0x92A19381444A001d62cE67BaFF066fA1111d7202`](https://basescan.org/address/0x92A19381444A001d62cE67BaFF066fA1111d7202) (proposer, executor, sole confirmed canceller) | 5-of-8 + 48h; no independent canceller, and no xOGN vote | ~$1.07M (16.6%) |
+| `upgradeTo` on the Base remote strategy proxy [`0xB1d624fc40824683e2bFBEfd19eB208DbBE00866`](https://basescan.org/address/0xB1d624fc40824683e2bFBEfd19eB208DbBE00866) | Base Timelock [`0xf817cb3092179083c48c014688D98B72fB61464f`](https://basescan.org/address/0xf817cb3092179083c48c014688D98B72fB61464f) ← Origin 5/8 Safe [`0x92A19381444A001d62cE67BaFF066fA1111d7202`](https://basescan.org/address/0x92A19381444A001d62cE67BaFF066fA1111d7202) (proposer, executor, sole canceller) | 5-of-8 + 48h; no independent canceller, and no xOGN vote | ~$1.07M (16.6%) |
 | `upgradeTo` on the HyperEVM remote strategy proxy [`0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e`](https://hyperevmscan.io/address/0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e) | HyperEVM Timelock [`0x77121911A387c9e4Eae46345E0f831A6da8a1364`](https://hyperevmscan.io/address/0x77121911A387c9e4Eae46345E0f831A6da8a1364) ← same Origin 5/8 Safe | 5-of-8 + **60s** | ~$28 now. If the strategist re-funds the leg, the only limit is `MAX_TRANSFER_AMOUNT` = 10M USDC per CCTP transfer, not a cumulative cap |
 | Enable a new market on `OUSD-V1` (`submitCap` → `acceptCap`), then `reallocate` into it | Curator [`0x90D0f26025571295D18a6c041E47450B81886B51`](https://etherscan.io/address/0x90D0f26025571295D18a6c041E47450B81886B51) (2/3; owner Yearn Security 4/7 also holds curator powers); allocators EOA [`0x50B75d586929Ab2F75dC15f07E1B921b7C4Ba8fA`](https://etherscan.io/address/0x50B75d586929Ab2F75dC15f07E1B921b7C4Ba8fA), EIP-7702 account [`0x75a1253432356f90611546a487b5350cef08780d`](https://etherscan.io/address/0x75a1253432356f90611546a487b5350cef08780d), [PublicAllocator](https://etherscan.io/address/0xfd32fa2ca22c76dd6e550706ad913fc6ce91c75d), [EmergencyAllocator](https://etherscan.io/address/0xffb824d00fd6f9513259fc6e79674a0065570862) | 3-day `timelock()` on cap increases; guardian (Origin Strategist Safe) and owner can revoke; allocators can only move funds between markets that already have caps | ~$4.51M (70.0%) |
 | `addAdapter` / cap increases on `OUSD-V2` | Curator Yearn Security [`0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0`](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) (4/7) | 3-day timelock; sentinel (Origin Strategist Safe) can revoke; `setAdapterRegistry` abdicated | ~$4.51M |
@@ -289,12 +289,12 @@ A material loss here means loss of the USDC backing OUSD. The inventory covers t
 
 **Weakest credible path to material loss:** Two paths are comparably weak, and neither is held by an EOA or a Safe with fewer than three required signers acting without an effective delay.
 
-1. **Base remote-strategy upgrade:** the Origin 5-of-8 Safe proposes `upgradeTo` on the Base remote strategy through the Base Timelock and executes it 48 hours later, putting ~$1.07M (16.6% of TVL) at risk. This bypasses the xOGN vote that guards everything on mainnet. The same Safe is the only confirmed canceller, so the 48 hours are a detection window rather than a veto. Exiting within the window is partial: the cbXRP portion can be pulled back over CCTP, but only ~$79K of the ~$639K superOETHb portion is withdrawable.
+1. **Base remote-strategy upgrade:** the Origin 5-of-8 Safe proposes `upgradeTo` on the Base remote strategy through the Base Timelock and executes it 48 hours later, putting ~$1.07M (16.6% of TVL) at risk. This bypasses the xOGN vote that guards everything on mainnet. The same Safe is the only canceller, so the 48 hours are a detection window rather than a veto. Exiting within the window is partial: the cbXRP portion can be pulled back over CCTP, but only ~$79K of the ~$639K superOETHb portion is withdrawable.
 2. **Morpho curation on Ethereum:** the 2-of-3 curator Safe submits a cap for a malicious market, and after 3 days an allocator (one is an EOA) reallocates up to ~$4.51M (70% of TVL) into it. This path has the lowest signer threshold and the largest exposure, but it also has the most checks: a code-enforced 72-hour timelock that both the Origin Strategist Safe (guardian) and Yearn Security (owner) can revoke. The same structure applies on Base.
 
 The HyperEVM remote strategy is the weakest path by delay: an Origin 5-of-8 Safe through a 60-second Timelock. It is not material at the snapshot because the leg holds ~$28. It becomes the weakest material path if the strategist re-funds the HyperEVM strategy, which it can do without governance; that is a reassessment trigger below.
 
-`TODO`: full role-grant history of the Base Timelock. The configured Etherscan plan and Base RPC tier do not serve historical `RoleGranted` logs for Base. Deployment-time grants (tx [`0x2e2cbd5f5527b64e5bf33794ef09a908acfa75dceaed5bba811f7ecd22888a4e`](https://basescan.org/tx/0x2e2cbd5f5527b64e5bf33794ef09a908acfa75dceaed5bba811f7ecd22888a4e)) and current `hasRole` checks confirm the holders above, and the deployer's admin role has been renounced. Any later grant would itself have needed a 48h Timelock operation. The HyperEVM Timelock's full history was enumerated via Etherscan V2.
+Both remote Timelocks were enumerated from deployment to the snapshot. For the Base Timelock that covers every `RoleGranted` / `RoleRevoked` event since deployment tx [`0x2e2cbd5f5527b64e5bf33794ef09a908acfa75dceaed5bba811f7ecd22888a4e`](https://basescan.org/tx/0x2e2cbd5f5527b64e5bf33794ef09a908acfa75dceaed5bba811f7ecd22888a4e); for HyperEVM it was read via Etherscan V2. The Base Timelock has scheduled 91 calls and executed 88, with none cancelled. The three ready-but-unexecuted operations target other Origin Base contracts ([`0x98a0CbeF61bD2D21435f433bE4CD42B56B38CC93`](https://basescan.org/address/0x98a0CbeF61bD2D21435f433bE4CD42B56B38CC93) `removeStrategy`, [`0xF611cC500eEE7E4e4763A05FE623E2363c86d2Af`](https://basescan.org/address/0xF611cC500eEE7E4e4763A05FE623E2363c86d2Af) `setAllowedPoolWethShareInterval`, [`0x9cfcAF81600155e01c63e4D2993A8A81A8205829`](https://basescan.org/address/0x9cfcAF81600155e01c63e4D2993A8A81A8205829) `setHarvesterAddress`), not the OUSD remote strategy. The HyperEVM Timelock has executed all 7 of its scheduled calls.
 
 ### Programmability
 
@@ -329,7 +329,7 @@ No single dependency failure stops the protocol. The surface is still wider and 
 - **Team:** Origin Protocol since 2017, public team, known leadership (Josh Fraser, Matthew Liu, Rafael Ugolini), VC-backed (Pantera, Founders Fund)
 - **Documentation:** Comprehensive. Public GitHub with active development, dedicated security repo with 30+ audits
 - **Legal:** Established company (Origin Protocol)
-- **Incident Response:** Learned from 2020 hack. $1M bug bounty on Immunefi. Full relaunch with multiple audits after the incident.
+- **Incident Response:** Learned from 2020 hack. $1M bug bounty on Immunefi with SEAL Safe Harbor offered. Full relaunch with multiple audits after the incident.
 
 ## Monitoring
 
@@ -396,7 +396,7 @@ No single dependency failure stops the protocol. The surface is still wider and 
 |--------|-----------|
 | Audits | 9 OUSD-specific audits by 5 top firms (OpenZeppelin, Trail of Bits, Sigma Prime, Solidified, Certora) |
 | Current architecture | The Feb 2026 Sigma Prime review scoped both the deployed vault implementation and the cross-chain CCTP strategies |
-| Bug Bounty | $1M on Immunefi, OUSD token and vault explicitly in scope |
+| Bug Bounty | $1M on Immunefi, OUSD token and vault explicitly in scope, SEAL Safe Harbor offered |
 | Formal Verification | Certora formal verification (December 2024) |
 | Continuous Review | OpenZeppelin reviews 100% of contract changes |
 
@@ -463,7 +463,7 @@ No single dependency failure stops the protocol. The surface is still wider and 
 
 - Established team (2017), public, VC-backed (Pantera, Founders Fund)
 - Comprehensive security repo with 30+ audit reports
-- $1M bug bounty
+- $1M bug bounty, SEAL Safe Harbor offered
 - Demonstrated incident response capability (2020 hack recovery and user compensation)
 
 ### Final Score Calculation
