@@ -40,6 +40,13 @@ check the critical gates first, then score each category with its embedded rubri
 
 Each category receives a score from 1-5 (1 = safest, 5 = highest risk), which are then weighted to produce a final risk score and tier classification.
 
+Governance is scored on the weakest permission path to a material loss: a loss
+of the collateral or main asset users deposited. An EOA may hold a pause-only
+role without triggering the critical gate; an EOA that can move deposits or set
+loss-causing parameters such as slippage, allowlists, oracles, or fees triggers
+it. Rubric changes apply to an existing report at its next reassessment, and a
+score change caused only by a rubric change is noted in its Assessment History.
+
 ### Key Principles
 
 - **Evidence-Based**: Link to contracts, transactions, and documentation
