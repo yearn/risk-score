@@ -558,7 +558,7 @@ Debt and collateral data, Yearn depositor-share conversions, and ERC-4626 PPS ar
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-**Score: 3.0/5** — The USDC outside operator principal is $20.83M, or 27.10% of USDC accounting. It covers a 20% cUSD exit ($15.37M) and the largest holder's full position (about $7.02M), and Aave reports $155.72M of withdrawal liquidity against its $20.73M position. The buffer was above 20% at the October 5, October 13, and October 27 blocks, and grew across them. The May 23 assessment recorded about $48.9M in the FRV against about $43.8M of operator loans. This places the October 3 reading of 10.06% as a low point rather than the norm. The score is unchanged at 3.0 from the merged May/July assessments.
+**Score: 3.0/5** — The USDC outside operator principal is $20.83M, or 27.10% of USDC accounting. It covers a 20% cUSD exit ($15.37M) and the largest holder's full position (Ether.Fi Liquid ETH, about $15.29M, which would leave about $5.54M), and Aave reports $155.72M of withdrawal liquidity against its $20.73M position. The buffer was above 20% at the October 5, October 13, and October 27 blocks, and grew across them. The May 23 assessment recorded about $48.9M in the FRV against about $43.8M of operator loans. This places the October 3 reading of 10.06% as a low point rather than the norm. The score is unchanged at 3.0 from the merged May/July assessments.
 
 It is not lower than 3.0:
 
