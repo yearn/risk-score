@@ -5,7 +5,8 @@
 - **Token:** savETH (Staked avETH)
 - **Chain:** Ethereum
 - **Token Address:** [`0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341`](https://etherscan.io/address/0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341)
-- **Final Score: 3.47/5.0**
+- **Final Score: 5.00/5.0**
+- **Status:** GATED — score capped by the "total centralization" critical gate under the weakest-link governance rule: EOAs hold direct control of the backing and an unbacked-mint/seize path. Ungated weighted score is 3.52 (Elevated). No realized loss event.
 
 > **Address correction.** The [request issue](https://github.com/yearn/risk-score/issues/565) links [`0xb8D89678E75a973E74698c976716308abB8a46A4`](https://etherscan.io/address/0xb8D89678E75a973E74698c976716308abB8a46A4). Onchain, that contract is `"Staked avUSD"` / `savUSD`, a CCIP-bridged copy of Avant's USD product. Avant's [contract-address page](https://docs.avantprotocol.com/security/contract-addresses) lists it the same way. The issue title, its description and the referenced [WETH/savETH Morpho market](https://app.morpho.org/ethereum/variable/0xd98cd88ae5b336086b39fb1d62ba6171282e946105b010143f0e89f8fe7cff36/weth-saveth#market) all refer to savETH. That market's `collateralToken` is [`0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341`](https://etherscan.io/address/0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341) (`name()` = `"Staked avETH"`, `symbol()` = `"savETH"`). This report assesses that token.
 
@@ -174,7 +175,7 @@ Role enumeration (full `RoleGranted`/`RoleRevoked` scan, confirmed with `hasRole
 
 ### Collateralization
 
-**Where the backing is.** Mint-time WETH goes directly to the **sole registered custodian** [`0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9`](https://etherscan.io/address/0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9). That address is an EOA and is also listed as an avETH strategy address. There have been **zero `CustodyTransfer` events**, so collateral never sits in a protocol contract. At the snapshot the custodian held only 0.147 ETH and spam tokens. The custodian forwards it: 16,121.8 WETH has gone out to strategy wallet [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) (4,430.4 returned) and 6,780.9 WETH to `AvantMintingV2` for redemptions. From `0x6CC6…` the assets go into Aave V4, Spark, Aave V3 and Morpho on Ethereum, and over bridges (Wormhole NTT, AggLayer, CCIP) to Monad, Sei, Berachain and Base. The positions are itemised in the reconciliation below. That wallet also supplies 40.0 WETH to the very Morpho savETH market under review.
+**Where the backing is.** Mint-time WETH goes directly to the **sole registered custodian** [`0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9`](https://etherscan.io/address/0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9). That address is an EOA and is also listed as an avETH strategy address. There have been **zero `CustodyTransfer` events**, so collateral never sits in a protocol contract. At the snapshot the custodian held only 0.147 ETH and spam tokens. The custodian forwards it: 16,121.8 WETH has gone out to strategy wallet [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) (4,430.4 returned) and 6,780.9 WETH to `AvantMintingV2` for redemptions. From that wallet the assets go into Aave V4, Spark, Aave V3 and Morpho on Ethereum, and over bridges (Wormhole NTT, AggLayer, CCIP) to Monad, Sei, Berachain and Base. The positions are itemised in the reconciliation below. That wallet also supplies 40.0 WETH to the very Morpho savETH market under review.
 
 **Onchain reconciliation (all chains).** All **60 EVM addresses** Avant publishes were checked: strategy wallets for every product, archived ones, and the Reserve Funds.
 
@@ -299,6 +300,32 @@ The full path is therefore **~2 to 8 days and permissioned**. US persons are exc
 - **Hot operational keys:** `MINTER/REDEEMER/SERVICE/PAUSER` EOA [`0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2`](https://etherscan.io/address/0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2). A compromise can mis-set the junior price and block mints and redemptions, but it cannot mint unbacked avETH. The `REWARDER` EOA [`0xdb87e930065bc4c9cc4273672a64bf8e2761f1d8`](https://etherscan.io/address/0xdb87e930065bc4c9cc4273672a64bf8e2761f1d8) can only add assets.
 - **Signers:** not public; offchain MPC.
 
+### Critical Permission Paths and Weakest Link
+
+Inventory covers savETH, avETH, `AvantMintingV2`, the Silo, the junior contracts (avETHx, `PriceStorage`, `RequestsManagerV2`), the savETH CCIP pool and the offchain-managed wallets that hold the backing. Roles come from full `RoleGranted`/`RoleRevoked`, `MinterUpdated` and `OwnershipTransferred` scans confirmed with `hasRole`/`owner()` at block 26294115 (see [Token Mint Authority](#token-mint-authority)). No contract in scope is upgradeable, so there is no upgrade path to trace. **Every holder below has no code and no EIP-7702 delegation at the snapshot**, so each is an EOA onchain. Avant states that its admin and strategy keys are Fordefi MPC wallets with a quorum and policy engine (Cyfrin L-2 response, [Secure Asset Management](https://docs.avantprotocol.com/security/secure-asset-management)). That is not observable onchain and is recorded as a team representation.
+
+| Capability and target | Current holder / control path | Safeguards | Assets exposed |
+|---|---|---|---|
+| Move or withdraw the backing assets: Aave V4/V3, Spark, Morpho, Curvance positions and bridged balances (direct transfers, `withdraw`, `borrow`) | Strategy wallet [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) (EOA, nonce 4,566) | None onchain; offchain Fordefi policy (claimed) | All located backing: **11,757.6 ETH gross collateral; net NAV 11,203.6 ETH (≈$26.4M)** — see [Collateralization](#collateralization) |
+| Receive and forward every new mint's WETH (`AvantMintingV2` routes collateral straight to it) | Custodian [`0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9`](https://etherscan.io/address/0xd0f02713D9905D4F08512F3305Eee1CAC47D6ac9) (EOA, nonce 477) | None onchain | All future mint collateral (in-flight; holds 0.147 ETH at snapshot) |
+| Mint unbacked avETH: `avETH.setMinter(self,true)` then `mint` | avETH `owner()` [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) (EOA) | No timelock, no cap (per-block cap applies only inside `AvantMintingV2`) | Dilutes all 12,211.18 avETH / 10,110.82 savETH; inflates the rate-based Morpho oracle via `transferInRewards` (151.67 WETH idle in the Morpho market, plus the Gearbox pool) |
+| Seize savETH: grant itself `BLACKLIST_MANAGER_ROLE` → `addToBlacklist(target,true)` → `redistributeLockedAmount(target,to)` | savETH `DEFAULT_ADMIN_ROLE` [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) | No timelock; owner cannot be blacklisted | Any holder, incl. Morpho Blue (1,687.07 savETH), Gearbox credit account (3,353.98), Midnight (400.00), CCIP pool (1,702.10) |
+| Redirect future mint collateral: `AvantMintingV2.addCustodianAddress` | `DEFAULT_ADMIN_ROLE` [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) | No timelock | All future mint WETH |
+| Release the CCIP escrow: `setRemotePool`/rate limits on [`0x43f47a434dadd5a122c42e49378365cca949fa54`](https://etherscan.io/address/0x43f47a434dadd5a122c42e49378365cca949fa54) | Pool `owner()` [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) | No timelock; per-lane bucket 2,518.51 savETH, larger than the escrow | 1,702.10 savETH backing Arbitrum holders |
+| Move the junior first-loss capital | Junior treasuries [`0xdD71CDd615f677E98C604bFF5679294cC7a6089b`](https://etherscan.io/address/0xdD71CDd615f677E98C604bFF5679294cC7a6089b) and [`0x29b091B0b70D24FEd3BEC3f511B92CC54307c0F6`](https://etherscan.io/address/0x29b091B0b70D24FEd3BEC3f511B92CC54307c0F6) (EOAs) | None onchain | 1,459.68 avETH (the buffer protecting savETH) |
+| Drain the junior treasury: chained `PriceStorage.setPrice` (+5% per call, unlimited calls) then `RequestsManagerV2.completeBurn`, paid by `transferFrom(treasury)` under a max allowance | `SERVICE_ROLE` on both contracts: [`0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2`](https://etherscan.io/address/0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2) (hot EOA, nonce 1,123) | Per-call price band only; no rate limit or cumulative cap, so repeated calls compound | Up to the 1,459.68 avETH junior treasury |
+
+Low-impact or non-material roles, recorded for completeness:
+- `REWARDER_ROLE` (EOA [`0xdb87e930065bc4c9cc4273672a64bf8e2761f1d8`](https://etherscan.io/address/0xdb87e930065bc4c9cc4273672a64bf8e2761f1d8)) can only *add* avETH.
+- `MINTER_ROLE`/`REDEEMER_ROLE` ([`0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2`](https://etherscan.io/address/0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2)) need a benefactor signature plus that benefactor's WETH or avETH, under `stablesDeltaLimit` = 0. Redemptions pay only from the minting contract's ~0 WETH balance.
+- `setCooldownDuration` and `disableMintRedeem` block or delay exits but cannot cause a material loss.
+
+**Weakest credible path to material loss:** the strategy wallet [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD). It is a single onchain EOA with **direct, unconstrained control over essentially the entire backing** of avETH, and therefore of savETH: 11,757.6 ETH of collateral across Aave V4, Spark, Aave V3, Morpho and Curvance on six chains. No contract, timelock, allowlist or cap stands between that key and the assets. The only barrier is Avant's offchain MPC policy, which cannot be verified.
+
+**Comparably weak:** the admin key [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb), also an EOA with no timelock. With one or two transactions it can mint unlimited unbacked avETH (and through it borrow out WETH against a rate-blind oracle) or seize the savETH posted as collateral in Morpho, Gearbox, Midnight and the CCIP pool.
+
+Under the weakest-link governance rule ([TEMPLATE](../TEMPLATE.md), [README](../README.md)), an EOA holding a fund-moving or unbacked-mint path triggers the critical gate. See [Critical Risk Gates](#critical-risk-gates).
+
 ### Programmability
 
 - savETH's share price is onchain ERC-4626, but its input (daily rewards) is an offchain calculation pushed by a hot key.
@@ -416,6 +443,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 ### Critical Risks
 
+- **EOA weakest link (gate).** Strategy-wallet EOA [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) holds direct, unconstrained control of ~11,758 ETH of backing. The admin EOA [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) can mint unbacked avETH or seize savETH collateral with no timelock. MPC custody is claimed but unverifiable.
 - **Backing is only ~92% located and leans on savUSD.** A multi-chain reconciliation located a net NAV of 11,203.6 ETH against 12,211.18 avETH; the ≈1,008 ETH remainder is unattested. savUSD, whose own backing is ~99% offchain, makes up 115% of the located NAV.
 - **Unbacked mint + rate-blind oracle.** A compromise or misuse of `0xd4d23209aaE8630bf386b7393763a5b7865e57cb` can mint avETH, stake it, post savETH on Morpho/Gearbox and borrow out WETH. It could also seize lending-market collateral via `redistributeLockedAmount`. Nothing onchain delays or caps this.
 
@@ -428,7 +456,7 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 - [ ] **Unverified contract source** — all assessed contracts and implementations are verified on Etherscan. **Pass.**
 - [ ] **No audit** — eight reports from reputable firms. **Pass.**
 - [ ] **Unverifiable reserves** — **Pass (borderline).** Reserves can be verified onchain. A full multi-chain reconciliation of the published wallets located **11,757.6 ETH of gross ETH collateral (96.3% of avETH)** and a **net NAV of 11,203.6 ETH (91.75%)**, with the ≈8% remainder matching dashboard legs on chains or venues not read here. There is no third-party attestation, and verification needs work across six chains. The unlocated remainder and the savUSD dependency are penalised in [Collateralization](#collateralization) rather than gated.
-- [ ] **Total centralization** — every admin power sits on one no-code address with no timelock. Avant represents it, in writing to its auditor, as a Fordefi MPC wallet requiring an admin quorum. Consistent with this repository's treatment of the same key in [Curvance hyAUSD](curvance-hyausd.md), this is scored as unverified MPC rather than a single-key EOA. **Pass (borderline); penalised in Governance.**
+- [x] **Total centralization** — **Triggered.** Under the weakest-link rule, the gate applies when an EOA or a Safe with fewer than 3 signers holds a path to material loss. Here the strategy-wallet EOA [`0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) directly controls essentially all of avETH's backing. The admin EOA [`0xd4d23209aaE8630bf386b7393763a5b7865e57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb), with no timelock, can mint unbacked avETH and seize lending-market collateral. Avant's claim that these are Fordefi MPC wallets with an admin quorum is not observable onchain and does not change the onchain holder type. See [Critical Permission Paths and Weakest Link](#critical-permission-paths-and-weakest-link).
 
 ### Category Scores
 
@@ -441,11 +469,11 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance: 4.5.** A single onchain admin, with no multisig or timelock, holds unbounded mint, seize and exit-lock powers. Held off 5.0 because every contract is immutable (no upgrade risk) and Avant documents MPC quorum custody with an ongoing Trail of Bits OPSEC engagement.
+- **Governance: 5.0.** Scored on the weakest path to material loss. EOAs with no timelock hold direct control of the backing (strategy wallet) and unbounded mint and seize powers (admin). Contract immutability and Avant's claimed MPC quorum (with an ongoing Trail of Bits OPSEC engagement) are real mitigants, but neither changes the rubric's "EOA or <3 signers" row.
 - **Programmability: 3.5.** The savETH share price is onchain, but its input is offchain-calculated rewards pushed by a hot key. Backing is managed offchain, mint and redemption are RFQ and manually funded, junior pricing and loss absorption are manual, and the cooldown is toggled operationally.
 - **Dependencies: 4.0.** Many dependencies: Aave, Spark, Morpho, Euler, Curvance, Dolomite, LSTs, CCIP, and critically Avant's own savUSD (107% of NAV) and Fordefi custody. Failure of savUSD or custody impairs savETH directly.
 
-**Score: 4.0/5** — `(4.5 + 3.5 + 4.0) / 3 = 4.0`.
+**Score: 4.17/5** — `(5.0 + 3.5 + 4.0) / 3 = 4.17`.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -472,15 +500,18 @@ A CCIP or pool-owner compromise could release up to the 1,702 savETH escrow in o
 
 ### Final Score Calculation
 
+The "total centralization" gate caps the score at **5.00 (GATED)**. The category calculation below is retained as the **ungated** score, so the underlying risk stays comparable.
+
 
 | Category | Score | Weight | Weighted |
 |---|---|---|---|
 | Audits & Historical | 2.5 | 20% | 0.500 |
-| Centralization & Control | 4.0 | 30% | 1.200 |
+| Centralization & Control | 4.17 | 30% | 1.250 |
 | Funds Management | 3.5 | 30% | 1.050 |
 | Liquidity Risk | 4.0 | 15% | 0.600 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.47/5.0** |
+| **Ungated weighted score** | | | **3.52/5.0** (3.525, rounded down) |
+| **Final Score (gate applied)** | | | **5.00/5.0 — GATED** |
 
 No optional modifiers apply: savETH is under 2 years old and below $500M TVL.
 
@@ -494,9 +525,11 @@ No optional modifiers apply: savETH is under 2 years old and below $500M TVL.
 | **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
 | **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Medium Risk** (top of the band).
+**Final Risk Tier: High Risk (GATED)** — not recommended while EOAs hold the fund-moving and unbacked-mint paths. Ungated, the score would be 3.52 (Elevated Risk, bottom of the band).
 
-As lending collateral, savETH should be sized against two facts. First, no liquidator can exit it without Avant. Second, the oracle cannot see an avETH impairment. Exposure in the WETH/savETH market should stay small relative to Avant's demonstrated redemption throughput and the ~1,460 avETH junior buffer, with the Monitoring alerts on `setMinter`, blacklist roles, the cooldown and the junior price wired to act on lender positions.
+**Gate-clearing condition:** move control of the backing wallets and the avETH/savETH/minting/CCIP admin powers to an onchain multisig of at least 3 signers (ideally with a timelock on `setMinter`, role grants and `redistributeLockedAmount`).
+
+If exposure is taken despite the gate, as lending collateral, savETH should be sized against two facts. First, no liquidator can exit it without Avant. Second, the oracle cannot see an avETH impairment. Exposure in the WETH/savETH market should stay small relative to Avant's demonstrated redemption throughput and the ~1,460 avETH junior buffer, with the Monitoring alerts on `setMinter`, blacklist roles, the cooldown and the junior price wired to act on lender positions.
 
 ---
 
@@ -508,7 +541,7 @@ As lending collateral, savETH should be sized against two facts. First, no liqui
   - Any `MinterUpdated`, admin or owner transfer, blacklist grant, `cooldownDuration` above 1 day, or `PriceSet` decrease.
   - Any savUSD/avUSD loss or depeg.
   - Redemptions not served within 7 days.
-  - Movement of the admin key to an onchain multisig and timelock (likely score improvement).
+  - Movement of the admin key and the backing wallets to an onchain multisig of at least 3 signers, plus a timelock (clears the gate).
   - Launch of Chainlink PoR or a savETH exchange-rate feed.
   - Located onchain NAV falling below 90% of avETH supply on re-reconciliation, which would trigger the unverifiable-reserves gate.
 
@@ -516,4 +549,4 @@ As lending collateral, savETH should be sized against two facts. First, no liqui
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [October 28, 2026](https://github.com/yearn/risk-score/pull/567) | 3.47 | Initial assessment |
+| [October 28, 2026](https://github.com/yearn/risk-score/pull/567) | 5.0 | Initial assessment, scored under the weakest-link governance rule ([#568](https://github.com/yearn/risk-score/pull/568)). GATED: EOA fund-moving/unbacked-mint paths; ungated 3.52 |
