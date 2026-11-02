@@ -5,7 +5,7 @@
 - **Chain:** Ethereum
 - **Token Address:** [`0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc`](https://etherscan.io/address/0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc)
 - **Snapshot:** Ethereum block [26,285,884](https://etherscan.io/block/26285884) (hash `0x85f5e71bfa59caeb6e93e74be66795719a9b7c3da062d1ae4ba0a4ea2c24bafd`, October 27, 2026 18:36:35 UTC). All onchain figures below are read at this block unless another block is stated.
-- **Final Score: 3.71/5.0**
+- **Final Score: 3.81/5.0**
 
 ## Overview + Links
 
@@ -318,11 +318,31 @@ All core contracts use a **two-tier TimelockController system** (verified onchai
 - The beacon controlling both vaults' shared implementation ([`0xa767a51810644dDc34588cB8392EFd2591350302`](https://etherscan.io/address/0xa767a51810644dDc34588cB8392EFd2591350302)) is owned by the same 7-day TimelockController as the core proxies — upgrade risk is symmetric with the rest of the protocol.
 - Each vault's `assetConfig().treasury` is the 3-of-5 multisig directly (not a separate treasury contract) — auction fees and treasury-allocated surplus accrue to the multisig.
 
+### Critical Permission Paths and Weakest Link
+
+Material loss here means loss of the USDC deposited into USD3, held as idle `waEthUSDC` in MorphoCredit or lent out of it. The inventory covers USD3, sUSD3, MorphoCredit, CreditLine, ProtocolConfig, MarkdownController, the five ProxyAdmins, both timelocks, EmergencyController v2, KeeperRelayer, the origination Safe, and the Safes behind them. Read at the snapshot block. Neither Safe has modules or a guard (`getModulesPaginated` empty; guard slot zero), so the effective threshold is the 3-of-5 multisig everywhere.
+
+| Capability and target | Current holder / control path | Safeguards | Assets exposed |
+|-----------------------|-------------------------------|------------|----------------|
+| Draw USDC within the existing credit line: `MorphoCredit.borrow` (via Helper) on behalf of the origination account, sent off-chain | Origination Safe [`0x3Ff3ff33D20a086834A095ed6ed562c9e189291b`](https://etherscan.io/address/0x3Ff3ff33D20a086834A095ed6ed562c9e189291b) (threshold 1; sole owner = 3/5 multisig [`0x33333333Bd7045F1A601A1E289D7AB21036fB5EF`](https://etherscan.io/address/0x33333333Bd7045F1A601A1E289D7AB21036fB5EF)) | 3/5 signatures; **no timelock**; capped by the credit line (94.06M `waEthUSDC`) and `DEBT_CAP` (95.02M `waEthUSDC`) | ~19.5M `waEthUSDC` (**~$23.2M**) of undrawn headroom, nearly all of the ~$25.15M idle buffer. The ~$88.82M already drawn left the chain the same way |
+| Raise any borrower's credit line, `DEBT_CAP`, or `MAX_CREDIT_LINE`: `CreditLine.setCreditLines`, `ProtocolConfig.setConfig` | CreditLine / ProtocolConfig `owner` = 24h timelock [`0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2`](https://etherscan.io/address/0x1dCcD4628d48a50C1A7adEA3848bcC869f08f8C2); proposer/executor/canceller = 3/5 multisig | 3/5 + 24h delay; global caps are lifted and restored inside the same batch, so they do not bind governance | All idle USDC (~$25.15M) and all future deposits |
+| Recognize a loss / write down NAV: `CreditLine.settle` → `MorphoCredit.settleAccount` | CreditLine `owner` = 24h timelock. `ozd` = EmergencyController v2, which exposes no `settle` forwarder | 3/5 + 24h | Any amount up to a borrower's debt (origination account: ~$88.82M), sUSD3 first |
+| Redirect or raise fees: USD3 `setPerformanceFee` / `setPerformanceFeeRecipient` (TokenizedStrategy; fee ≤ 50%); `ProtocolConfig.TRANCHE_SHARE_VARIANT` applied by `syncTrancheShare`; `MorphoCredit.setFee` | USD3/sUSD3 `management` and MorphoCredit/ProtocolConfig `owner` = 24h timelock | 3/5 + 24h | Future yield, not principal |
+| Upgrade logic: USD3, sUSD3, MorphoCredit, ProtocolConfig, AdaptiveCurveIRM | 5 ProxyAdmins owned by 7-day timelock [`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`](https://etherscan.io/address/0x3D3C41419Ab401cd25055E8f9421D7D96d887885); proposer/executor/canceller = 3/5 multisig | 3/5 + 7 days | All deposits (~$115.0M) |
+| Off-chain custody of drawn funds: Erebor account and FCC SPV positions | 3Jane off-chain signatories (**TODO:** account mandates and authorized signers not disclosed) | Not verifiable onchain | ~$88.48M self-reported principal + cash |
+
+**Recorded, not material (pause-only or bounded):**
+- **EmergencyController v2** [`0x84b31b84917485e221305edf590b8e3660d2e051`](https://etherscan.io/address/0x84b31b84917485e221305edf590b8e3660d2e051) (multisig + Hypernative EOA [`0x48c59b01Af01515E69460B6B5b55E557E914941d`](https://etherscan.io/address/0x48c59b01Af01515E69460B6B5b55E557E914941d), no delay). `ProtocolConfig.setEmergencyConfig` only accepts `IS_PAUSED = 1` and `DEBT_CAP` / `MAX_ON_CREDIT` / `USD3_SUPPLY_CAP = 0`; any other key reverts. `emergencyRevokeCreditLine` only removes a line and cannot move funds.
+- **KeeperRelayer** [`0xc22158100B823e1Ef612fBA265941efE9E7d7975`](https://etherscan.io/address/0xc22158100B823e1Ef612fBA265941efE9E7d7975), the USD3 keeper. Its authorized keepers (from `KeeperSet` events) are the multisig and two EOAs: the LCC `LISTER_ROLE` EOA and an EOA that is also a multisig signer. They can only call `report()`, `tend()`, and `syncTrancheShare()`. These realize the onchain NAV under health checks and apply the ProtocolConfig tranche share; they cannot inject a value or move funds.
+- **LCC** `LISTER_ROLE` EOA and `BOUNCER_ROLE` (24h timelock) act on LCC staker margin, not USD3 deposits.
+
+**Weakest credible path to material loss:** the 3-of-5 multisig, acting through the 1-of-1 origination Safe, can borrow the remaining ~19.5M `waEthUSDC` (~$23.2M) of credit-line headroom out of MorphoCredit and send it off-chain **with no timelock**. That is nearly all of USD3's redeemable liquidity. Only the 3/5 signature threshold stands in the way, and once off-chain the funds are protected only by 3Jane's undisclosed banking controls. Every larger path (more headroom, write-downs, upgrades) needs the same multisig plus the 24h or 7-day timelock, which are publicly visible in advance. No EOA or sub-3-signer holder can move deposits or set loss-causing parameters, so the critical gate is not triggered.
+
 ### Programmability
 
 - **Onchain:** Interest accruals, share price computation (ERC-4626), and loan state tracking are programmatic. Markdown decay exists in code but is deliberately not activated.
 - **Offchain (critical):** FCC facility selection, off-ramping, wires, collections, and valuation run through 3Jane's Erebor account and SPVs. CCL underwriting (3CA), credit-line sizing, and settlement are admin actions.
-- **Custodial deployment:** ~77% of `totalAssets` is drawn by a Safe controlled by the governance multisig and moved off-chain. Draws within the credit line need no timelock.
+- **Custodial deployment:** ~77% of `totalAssets` is drawn by a Safe controlled by the governance multisig and moved off-chain (the permission path is scored under Governance; the off-chain operation of those funds is scored here).
 - **PPS (price per share):** computed onchain via ERC-4626, but it reflects the origination account's face debt plus IRM interest. Losses on the off-chain assets reach PPS only when governance calls `CreditLine.settle()`, which in effect makes NAV admin-attested for the dominant asset.
 
 ### External Dependencies
@@ -563,6 +583,7 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 
 ### Key Risks
 
+- **Weakest permission path is untimelocked:** the 3/5 multisig can draw ~$23.2M, nearly the entire idle buffer, through its 1-of-1 origination Safe and send it off-chain with no timelock.
 - **Single-borrower concentration in a protocol-controlled account:** 98.8% of borrows (~$88.82M, ~77% of `totalAssets`) are owed by a 1-of-1 Safe owned by the governance multisig. That account pays a zero premium and has made one repayment since May. It can draw ~$23.2M more without new governance action.
 - **Off-chain, self-attested backing:** the assets behind that debt (Erebor cash, Slope and Settle forward-flow loans, the LendSwift warehouse) are unverifiable onchain and lack any third-party attestation. The dashboard's "verified value" is 3Jane's own carrying value.
 - **Counterparty concentration without first-loss:** Slope is ~$66.4M (76.6% of deployed FCC, ~58% of `totalAssets`). The forward flows (92% of FCC) are whole-loan purchases with no originator first-loss; documented credit enhancement covers only the $6.56M LendSwift warehouse.
@@ -614,10 +635,10 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 |--------|-----------|
 | Upgradeability | MorphoCredit, USD3, sUSD3, ProtocolConfig, AdaptiveCurveIRM upgradeable via TransparentUpgradeableProxy; **all five ProxyAdmins and the LCC beacon are owned by the 7-day TimelockController** (`0x3D3C41419Ab401cd25055E8f9421D7D96d887885`). USD3 → `0xd1f1c3f485063712873285bf4ef25ab068f13893` and sUSD3 → `0x6093d95f6c102163d19f5681e7d84997060bbaed` since September 25, 2026 |
 | Timelock | **Two-tier system** (verified October 27, 2026): 7-day `getMinDelay() = 604800` for upgrades; 24h `getMinDelay() = 86400` for configuration. The 24h timelock is `owner()` of MorphoCredit, CreditLine, ProtocolConfig, MarkdownController, and JANE, USD3/sUSD3 `management()`, and `OWNER_ROLE`/`BOUNCER_ROLE` on `LCCVaultFactory`. Both are self-administered; the 3-of-5 multisig holds PROPOSER + EXECUTOR + CANCELLER on both. |
-| Privileged roles | Pause, config changes, credit lines, settlement, upgrades. Global caps (`MAX_CREDIT_LINE`) are lifted and restored within governance batches, so the 24h delay, not the cap, constrains credit-line growth. The OperationalController split is still not executed onchain. LCC adds a single-EOA `LISTER_ROLE` (depositor caps only). |
+| Privileged roles | **Weakest path:** 3/5 multisig → origination Safe → untimelocked draw of ~$23.2M headroom. Pause, config changes, credit lines, settlement, upgrades. Global caps (`MAX_CREDIT_LINE`) are lifted and restored within governance batches, so the 24h delay, not the cap, constrains credit-line growth. The OperationalController split is still not executed onchain. LCC adds a single-EOA `LISTER_ROLE` (depositor caps only). |
 | Emergency | EmergencyController v2 ([`0x84b31b84917485e221305edf590b8e3660d2e051`](https://etherscan.io/address/0x84b31b84917485e221305edf590b8e3660d2e051)): multisig + Hypernative EOA can pause, zero caps, and revoke credit lines, bypassing both timelocks. `LCCVaultFactory.GUARDIAN_ROLE` reuses the same holders. |
 
-**Subcategory A Score: 3.0/5** — The 3/5 multisig maps to ~4, and the 7-day upgrade delay pulls toward 2. Every protocol-changing action since September went through the 24h or 7d timelock. The multisig's control of the origination account is a custody and operations concern, scored under Programmability.
+**Subcategory A Score: 4.0/5** — Scored on the weakest permission path to material loss (see *Critical Permission Paths and Weakest Link*). The 3/5 multisig can draw ~$23.2M, nearly the whole idle buffer, through the origination Safe with no timelock, bounded only by a credit line that it can raise after 24h. A 3/5 threshold with untimelocked fund movement maps to 4. Upgrade (7-day) and parameter (24h) paths are stronger but do not set the score. No EOA holds a material path.
 
 **Subcategory B: Programmability**
 
@@ -644,9 +665,9 @@ Key takeaway: the timing and size of any loss on ~77% of the backing is a discre
 
 **Subcategory C Score: 4.5/5** — The critical dependencies have shifted from early-stage onchain infrastructure to off-chain counterparties (originators, SPVs, servicers, one bank). Their failure would impair most of the backing, and none can be monitored onchain. Slope alone backs ~58% of `totalAssets`, which is close to a single-point-of-failure profile. The score is held below 5 by diversification across ~24,000 underlying loans, short duration, and SPV structuring, all self-reported.
 
-**Centralization Score = (3.0 + 4.5 + 4.5) / 3 = 4.0/5**
+**Centralization Score = (4.0 + 4.5 + 4.5) / 3 = 4.33/5**
 
-**Score: 4.0/5** — Upgrade and parameter governance is sound. Operationally, however, most pool capital is custodied and valued by the same multisig through off-chain counterparties.
+**Score: 4.33/5** — Upgrades and parameter changes go through timelocks. However, the same 3/5 multisig can move pool capital off-chain without a timelock and values it through off-chain counterparties.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -710,11 +731,11 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical Track Record | 3.0 | 20% | 0.60 |
-| Centralization & Control | 4.0 | 30% | 1.20 |
+| Centralization & Control | 4.33 | 30% | 1.30 |
 | Funds Management | 4.25 | 30% | 1.275 |
 | Liquidity Risk | 3.25 | 15% | 0.4875 |
 | Operational Risk | 3.0 | 5% | 0.15 |
-| **Final Score** | | | **3.71/5.0** |
+| **Final Score** | | | **3.81/5.0** |
 
 ### Risk Tier
 
@@ -726,9 +747,9 @@ Final Score = (Centralization × 0.30) + (Funds Mgmt × 0.30) + (Audits × 0.20)
 | **3.50–4.49** | **Elevated Risk** | **Limited approval, strict limits** |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Elevated Risk (3.71/5.0) — Limited approval, strict limits**
+**Final Risk Tier: Elevated Risk (3.81/5.0) — Limited approval, strict limits**
 
-The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets`) is owed by 3Jane's own multisig-controlled origination account. The account funds off-chain fintech receivables through a bank account. Its backing is self-attested only, it is concentrated in one counterparty (Slope, ~58% of `totalAssets`) without originator first-loss, and losses on it reach USD3 PPS only when governance chooses to settle. The holder base is heavily leveraged through Morpho and Pendle. Weighted sum is 3.7125, reported as 3.71 under the template's round-down rule. Mitigants: a sound two-tier timelock with unchanged signers, broad audit coverage, granular self-reported facility data that reconciles to onchain debt, short-duration receivables, unusually candid accepted-risk documentation, and no recognized loss to date. An independent attestation of the Erebor balances and FCC assets is the main item that could lower the score.
+The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets`) is owed by 3Jane's own multisig-controlled origination account. The account funds off-chain fintech receivables through a bank account. Its backing is self-attested only, it is concentrated in one counterparty (Slope, ~58% of `totalAssets`) without originator first-loss, and losses on it reach USD3 PPS only when governance chooses to settle. The holder base is heavily leveraged through Morpho and Pendle. The weakest permission path, an untimelocked 3/5 draw of the idle buffer, sets Governance at 4.0. Weighted sum is 3.8125, reported as 3.81 under the template's round-down rule. Mitigants: a sound two-tier timelock with unchanged signers, broad audit coverage, granular self-reported facility data that reconciles to onchain debt, short-duration receivables, unusually candid accepted-risk documentation, and no recognized loss to date. An independent attestation of the Erebor balances and FCC assets is the main item that could lower the score.
 
 ---
 
@@ -755,4 +776,4 @@ The tier is **Elevated** because ~98.8% of the borrow book (~77% of `totalAssets
 | [March 4, 2026](https://github.com/yearn/risk-score/pull/77) | 3.5 | Initial assessment |
 | [July 3, 2026](https://github.com/yearn/risk-score/pull/168) | 3.4 | Reassessment after April 2026 emergency shutdown |
 | [September 5, 2026](https://github.com/yearn/risk-score/pull/444) | 3.46 | Reassessment: thinner loss buffer, higher utilization; LCC launch noted but not risk-scored (deposit path disabled at snapshot) |
-| [October 27, 2026](https://github.com/yearn/risk-score/pull/562) | 3.71 | Reassessment: 98.8% of borrows owed by protocol-owned origination account funding self-reported off-chain FCC assets (Slope-concentrated); discretionary loss recognition; leveraged Morpho/Pendle holder base; v1.2 upgrade enables LCC funding; TVL ~$115M |
+| [October 27, 2026](https://github.com/yearn/risk-score/pull/562) | 3.81 | Reassessment: Governance rescored 3.0 → 4.0 under the weakest-link governance rule (PR #568; untimelocked origination-account draw path, no additional onchain change); 98.8% of borrows owed by protocol-owned origination account funding self-reported off-chain FCC assets (Slope-concentrated); discretionary loss recognition; leveraged Morpho/Pendle holder base; v1.2 upgrade enables LCC funding; TVL ~$115M |
