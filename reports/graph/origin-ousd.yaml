@@ -100,12 +100,12 @@ nodes:
     label: Cross-Chain Master (Base, 16.6%)
     address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
     category: strategy
-    note: Reports a cached remoteStrategyBalance pushed over CCTP messaging and accepted up to one day old, rather than a live read.
+    note: Reports a cached remoteStrategyBalance pushed over CCTP messaging rather than a live read. The stored value never expires and is not capped; stale incoming messages are ignored, but transfer confirmations skip that check.
   - id: cc-hyperevm
     label: Cross-Chain Master (HyperEVM, ~$28)
     address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
     category: strategy
-    note: Same cached-balance design as the Base leg. Wound down to about $28 between September 28 and October 1, 2026, but still an approved strategy the strategist can re-fund.
+    note: Same cached-balance design as the Base leg. Wound down to about $28 between September 28 and October 1, 2026, but still approved. Its remote side can be upgraded after a 60-second delay, and an upgraded remote could report an uncapped forged balance into vault accounting.
 
   # === Ethereum Morpho stack ===
   - id: morphousd-vault
