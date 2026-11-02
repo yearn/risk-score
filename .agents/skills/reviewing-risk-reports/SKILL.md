@@ -20,6 +20,16 @@ for corrections. Follow [AGENTS.md](../../../AGENTS.md).
   when assessing backing completeness.
 - Governance characterization and reassessment continuity under the
   [multisig standard](../verifying-onchain-data/references/governance.md).
+- Completeness of the permission inventory across material fund and control
+  paths. Check direct fund-moving powers and indirect paths through role grants,
+  upgrades, and timelock bypasses. Verify that the report identifies the weakest
+  credible path, its actual holder and safeguards, and the deposited funds
+  exposed. Flag a material EOA or low-threshold Safe path omitted from the
+  conclusion, but not an EOA pause-only role; distinguish verified absence from
+  incomplete enumeration. Check that bounded roles were tested for setter
+  control, price manipulation, and repeated-call losses. If an existing
+  report lacks the Critical Permission Paths and Weakest Link section, note it
+  for the next reassessment rather than failing the review.
 - Required sections, critical gates, exception status, category scores, weighted
   total, and tier against the [template](../../../reports/TEMPLATE.md) and
   [scoring framework](../../../reports/README.md).
