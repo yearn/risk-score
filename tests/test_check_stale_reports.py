@@ -1,7 +1,8 @@
+import json
 import os
 import tempfile
 import unittest
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
 
@@ -31,7 +32,9 @@ class BuildIssueBodyTests(unittest.TestCase):
             "- **Source:** [`reports/report/cap-stcusd.md`](https://github.com/yearn/risk-score/blob/master/reports/report/cap-stcusd.md)",
             body,
         )
-        self.assertIn("- **Last Assessment Date:** 2026-03-20 (source: report-header)", body)
+        self.assertIn(
+            "- **Last Assessment Date:** 2026-03-20 (source: report-header)", body
+        )
         self.assertIn("- **Current Score:** 2.4/5.0", body)
         self.assertIn("- **Days Since Last Assessment:** 68", body)
         self.assertIn("- **Threshold:** 60 days", body)
@@ -111,6 +114,161 @@ class ParseReportTests(unittest.TestCase):
         )
 
         self.assertIsNone(report["terminal_status"])
+
+
+class ReassessmentListTests(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.reports = self.root / "report"
+        self.reports.mkdir()
+        self.scope = self.root / "reassessment.json"
+        for name, value in (
+            ("REPORTS_DIR", self.reports),
+            ("REASSESSMENT_LIST", self.scope),
+        ):
+            patch = mock.patch.object(stale_reports, name, value)
+            patch.start()
+            self.addCleanup(patch.stop)
+
+    def write_report(self, slug: str, days: int = 90, status: str = ""):
+        date = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%B %d, %Y")
+        (self.reports / f"{slug}.md").write_text(
+            f"# Protocol Risk Assessment: {slug}\n\n"
+            f"- **Assessment Date:** {date}\n"
+            "- **Final Score: 2.4/5.0**\n"
+            f"- **Status:** {status}\n\n"
+            "## Overview + Links\n"
+        )
+
+    def test_list_resolves_only_selected_reports_in_sorted_order(self):
+        for slug in ("yearn-vault", "asset", "unlisted"):
+            self.write_report(slug)
+        self.scope.write_text(json.dumps(["yearn-vault", "asset"]))
+
+        self.assertEqual(
+            stale_reports.load_reassessment_reports(),
+            [self.reports / "asset.md", self.reports / "yearn-vault.md"],
+        )
+
+    def test_empty_list_is_valid(self):
+        self.scope.write_text("[]")
+
+        self.assertEqual(stale_reports.load_reassessment_reports(), [])
+
+    def test_missing_list_has_actionable_error(self):
+        with self.assertRaisesRegex(ValueError, "cannot read .*reassessment.json"):
+            stale_reports.load_reassessment_reports()
+
+    def test_malformed_json_has_actionable_error(self):
+        self.scope.write_text("[broken")
+
+        with self.assertRaisesRegex(ValueError, "fix the report list"):
+            stale_reports.load_reassessment_reports()
+
+    def test_invalid_encoding_has_actionable_error(self):
+        self.scope.write_bytes(b"\xff")
+
+        with self.assertRaisesRegex(ValueError, "fix the report list"):
+            stale_reports.load_reassessment_reports()
+
+    def test_non_array_is_rejected(self):
+        for value in ({"reports": []}, None, "yearn-vault", 42):
+            with self.subTest(value=value):
+                self.scope.write_text(json.dumps(value))
+                with self.assertRaisesRegex(ValueError, "JSON array"):
+                    stale_reports.load_reassessment_reports()
+
+    def test_invalid_slugs_are_rejected(self):
+        for value in (None, 1, {}, [], "", "../secret", "asset.md", "/asset", "Asset"):
+            with self.subTest(value=value):
+                self.scope.write_text(json.dumps([value]))
+                with self.assertRaisesRegex(ValueError, "invalid report slugs"):
+                    stale_reports.load_reassessment_reports()
+
+    def test_duplicates_are_rejected(self):
+        self.scope.write_text('["asset", "asset"]')
+
+        with self.assertRaisesRegex(ValueError, "duplicate report slugs"):
+            stale_reports.load_reassessment_reports()
+
+    def test_missing_report_is_rejected(self):
+        self.scope.write_text('["missing-asset"]')
+
+        with self.assertRaisesRegex(ValueError, "missing reports: .*missing-asset.md"):
+            stale_reports.load_reassessment_reports()
+
+    def test_directory_is_not_accepted_as_a_report(self):
+        (self.reports / "asset.md").mkdir()
+        self.scope.write_text('["asset"]')
+
+        with self.assertRaisesRegex(ValueError, "missing reports"):
+            stale_reports.load_reassessment_reports()
+
+    def test_invalid_list_stops_scan_before_github_operations(self):
+        self.scope.write_text('["missing-asset"]')
+        with (
+            mock.patch.object(stale_reports.subprocess, "check_output") as read,
+            mock.patch.object(stale_reports.subprocess, "run") as write,
+            self.assertLogs(stale_reports.log, level="ERROR") as logs,
+        ):
+            self.assertEqual(stale_reports.main(), 1)
+
+        self.assertIn("missing-asset.md", logs.output[0])
+        read.assert_not_called()
+        write.assert_not_called()
+
+    def test_scan_only_creates_issues_for_eligible_stale_reports(self):
+        self.write_report("asset")
+        self.write_report("yearn-vault")
+        self.write_report("unlisted")
+        self.write_report("terminal", status="DEAD")
+        self.write_report("fresh", days=1)
+        self.write_report("existing")
+        self.scope.write_text(
+            json.dumps(["asset", "yearn-vault", "terminal", "fresh", "existing"])
+        )
+        with (
+            mock.patch.dict(
+                os.environ, {"DRY_RUN": "", "GITHUB_REPOSITORY": "yearn/risk-score"}
+            ),
+            mock.patch.object(
+                stale_reports.subprocess,
+                "check_output",
+                return_value='[{"title": "Reassessment: existing"}]',
+            ),
+            mock.patch.object(stale_reports.subprocess, "run") as create,
+        ):
+            self.assertEqual(stale_reports.main(), 0)
+
+        titles = [call.args[0][4] for call in create.call_args_list]
+        self.assertEqual(titles, ["Reassessment: asset", "Reassessment: yearn-vault"])
+
+    def test_dry_run_does_not_create_issues(self):
+        self.write_report("asset")
+        self.scope.write_text('["asset"]')
+        with (
+            mock.patch.dict(os.environ, {"DRY_RUN": "true"}),
+            mock.patch.object(
+                stale_reports.subprocess, "check_output", return_value="[]"
+            ),
+            mock.patch.object(stale_reports.subprocess, "run") as create,
+        ):
+            self.assertEqual(stale_reports.main(), 0)
+
+        create.assert_not_called()
+
+
+class RepositoryReassessmentListTests(unittest.TestCase):
+    def test_committed_list_is_valid_and_contains_all_yearn_reports(self):
+        selected = {path.stem for path in stale_reports.load_reassessment_reports()}
+        yearn_reports = {
+            path.stem for path in stale_reports.REPORTS_DIR.glob("yearn-*.md")
+        }
+
+        self.assertTrue(yearn_reports)
+        self.assertLessEqual(yearn_reports, selected)
 
 
 if __name__ == "__main__":

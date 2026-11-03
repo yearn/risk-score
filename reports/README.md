@@ -14,6 +14,7 @@ The risk framework provides a structured approach to evaluating the safety and r
 reports/
 ├── TEMPLATE.md           # Risk assessment template (includes scoring rubrics)
 ├── README.md             # This file
+├── reassessment.json     # Report slugs eligible for scheduled reassessment
 ├── report/               # All risk assessments
 │   ├── reserve-ethplus.md      # Example: ETH+ asset
 │   ├── origin-arm.md           # Example: Origin ARM protocol
@@ -24,6 +25,44 @@ reports/
 ```
 
 Authoring procedures: [shared agent skills](../AGENTS.md#shared-skills-and-commands).
+
+## Scheduled Reassessment
+
+[reassessment.json](reassessment.json) is the explicit list of report slugs scanned
+by the weekly [reassessment workflow](../.github/workflows/reassessment-scan.yml).
+Include Yearn assets and protocols/assets used by Yearn, including collateral,
+infrastructure, and approved integrations that are currently unfunded. A completed
+risk assessment alone does not qualify a report for this list.
+
+The scanner keeps its existing 60-day threshold, assessment-date parsing, terminal
+status exclusions, and open-issue deduplication. Reports outside the list remain
+available on the website but do not generate scheduled reassessment issues. The
+list itself is used only by automation and is not rendered on the website.
+
+To change eligibility, add or remove a report slug (the filename under `report/`
+without `.md`). Keep entries sorted and unique. Missing files, invalid slugs, and
+duplicates fail the scan before any issues are created. An empty array disables
+issue creation without changing the workflow schedule.
+
+The initial list is seeded from the existing Yearn assessment snapshots:
+
+- All seven `yearn-*` reports cover Yearn's own assessed vaults.
+- `3jane-usd3`, `cap-stcusd`, and `sky-usds` are funded dependencies in
+  [yvUSD](report/yearn-yvusd.md#strategy-protocol-dependencies-with-existing-reports).
+  Cap and Sky also appear in [yvUSDC-1](report/yearn-yvusdc.md).
+- `infinifi`, `maple-syrupusdc`, and `origin-ousd` are approved but unfunded
+  integrations in [yvUSD](report/yearn-yvusd.md#active-but-unfunded-10-all-at-0-debt).
+- `spectra-finance` is listed as a PT infrastructure dependency in
+  [yvUSD](report/yearn-yvusd.md#strategy-protocol-dependencies-with-existing-reports).
+
+Maintain this list when Yearn integrations are added or removed, including uses
+outside these seven vaults. This is a manually maintained scope, not live exposure
+discovery. Revoked integrations and historical incident references alone do not
+qualify. Preview the scan without creating issues:
+
+```bash
+DRY_RUN=true uv run scripts/check_stale_reports.py
+```
 
 ## Scoring
 
