@@ -54,6 +54,7 @@ The initial list is seeded from the existing Yearn assessment snapshots:
   integrations in [yvUSD](report/yearn-yvusd.md#active-but-unfunded-10-all-at-0-debt).
 - `spectra-finance` is listed as a PT infrastructure dependency in
   [yvUSD](report/yearn-yvusd.md#strategy-protocol-dependencies-with-existing-reports).
+- `flex` covers the [Flex allocator and lending markets](report/flex.md) used by Yearn.
 
 Maintain this list when Yearn integrations are added or removed, including uses
 outside these seven vaults. This is a manually maintained scope, not live exposure
