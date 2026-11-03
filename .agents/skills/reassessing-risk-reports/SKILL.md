@@ -5,6 +5,11 @@ description: Focused procedure for refreshing existing risk reports by validatin
 
 # Reassessing risk reports
 
+## Contents
+
+- [Check current state](#check-current-state)
+- [Editing](#editing)
+
 Refresh `reports/report/<slug>.md` in place. Follow [AGENTS.md](../../../AGENTS.md).
 Re-derive static background or scores only when verified changes justify it.
 
@@ -37,6 +42,12 @@ update the [graph](../generating-dependency-graphs/SKILL.md). Create a missing
 graph when sufficient report evidence exists. For added, removed, or changed
 cross-chain exposure, use the [bridge skill](../assessing-bridge-dependencies/SKILL.md)
 to keep the index consistent.
+
+When Yearn usage changes, maintain the external dependency list in
+[reassessment.json](../../../reports/reassessment.json) under the
+[eligibility rules](../../../reports/README.md#scheduled-reassessment). Include
+approved but unfunded integrations; remove an entry only when no qualifying
+Yearn use remains. Yearn asset reports named `yearn-*.md` are included automatically.
 
 ## Editing
 

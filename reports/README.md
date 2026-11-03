@@ -14,6 +14,7 @@ The risk framework provides a structured approach to evaluating the safety and r
 reports/
 ├── TEMPLATE.md           # Risk assessment template (includes scoring rubrics)
 ├── README.md             # This file
+├── reassessment.json     # External dependencies eligible for scheduled reassessment
 ├── report/               # All risk assessments
 │   ├── reserve-ethplus.md      # Example: ETH+ asset
 │   ├── origin-arm.md           # Example: Origin ARM protocol
@@ -24,6 +25,58 @@ reports/
 ```
 
 Authoring procedures: [shared agent skills](../AGENTS.md#shared-skills-and-commands).
+
+## Scheduled Reassessment
+
+The weekly [reassessment workflow](../.github/workflows/reassessment-scan.yml)
+automatically includes every `report/yearn-*.md` asset report and the external
+dependency slugs in [reassessment.json](reassessment.json). Include external
+protocols/assets used by Yearn, including collateral, infrastructure with a
+documented integration, and approved integrations that are currently unfunded.
+A requested or completed assessment alone does not qualify an external report.
+
+The scanner keeps its existing 60-day threshold, assessment-date parsing, terminal
+status exclusions, and open-issue deduplication. Reports outside this scope remain
+available on the website but do not generate scheduled reassessment issues. The
+list itself is used only by automation and is not rendered on the website.
+
+To change external eligibility, add or remove a report slug (the filename under
+`report/` without `.md`). Keep entries sorted and unique; do not list `yearn-*`
+reports, which are discovered automatically. Invalid slugs, duplicates, unsorted
+entries, and malformed lists fail before GitHub operations. An empty array leaves
+only Yearn asset reports eligible.
+
+CI validates the list whenever reports are added, renamed, removed, or edited,
+as well as when the list itself changes. A missing or unreadable report at runtime
+is logged as an error; the scanner processes the remaining reports and returns a
+failure status afterward. Live scans flag open reassessment issues whose slugs
+have left the scope for manual review and closure.
+
+The scope is based on existing assessments and confirmed Yearn integration context:
+
+- The `yearn-*` reports cover Yearn's own assessed vaults and are discovered automatically.
+- `3jane-usd3`, `cap-stcusd`, and `sky-usds` are funded dependencies in
+  [yvUSD](report/yearn-yvusd.md#strategy-protocol-dependencies-with-existing-reports).
+  Cap and Sky also appear in [yvUSDC-1](report/yearn-yvusdc.md).
+- `infinifi`, `maple-syrupusdc`, and `origin-ousd` are approved but unfunded
+  integrations in [yvUSD](report/yearn-yvusd.md#active-but-unfunded-10-all-at-0-debt).
+- `flex` covers the [Flex allocator and lending markets](report/flex.md) used by Yearn.
+- `paxos-usdg` covers [USDG](report/paxos-usdg.md), used by Yearn on Robinhood Chain
+  as confirmed in the scope request.
+
+Maintain this list when Yearn integrations are added or removed, including uses
+outside the currently assessed vaults. External eligibility is maintained manually;
+it is not live exposure discovery. Revoked integrations and historical incident
+references alone do not qualify. Preview eligible stale reports locally:
+
+```bash
+DRY_RUN=true uv run scripts/check_stale_reports.py
+```
+
+Dry runs make no GitHub calls and require no `gh` authentication. They do not check
+existing issues, so the preview can include reports that already have open issues.
+Report-specific time-based and event-based review recommendations still apply
+outside the scheduled scope; they do not imply automatic GitHub issue creation.
 
 ## Scoring
 
