@@ -52,7 +52,7 @@ is logged as an error; the scanner processes the remaining reports and returns a
 failure status afterward. Live scans flag open reassessment issues whose slugs
 have left the scope for manual review and closure.
 
-The initial list is seeded from the existing Yearn assessment snapshots:
+The scope is based on existing assessments and confirmed Yearn integration context:
 
 - The `yearn-*` reports cover Yearn's own assessed vaults and are discovered automatically.
 - `3jane-usd3`, `cap-stcusd`, and `sky-usds` are funded dependencies in
@@ -61,6 +61,8 @@ The initial list is seeded from the existing Yearn assessment snapshots:
 - `infinifi`, `maple-syrupusdc`, and `origin-ousd` are approved but unfunded
   integrations in [yvUSD](report/yearn-yvusd.md#active-but-unfunded-10-all-at-0-debt).
 - `flex` covers the [Flex allocator and lending markets](report/flex.md) used by Yearn.
+- `paxos-usdg` covers [USDG](report/paxos-usdg.md), used by Yearn on Robinhood Chain
+  as confirmed in the scope request.
 
 Maintain this list when Yearn integrations are added or removed, including uses
 outside the currently assessed vaults. External eligibility is maintained manually;
