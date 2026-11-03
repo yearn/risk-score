@@ -145,7 +145,7 @@ class ReassessmentListTests(unittest.TestCase):
     def test_list_resolves_only_selected_reports_in_sorted_order(self):
         for slug in ("yearn-vault", "asset", "unlisted"):
             self.write_report(slug)
-        self.scope.write_text(json.dumps(["yearn-vault", "asset"]))
+        self.scope.write_text('["asset"]')
 
         self.assertEqual(
             stale_reports.load_reassessment_reports(),
@@ -156,6 +156,22 @@ class ReassessmentListTests(unittest.TestCase):
         self.scope.write_text("[]")
 
         self.assertEqual(stale_reports.load_reassessment_reports(), [])
+
+    def test_empty_dependency_list_still_includes_new_yearn_reports(self):
+        self.scope.write_text("[]")
+        self.write_report("yearn-new-vault")
+        self.write_report("unlisted")
+
+        self.assertEqual(
+            stale_reports.load_reassessment_reports(),
+            [self.reports / "yearn-new-vault.md"],
+        )
+
+    def test_yearn_reports_must_not_be_duplicated_in_dependency_list(self):
+        self.scope.write_text('["yearn-vault"]')
+
+        with self.assertRaisesRegex(ValueError, "discovered automatically"):
+            stale_reports.load_reassessment_reports()
 
     def test_missing_list_has_actionable_error(self):
         with self.assertRaisesRegex(ValueError, "cannot read .*reassessment.json"):
@@ -193,21 +209,53 @@ class ReassessmentListTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate report slugs"):
             stale_reports.load_reassessment_reports()
 
-    def test_missing_report_is_rejected(self):
+    def test_unsorted_list_is_rejected(self):
+        self.scope.write_text('["z-asset", "a-asset"]')
+
+        with self.assertRaisesRegex(ValueError, "sorted alphabetically"):
+            stale_reports.load_reassessment_reports()
+
+    def test_missing_report_is_retained_for_scan_error_reporting(self):
         self.scope.write_text('["missing-asset"]')
 
-        with self.assertRaisesRegex(ValueError, "missing reports: .*missing-asset.md"):
-            stale_reports.load_reassessment_reports()
+        self.assertEqual(
+            stale_reports.load_reassessment_reports(),
+            [self.reports / "missing-asset.md"],
+        )
 
-    def test_directory_is_not_accepted_as_a_report(self):
-        (self.reports / "asset.md").mkdir()
-        self.scope.write_text('["asset"]')
+    def test_bad_report_does_not_prevent_other_issues_and_returns_failure(self):
+        for failure in ("missing", "directory", "encoding"):
+            with self.subTest(failure=failure):
+                self.write_report("valid-asset")
+                slug = f"bad-{failure}"
+                bad = self.reports / f"{slug}.md"
+                if failure == "directory":
+                    bad.mkdir()
+                if failure == "encoding":
+                    bad.write_bytes(b"\xff")
+                self.scope.write_text(json.dumps([slug, "valid-asset"]))
+                with (
+                    mock.patch.dict(
+                        os.environ,
+                        {"DRY_RUN": "", "GITHUB_REPOSITORY": "yearn/risk-score"},
+                    ),
+                    mock.patch.object(
+                        stale_reports.subprocess, "check_output", return_value="[]"
+                    ),
+                    mock.patch.object(stale_reports.subprocess, "run") as create,
+                    self.assertLogs(stale_reports.log, level="ERROR") as logs,
+                ):
+                    self.assertEqual(stale_reports.main(), 1)
 
-        with self.assertRaisesRegex(ValueError, "missing reports"):
-            stale_reports.load_reassessment_reports()
+                self.assertIn(f"{slug}.md", logs.output[0])
+                self.assertIn("continuing", logs.output[0])
+                self.assertEqual(create.call_count, 1)
+                self.assertEqual(
+                    create.call_args.args[0][4], "Reassessment: valid-asset"
+                )
 
     def test_invalid_list_stops_scan_before_github_operations(self):
-        self.scope.write_text('["missing-asset"]')
+        self.scope.write_text("{broken")
         with (
             mock.patch.object(stale_reports.subprocess, "check_output") as read,
             mock.patch.object(stale_reports.subprocess, "run") as write,
@@ -215,7 +263,7 @@ class ReassessmentListTests(unittest.TestCase):
         ):
             self.assertEqual(stale_reports.main(), 1)
 
-        self.assertIn("missing-asset.md", logs.output[0])
+        self.assertIn("fix the report list", logs.output[0])
         read.assert_not_called()
         write.assert_not_called()
 
@@ -226,9 +274,7 @@ class ReassessmentListTests(unittest.TestCase):
         self.write_report("terminal", status="DEAD")
         self.write_report("fresh", days=1)
         self.write_report("existing")
-        self.scope.write_text(
-            json.dumps(["asset", "yearn-vault", "terminal", "fresh", "existing"])
-        )
+        self.scope.write_text(json.dumps(["asset", "existing", "fresh", "terminal"]))
         with (
             mock.patch.dict(
                 os.environ, {"DRY_RUN": "", "GITHUB_REPOSITORY": "yearn/risk-score"}
@@ -245,24 +291,69 @@ class ReassessmentListTests(unittest.TestCase):
         titles = [call.args[0][4] for call in create.call_args_list]
         self.assertEqual(titles, ["Reassessment: asset", "Reassessment: yearn-vault"])
 
-    def test_dry_run_does_not_create_issues(self):
+    def test_dry_run_requires_no_github_commands_or_authentication(self):
         self.write_report("asset")
         self.scope.write_text('["asset"]')
         with (
-            mock.patch.dict(os.environ, {"DRY_RUN": "true"}),
-            mock.patch.object(
-                stale_reports.subprocess, "check_output", return_value="[]"
+            mock.patch.dict(
+                os.environ,
+                {"DRY_RUN": "true", "GITHUB_REPOSITORY": "yearn/risk-score"},
+                clear=True,
             ),
+            mock.patch.object(
+                stale_reports.subprocess,
+                "check_output",
+                side_effect=FileNotFoundError("no gh"),
+            ) as read,
             mock.patch.object(stale_reports.subprocess, "run") as create,
         ):
             self.assertEqual(stale_reports.main(), 0)
 
+        read.assert_not_called()
         create.assert_not_called()
+
+    def test_live_scan_flags_open_issues_for_removed_slugs(self):
+        self.write_report("asset", days=1)
+        self.scope.write_text('["asset"]')
+        with (
+            mock.patch.dict(os.environ, {"DRY_RUN": ""}),
+            mock.patch.object(
+                stale_reports.subprocess,
+                "check_output",
+                return_value=json.dumps(
+                    [
+                        {"title": "Reassessment: asset"},
+                        {"title": "Reassessment: removed"},
+                        {"title": "Manual reassessment checklist"},
+                    ]
+                ),
+            ),
+            mock.patch.object(stale_reports.subprocess, "run") as create,
+            self.assertLogs(stale_reports.log, level="WARNING") as logs,
+        ):
+            self.assertEqual(stale_reports.main(), 0)
+
+        self.assertEqual(len(logs.output), 1)
+        self.assertIn("OUT-OF-SCOPE Reassessment: removed", logs.output[0])
+        create.assert_not_called()
+
+    def test_missing_selected_report_is_not_flagged_as_removed(self):
+        self.scope.write_text('["missing"]')
+        with self.assertNoLogs(stale_reports.log, level="WARNING"):
+            stale_reports.flag_out_of_scope_issues(
+                stale_reports.load_reassessment_reports(), {"Reassessment: missing"}
+            )
 
 
 class RepositoryReassessmentListTests(unittest.TestCase):
     def test_committed_list_is_valid_and_contains_all_yearn_reports(self):
-        selected = {path.stem for path in stale_reports.load_reassessment_reports()}
+        paths = stale_reports.load_reassessment_reports()
+        self.assertEqual(
+            [str(path) for path in paths if not path.is_file()],
+            [],
+            "Update reports/reassessment.json when renaming or deleting a listed report",
+        )
+        selected = {path.stem for path in paths}
         yearn_reports = {
             path.stem for path in stale_reports.REPORTS_DIR.glob("yearn-*.md")
         }
