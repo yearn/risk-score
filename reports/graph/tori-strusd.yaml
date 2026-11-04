@@ -34,13 +34,18 @@ nodes:
     label: Staking Rewards Distributor
     address: "0xa0C49fFa4B7941830235cde974d9B2a8420CD375"
     category: vault
-    note: "REWARDER_ROLE on strUSD"
+    note: "REWARDER_ROLE on strUSD; Ownable → Safe; forwards operator calls"
+  - id: dist-operator
+    label: Distributor Operator EOA
+    address: "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
+    category: governance
+    note: "No code; can reportLoss ≤5%/day without Safe/TL (material-EOA gate)"
 
   - id: minting
     label: Minting
     address: "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
     category: minting
-    note: "Whitelist EIP-712 mint/redeem; USDC/USDT; per-block caps"
+    note: "Directly deployed (not UUPS); whitelist EIP-712 mint/redeem; USDC/USDT"
   - id: custodian
     label: Custodian EOA
     address: "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
@@ -51,22 +56,27 @@ nodes:
     label: Admin Safe (3/5)
     address: "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
     category: governance
-    note: "DEFAULT_ADMIN; timelock proposer; CCIP pool owner"
+    note: "DEFAULT_ADMIN; TL proposer only (not executor/canceller); CCIP pool owner; can redistribute/seize"
   - id: timelock
     label: ToriTimelock (24h)
     address: "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4"
     category: governance
-    note: "TIMELOCK_ADMIN; upgrades / add custodian / add collateral"
+    note: "TIMELOCK_ADMIN; strUSD/trUSD upgrades; Minting params/custody (Minting not upgradeable)"
   - id: tl-executor-eoa
     label: Timelock Executor EOA
     address: "0x039e71e865a34bcaaebfc641291bec6517ea0ce7"
     category: governance
-    note: "EXECUTOR_ROLE alongside Safe"
+    note: "Sole EXECUTOR_ROLE (Safe hasRole false)"
   - id: tl-canceller-eoa
     label: Timelock Canceller EOA
     address: "0x60226cbb34445143e5f923abe2d42e5df852d065"
     category: governance
-    note: "CANCELLER_ROLE alongside Safe"
+    note: "Sole CANCELLER_ROLE (Safe hasRole false)"
+  - id: blacklist-eoa
+    label: Blacklist Manager EOA
+    address: "0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169"
+    category: governance
+    note: "BLACKLIST_MANAGER alongside Safe; prerequisite for redistribute/seize"
 
   - id: strusd-pool
     label: strUSD CCIP LockRelease Pool
@@ -96,7 +106,7 @@ nodes:
   - id: dep-accountable
     label: Accountable PoR
     category: dependency
-    note: "Continuous attestations at tori.accountable.capital"
+    note: "Continuous attestations; HT Digital letter 2026-10-23 (100.41%)"
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency
@@ -115,22 +125,14 @@ edges:
     to: timelock
     kind: proposes-on
     label: PROPOSER
-  - from: admin-safe
-    to: timelock
-    kind: cancels-on
-    label: CANCELLER
   - from: tl-canceller-eoa
     to: timelock
     kind: cancels-on
-    label: CANCELLER
-  - from: admin-safe
-    to: timelock
-    kind: holds-role
-    label: EXECUTOR (with EOA)
+    label: CANCELLER (Safe hasRole false)
   - from: tl-executor-eoa
     to: timelock
     kind: holds-role
-    label: EXECUTOR
+    label: EXECUTOR (Safe hasRole false)
   - from: timelock
     to: strusd
     kind: holds-role
@@ -142,11 +144,11 @@ edges:
   - from: timelock
     to: minting
     kind: holds-role
-    label: TIMELOCK_ADMIN (24h)
+    label: TIMELOCK_ADMIN (24h params; not upgradeable)
   - from: admin-safe
     to: strusd
     kind: holds-role
-    label: DEFAULT_ADMIN (no delay)
+    label: DEFAULT_ADMIN (redistribute/seize, no delay)
   - from: admin-safe
     to: trusd
     kind: holds-role
@@ -155,6 +157,10 @@ edges:
     to: minting
     kind: holds-role
     label: DEFAULT_ADMIN
+  - from: admin-safe
+    to: distributor
+    kind: controls
+    label: owner (can replace operator)
   - from: admin-safe
     to: strusd-pool
     kind: controls
@@ -163,6 +169,10 @@ edges:
     to: trusd-pool
     kind: controls
     label: owner
+  - from: blacklist-eoa
+    to: strusd
+    kind: holds-role
+    label: BLACKLIST_MANAGER
 
   - from: minting
     to: trusd
@@ -189,6 +199,14 @@ edges:
     to: strusd
     kind: holds-role
     label: REWARDER (rewards / reportLoss)
+  - from: dist-operator
+    to: distributor
+    kind: controls
+    label: operator (reportLoss ≤5%/day)
+  - from: admin-safe
+    to: strusd
+    kind: holds-role
+    label: REWARDER
   - from: strusd
     to: silo
     kind: routes-through
