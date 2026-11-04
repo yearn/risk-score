@@ -67,7 +67,8 @@
       ],
       "ignore": [
         "midas-mglobal",
-        "midas-mhyper"
+        "midas-mhyper",
+        "superstate-ustb"
       ],
       "dependencies": [
         {
