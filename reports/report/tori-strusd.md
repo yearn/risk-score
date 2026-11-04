@@ -280,4 +280,4 @@ strUSD's onchain wrapper is conventional and timelocked, but economic value sits
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| November 4, 2026 | 3.25 | Initial assessment (PR link TBD) |
+| [November 4, 2026](https://github.com/yearn/risk-score/pull/577) | 3.25 | Initial assessment |
