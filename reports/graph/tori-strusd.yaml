@@ -106,7 +106,7 @@ nodes:
   - id: dep-accountable
     label: Accountable PoR
     category: dependency
-    note: "Continuous attestations; HT Digital letter 2026-10-23 (100.41%)"
+    note: "Live :8443/dashboard JSON (DFID 100000007); CR 100.35% at 2026-11-04 10:46 UTC"
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency

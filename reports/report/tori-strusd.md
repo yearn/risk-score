@@ -1,7 +1,7 @@
 # Protocol Risk Assessment: Tori Finance
 
 - **Assessment Date:** November 4, 2026
-- **Onchain Snapshot:** Ethereum block [26340122](https://etherscan.io/block/26340122) (November 4, 2026 08:01 UTC); DeFiLlama, GeckoTerminal, and remote-chain supplies fetched the same day; Accountable / HT Digital PoR evidence dated 2026-10-23 and 2026-10-30
+- **Onchain Snapshot:** Ethereum block [26340122](https://etherscan.io/block/26340122) (November 4, 2026 08:01 UTC); DeFiLlama, GeckoTerminal, and remote-chain supplies fetched the same day; Accountable live PoR via `GET https://tori.accountable.capital:8443/dashboard` (`Accept: application/json`, DFID `100000007`) at report `ts` **2026-11-04 10:46:00 UTC** (11:46 Europe/Zagreb); HT Digital letters 2026-10-16/23/30 also linked from the feed
 - **Token:** strUSD (Staked trUSD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x280839980a7eD0D7717F64125fE241012E5F5815`](https://etherscan.io/address/0x280839980a7eD0D7717F64125fE241012E5F5815)
@@ -40,7 +40,8 @@ This assessment covers **holding and using strUSD on Ethereum**, including the M
 - [Roles, Multisig and Timelocks](https://docs.tori.finance/security/roles)
 - [Audits](https://docs.tori.finance/security/audits)
 - [Backing & Reserves](https://docs.tori.finance/solution/backing)
-- [Accountable attestations](https://tori.accountable.capital)
+- [Accountable attestations (UI)](https://tori.accountable.capital/)
+- [Accountable live JSON feed](https://tori.accountable.capital:8443/dashboard) (DFID `100000007`; Yearn monitor pattern: [`utils/accountable.py`](https://github.com/yearn/monitoring/blob/main/utils/accountable.py))
 - [HT Digital PoR letter (23 Oct 2026)](https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029)
 - [GitHub — tori-contracts](https://github.com/Tori-Finance/tori-contracts)
 - [DeFiLlama](https://defillama.com/protocol/tori-finance)
@@ -123,10 +124,14 @@ Ultimate backing for strUSD is **trUSD**, which is itself backed by **offchain h
 
 ### Collateralization
 
-Offchain delta-neutral book (docs: money markets, futures arb, calendar spreads). Not onchain blue-chip collateral. Dated transparent attestation:
+Offchain delta-neutral book (docs: money markets, futures arb, calendar spreads). Not onchain blue-chip collateral. **Live transparent attestation obtained** this assessment using the same public JSON approach as Yearn monitoring ([`utils/accountable.py`](https://github.com/yearn/monitoring/blob/main/utils/accountable.py) `fetch_report`: `GET` the feed `dashboard_url` with `Accept: application/json`):
 
-- **HT Digital Services Ltd letter, 23 October 2026 14:00 UTC** ([PDF](https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029)): sight of **$73.079M** collateral vs **72.781M** trUSD in circulation (Ethereum block 26,255,786); **collateral ratio 100.41%**. Breakdown: money market $37.877M, bank deposits $15.313M, derivatives cash collateral $7.769M, listed equities (hedged) $5.890M, cash/receivables $0.102M, digital assets $6.127M. Letter states a future ISAE 3000 engagement is planned; this letter is a review of sighted collateral, not assurance.
-- **Accountable dashboard capture, 2026-10-30 ~10:15 UTC** (RockawayX Protocol Transparency Rating / Accountable PTR PDF): total supply **USD 72,299,429** (matches onchain `totalSupply`), collateral ratio **~100.4%**, Reserve Fund **USD 292,103** (~0.40% of supply). Continuous Accountable PoR at [tori.accountable.capital](https://tori.accountable.capital).
+- **Endpoint:** [`https://tori.accountable.capital:8443/dashboard`](https://tori.accountable.capital:8443/dashboard) (SPA config `dashboardUrl`; DFID **`100000007`**; UI [tori.accountable.capital](https://tori.accountable.capital/)).
+- **Report timestamp (`data.ts`):** **2026-11-04 10:46:00.162 UTC** (11:46 Europe/Zagreb).
+- **Totals:** `total_reserves.value` **$73,156,847.25**; `total_supply.value` **$72,899,632.79** (`fx: 1`); reported `collateralization` **1.003528** (**100.3528%**); `net` **$257,214.45**; `reserves.verifiability` **100**; `reserves.interval` **live**.
+- **Composition (`reserves.nested_split`, USD):** Money Market Instruments **$53.00M**; Delta-Neutral Equity Arbitrage **$6.71M**; FX Collateral **$7.20M**; Bank Cash **~$0.10M**; on-chain sleeves (Monad Morpho AUSD / Ethereum USDC·USDT / Base) making up the remainder of the book. Custody mix (`custodyBreakdown`): regulated custodian banks **~81.8%**, regulated investment banks **~9.8%**, on-chain custody **~8.4%**.
+- **Data sources (share of reserves):** Asset Manager API **91.48%** (verification level 4, private); DeFi Protocols **6.7%** (level 6, public); Blockchain Wallets **1.69%** (level 6); Payment Service provider **0.14%** (level 2); others ~0. Feed includes Nitro TEE / merkle / ZKP attestation blobs and links HT Digital letters dated **2026-10-16 / 10-23 / 10-30**.
+- **Cross-check letter:** HT Digital Services Ltd, **23 October 2026 14:00 UTC** ([PDF](https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029)): sight of **$73.079M** collateral vs **72.781M** trUSD (block 26,255,786); **100.41%** CR. Review of sighted collateral, not ISAE 3000 assurance (future engagement planned per letter).
 
 ### Exchange Rate
 
@@ -193,7 +198,7 @@ A **material loss** here is loss of deposited trUSD in the strUSD vault (or conf
 ## Dependencies
 
 1. **Offchain trading / custody stack** — critical; economic solvency of trUSD.
-2. **Accountable** continuous attestation — transparency layer (not a hard onchain gate); dated HT Digital letters + dashboard captures cited above.
+2. **Accountable** continuous attestation — live JSON feed at `:8443/dashboard` (DFID 100000007) as cited above; not a hard onchain solvency gate.
 3. **Chainlink CCIP** — lock/release hub; remote Burn & Mint on Monad / Pharos / Arbitrum / Solana (~13.23M strUSD and ~0.68M trUSD escrowed at snapshot; remote supplies reconcile to lockboxes within ~100 wei dust across verified chains).
 4. **USDC / USDT** — mint collateral.
 5. **RedStone** (Morpho use only).
@@ -234,7 +239,7 @@ Primary exit for verified parties: whitelist redeem of trUSD (rate-limited). str
 
 - [ ] **No audit** — Sherlock + Nethermind public reports
 - [ ] **Unverified contract source** — core contracts verified
-- [ ] **Unverifiable reserves** — Restored. Dated transparent attestation obtained: HT Digital letter **2026-10-23** (100.41% CR; $73.079M collateral vs 72.781M trUSD) and Accountable dashboard capture **2026-10-30** (~100.4% CR; supply USD 72,299,429; Reserve Fund USD 292,103). Gate passes under the template's "onchain **or** transparent attestation" wording. Reserves remain offchain (reflected in Funds Management scores, not this gate).
+- [ ] **Unverifiable reserves** — Restored and evaluated with **obtained** Accountable data. Live feed `GET https://tori.accountable.capital:8443/dashboard` (`Accept: application/json`, same pattern as yearn/monitoring `utils/accountable.py`) returned `res=ok` at `ts` **2026-11-04 10:46:00 UTC**: reserves **$73,156,847.25**, supply **$72,899,632.79**, CR **100.3528%**, composition + custody breakdown + TEE attestations present; HT Digital letters 2026-10-16/23/30 linked. Gate **passes** under "onchain **or** transparent attestation". Reserves remain predominantly offchain (FM scores), but they are **not** unverifiable.
 - [x] **Total centralization** — **TRIGGERED** under the weakest-link / material-EOA rule ([TEMPLATE](../TEMPLATE.md) / #568): Distributor `operator` EOA [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) can burn deposited vault trUSD via `reportLoss` without Safe approval or timelock. Per-day 5% cap is not a qualifying lifetime bound; repeated calls are a material cumulative-loss path. Admin Safe 3/5 + 24h timelock on upgrades do **not** cover this operator path.
 
 **Gate triggered → Final Score capped at 5.00 (Status: GATED).** Category scores below are the ungated rubric result for transparency.
@@ -261,9 +266,9 @@ Two reputable firm audits with public PDFs, $1M critical bounty (private email c
 
 #### Category 3: Funds Management (Weight: 30%)
 
-**Collateralization: 3.5/5** — Attested fully reserved delta-neutral book (HT Digital 100.41% on 2026-10-23; Accountable ~100.4% on 2026-10-30), not onchain blue-chip collateral; Reserve Fund ~$292k (~0.40% of supply) at the Oct 30 capture.
+**Collateralization: 3.5/5** — Live Accountable feed shows **100.3528%** CR ($73.16M reserves / $72.90M supply at 2026-11-04 10:46 UTC) with disclosed sleeves (money markets, delta-neutral equity arb, FX collateral, on-chain). Not onchain blue-chip collateral; ~91% of reserves via private Asset Manager API (level 4).
 
-**Provability: 3.0/5** — strUSD `totalAssets` is onchain trUSD; trUSD backing relies on Accountable continuous attestations plus dated HT Digital letters. Onchain custodian balances remain a tiny fraction of supply.
+**Provability: 3.0/5** — strUSD `totalAssets` is onchain trUSD; trUSD backing is continuously attested via Accountable public JSON (`:8443/dashboard`, DFID 100000007) with TEE/ZKP blobs and HT Digital letters. Onchain custodian balances remain a tiny fraction of supply; most economic backing is offchain-attested rather than wallet-readable.
 
 **Funds Management = (3.5 + 3.0) / 2 = 3.25**
 
@@ -327,4 +332,4 @@ strUSD's onchain wrapper is conventional and (for upgrades) timelocked, but (1) 
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [November 4, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.59) | Review fix: material-EOA `reportLoss` operator path; restore Unverifiable-reserves gate + dated PoR; Safe not TL executor/canceller; Minting non-UUPS; confiscation powers; Curve exit quotes vs inventory |
+| [November 4, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.59) | Review fix: material-EOA `reportLoss` operator path; restore Unverifiable-reserves gate; **Accountable live JSON obtained** (`:8443/dashboard`, ts 2026-11-04 10:46 UTC, CR 100.3528%); Safe not TL executor/canceller; Minting non-UUPS; confiscation; Curve exit quotes vs inventory |
