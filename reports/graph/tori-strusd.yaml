@@ -1,0 +1,233 @@
+slug: tori-strusd
+title: Tori Finance (strUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: minting
+    label: Minting / Custody
+  - id: governance
+    label: Governance
+  - id: bridge
+    label: Bridge
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  - id: strusd
+    label: strUSD (StakedTrUSD)
+    address: "0x280839980a7eD0D7717F64125fE241012E5F5815"
+    category: vault
+    note: "ERC-4626 UUPS; ~62.54M supply; PPS ~1.0363; 7d cooldown"
+  - id: trusd
+    label: trUSD
+    address: "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697"
+    category: vault
+    note: "Synthetic dollar; ~72.80M supply; sole minter = Minting"
+  - id: silo
+    label: trUSD Silo
+    address: "0xF7c0d8853E69DCD37ee7599c6280d2632F3360B4"
+    category: vault
+    note: "Cooldown escrow; ~618.3k trUSD at snapshot"
+  - id: distributor
+    label: Staking Rewards Distributor
+    address: "0xa0C49fFa4B7941830235cde974d9B2a8420CD375"
+    category: vault
+    note: "REWARDER_ROLE on strUSD"
+
+  - id: minting
+    label: Minting
+    address: "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
+    category: minting
+    note: "Whitelist EIP-712 mint/redeem; USDC/USDT; per-block caps"
+  - id: custodian
+    label: Custodian EOA
+    address: "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
+    category: minting
+    note: "Registered custodian; ~$897k USDC+USDT onchain (bulk backing offchain)"
+
+  - id: admin-safe
+    label: Admin Safe (3/5)
+    address: "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
+    category: governance
+    note: "DEFAULT_ADMIN; timelock proposer; CCIP pool owner"
+  - id: timelock
+    label: ToriTimelock (24h)
+    address: "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4"
+    category: governance
+    note: "TIMELOCK_ADMIN; upgrades / add custodian / add collateral"
+  - id: tl-executor-eoa
+    label: Timelock Executor EOA
+    address: "0x039e71e865a34bcaaebfc641291bec6517ea0ce7"
+    category: governance
+    note: "EXECUTOR_ROLE alongside Safe"
+  - id: tl-canceller-eoa
+    label: Timelock Canceller EOA
+    address: "0x60226cbb34445143e5f923abe2d42e5df852d065"
+    category: governance
+    note: "CANCELLER_ROLE alongside Safe"
+
+  - id: strusd-pool
+    label: strUSD CCIP LockRelease Pool
+    address: "0x63AAEFD6e9F8a306ad6AD60f18f882Ee7Da866b9"
+    category: bridge
+    note: "LockReleaseTokenPool 2.0.0"
+  - id: trusd-pool
+    label: trUSD CCIP LockRelease Pool
+    address: "0x6823666FD0869050a0530eB15BA568936234d463"
+    category: bridge
+    note: "LockReleaseTokenPool 2.0.0"
+  - id: strusd-lockbox
+    label: strUSD LockBox
+    address: "0xc1A9e4BBb58573B8971C9b3C24e17f9851268F86"
+    category: bridge
+    note: "~13.23M strUSD escrowed"
+  - id: trusd-lockbox
+    label: trUSD LockBox
+    address: "0x8D21EB2945c6084797De85D7AE0c163e1971a37f"
+    category: bridge
+    note: "~0.68M trUSD escrowed"
+
+  - id: dep-offchain
+    label: Offchain delta-neutral book
+    category: dependency
+    note: "Custodied hedged positions; economic backing of trUSD"
+  - id: dep-accountable
+    label: Accountable PoR
+    category: dependency
+    note: "Continuous attestations at tori.accountable.capital"
+  - id: dep-ccip
+    label: Chainlink CCIP
+    category: dependency
+    note: "Hub lock/release; remotes Burn&Mint (Monad/Pharos/Arb/Solana)"
+  - id: dep-usdc
+    label: USDC
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    category: dependency
+  - id: dep-usdt
+    label: USDT
+    address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    category: dependency
+
+edges:
+  - from: admin-safe
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER
+  - from: admin-safe
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+  - from: tl-canceller-eoa
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER
+  - from: admin-safe
+    to: timelock
+    kind: holds-role
+    label: EXECUTOR (with EOA)
+  - from: tl-executor-eoa
+    to: timelock
+    kind: holds-role
+    label: EXECUTOR
+  - from: timelock
+    to: strusd
+    kind: holds-role
+    label: TIMELOCK_ADMIN (24h upgrades)
+  - from: timelock
+    to: trusd
+    kind: holds-role
+    label: TIMELOCK_ADMIN (24h upgrades)
+  - from: timelock
+    to: minting
+    kind: holds-role
+    label: TIMELOCK_ADMIN (24h)
+  - from: admin-safe
+    to: strusd
+    kind: holds-role
+    label: DEFAULT_ADMIN (no delay)
+  - from: admin-safe
+    to: trusd
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: admin-safe
+    to: minting
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: admin-safe
+    to: strusd-pool
+    kind: controls
+    label: owner
+  - from: admin-safe
+    to: trusd-pool
+    kind: controls
+    label: owner
+
+  - from: minting
+    to: trusd
+    kind: holds-role
+    label: sole minter()
+  - from: minting
+    to: custodian
+    kind: routes-through
+    label: transferToCustody
+  - from: dep-usdc
+    to: minting
+    kind: deposits-into
+    label: whitelist collateral
+  - from: dep-usdt
+    to: minting
+    kind: deposits-into
+    label: whitelist collateral
+
+  - from: strusd
+    to: trusd
+    kind: deposits-into
+    label: "ERC-4626 totalAssets (~64.81M)"
+  - from: distributor
+    to: strusd
+    kind: holds-role
+    label: REWARDER (rewards / reportLoss)
+  - from: strusd
+    to: silo
+    kind: routes-through
+    label: 7d cooldown claim path
+
+  - from: strusd
+    to: strusd-pool
+    kind: routes-through
+    label: CCIP lock (holder-level)
+  - from: trusd
+    to: trusd-pool
+    kind: routes-through
+    label: CCIP lock (holder-level)
+  - from: strusd-pool
+    to: strusd-lockbox
+    kind: routes-through
+    label: escrow
+  - from: trusd-pool
+    to: trusd-lockbox
+    kind: routes-through
+    label: escrow
+  - from: strusd-pool
+    to: dep-ccip
+    kind: routes-through
+    label: CCT messages
+  - from: trusd-pool
+    to: dep-ccip
+    kind: routes-through
+    label: CCT messages
+
+  - from: custodian
+    to: dep-offchain
+    kind: allocates-to
+    label: offchain hedges
+  - from: dep-offchain
+    to: dep-accountable
+    kind: manages
+    label: continuous attestation
+  - from: trusd
+    to: dep-offchain
+    kind: deposits-into
+    label: economic backing (offchain)
