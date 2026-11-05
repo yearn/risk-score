@@ -47,6 +47,12 @@ https://curation.yearn.fi/cdn/vaults/1/0x4cE9c93513DfF543Bc392870d57dF8C04e89Ba0
 
 Vault addresses are case-insensitive and normalized to lowercase.
 
+The same paths are available under `/api/cdn/`. Both prefixes also serve
+`vaults/RISK_FRAMEWORK.md` and `vaults/VAULT.md`. GET is supported, OPTIONS returns
+204, and HEAD/other methods return 405. Bare `/cdn` and `/api/cdn` requests return
+400, including query-only calls. Data comes from the same deployed revision as
+the site, with a 60-second browser TTL.
+
 ### Supported Chains
 
 | Chain | ID |
@@ -57,6 +63,14 @@ Vault addresses are case-insensitive and normalized to lowercase.
 | Base | 8453 |
 | Arbitrum | 42161 |
 | Katana | 747474 |
+
+## Website development and deployment
+
+The site uses Astro's static build and a small Cloudflare Worker. Run `npm ci`,
+`npm run build`, then `npm run preview` for the built site and API routes locally.
+Normal local and PR builds disable analytics and need no monitoring credentials.
+See the [deployment guide](docs/cloudflare-deployment.md) for runtime/browser
+tests, protected preview publication, owner prerequisites, cutover and rollback.
 
 ## Publishing to Yearn Artifacts
 

@@ -1,5 +1,5 @@
 // Client + types for the monitoring alerts API, consumed through the `/api/monitoring` edge
-// proxy (see api/monitoring.ts). The shapes mirror the backend contract in
+// proxy (see worker/monitoring.ts). The shapes mirror the backend contract in
 // github.com/yearn/monitoring `api/server.py` / `deploy/alerts-api.md` (PR #273).
 //
 // All fetching happens in the browser so the static site stays decoupled from backend uptime —

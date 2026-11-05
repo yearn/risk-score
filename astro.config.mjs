@@ -1,13 +1,9 @@
 import { defineConfig } from "astro/config";
-import vercel from "@astrojs/vercel";
 import sitemap from "@astrojs/sitemap";
 
 export default defineConfig({
   output: "static",
-  adapter: vercel(),
-  // Always the stable production domain. Using VERCEL_URL here leaks the
-  // per-deployment hostname (e.g. risk-score-<hash>-yearn.vercel.app) into
-  // canonical/og URLs, splitting SEO signal across throwaway aliases.
+  // Canonical URLs stay on the production domain in every environment.
   site: "https://curation.yearn.fi",
   integrations: [
     sitemap({

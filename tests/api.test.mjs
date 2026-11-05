@@ -1,8 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { getPath } from "../api/cdn.ts";
-import { getUpstreamPath } from "../api/monitoring.ts";
+import { getPath } from "../worker/cdn.ts";
+import { getUpstreamPath } from "../worker/monitoring.ts";
 
 const VAULT = "0xb9228370e2fa4908fc2bf559a50bb77ba66fdd66";
 const MIXED = "0xABCDEF1234567890ABCDEF1234567890ABCDEF12";
@@ -11,7 +11,7 @@ const cdn = (path) => getPath(new URL(`http://localhost${path}`));
 const upstream = (path) => getUpstreamPath(new URL(`http://localhost${path}`));
 
 test("cdn resolves query params, then /api/cdn/ and /cdn/ prefixes", () => {
-  assert.deepEqual(cdn("/api/cdn?schema=vaults&file=1.json"), { type: "direct", path: "vaults/1.json" });
+  assert.equal(cdn("/api/cdn?schema=vaults&file=1.json"), undefined);
   assert.deepEqual(cdn("/api/cdn/ignored?schema=vaults&file=1.json"), { type: "direct", path: "vaults/1.json" });
   assert.deepEqual(cdn("/api/cdn/vaults/42161.json"), { type: "direct", path: "vaults/42161.json" });
   assert.deepEqual(cdn("/cdn/asset/ETHplus.md"), { type: "direct", path: "asset/ETHplus.md" });
@@ -52,16 +52,20 @@ test("monitoring maps allowed routes and params upstream", () => {
     "/api/monitoring/alerts/5021": "/v1/alerts/5021",
     "/api/monitoring/alerts?protocol=aave&severity=HIGH&limit=5": "/v1/alerts?protocol=aave&severity=HIGH&limit=5",
     "/api/monitoring/alerts?cursor=5021&limit=100": "/v1/alerts?cursor=5021&limit=100",
-    // Vercel's /api/monitoring/:path* rewrite appends ?path=alerts to the destination.
-    "/api/monitoring/alerts?path=alerts&protocol=aave&limit=5": "/v1/alerts?protocol=aave&limit=5",
   };
   for (const [path, expected] of Object.entries(cases)) {
-    assert.deepEqual(upstream(path), { path: expected }, path);
+    const result = upstream(path);
+    const actual = new URL(result.path, 'https://upstream');
+    const wanted = new URL(expected, 'https://upstream');
+    actual.searchParams.sort();
+    wanted.searchParams.sort();
+    assert.equal(actual.href, wanted.href, path);
   }
 });
 
 test("monitoring rejects anything outside the allowlist", () => {
   const cases = {
+    "/api/monitoring/alerts?path=alerts": [400, "unsupported query param: path"],
     "/api/monitoring/alerts?protocol=aave&evil=1": [400, "unsupported query param: evil"],
     "/api/monitoring/alerts?severity=URGENT": [400, "invalid severity"],
     "/api/monitoring/alerts?limit=abc": [400, "invalid limit"],
