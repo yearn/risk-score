@@ -196,8 +196,11 @@ GitHub environment setup completed November 5, 2026: `cloudflare-preview` accept
 only `refs/pull/*/merge`; `cloudflare-production` accepts only `master`. Both require
 approval from an existing repository admin, prevent self-review and disallow
 admin bypass. The configured reviewers are matheus1lva, banteg, tapired,
-johnnyonline and spalen0. This does not establish master branch protection,
-credential scope, Worker provisioning or deployed validation. Environment token
+johnnyonline and spalen0. Master protection was enabled after both Linux checks
+passed on review commit `9f299ca`: it requires both named checks, an up-to-date
+branch and one independent approval after the latest push. Stale approvals are
+dismissed, admins are included, and force pushes/deletions are disabled. This
+does not establish credential scope, Worker provisioning or deployed validation. Environment token
 secrets still need to be entered: GitHub does not return stored plaintext values,
 and no local copy of the repository token was available to migrate.
 
@@ -208,12 +211,12 @@ and no local copy of the repository token was available to migrate.
   credentials and secrets, preview-only permissions and absence of production
   access. Configure preview Access, alternate test endpoints, version retention,
   API abuse controls and usage alerts. Keep domain-setup permission out of CI.
-- [ ] Repository owner (name TODO): require review plus `Build, data and Worker
-  checks` and `Merge result checks` on master; configure both protected deploy
-  environments with required reviewers and prevent self-review. Restrict the
-  production environment to master. The issue reports no protection/rulesets on
-  November 5; workflow checks alone do not enforce merges. Validate a fork can
-  run checks without reaching a protected environment, credentials or OIDC.
+- [x] Require review plus `Build, data and Worker checks` and `Merge result checks`
+  on master; configure both protected deploy environments with required reviewers
+  and prevent self-review. Restrict the production environment to master.
+- [ ] Repository owner (name TODO): validate an actual fork can run checks without
+  reaching a protected environment, credentials or OIDC. Local workflow tests and
+  same-repository CI do not establish this deployed permission boundary.
 - [ ] Enable repository variable `CLOUDFLARE_PREVIEW_ENABLED=true` only after the
   preceding preview prerequisites. Verify PR uploads leave preview active
   deployments unchanged and record the immutable version URL for the exact SHA.
@@ -253,6 +256,7 @@ and no local copy of the repository token was available to migrate.
 
 ## Platform references
 
+- [Reusable workflow environment secrets](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows#using-inputs-and-secrets-in-a-reusable-workflow)
 - [Static asset routing and bindings](https://developers.cloudflare.com/workers/static-assets/binding/)
 - [HTML handling](https://developers.cloudflare.com/workers/static-assets/routing/advanced/html-handling/)
 - [Static asset headers](https://developers.cloudflare.com/workers/static-assets/headers/)
