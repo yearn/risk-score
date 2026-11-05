@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: curation-${{ github.event_name }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: curation-${{ github.event_name }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   tests:
@@ -106,13 +106,18 @@ jobs:
       pull-requests: read
       deployments: write
     # Protected environment approval reviews workflow changes; tooling comes from master.
-    uses: ./.github/workflows/cloudflare-publish.yml
+    # Retain GitHub's documented local reusable-workflow syntax.
+    uses: ./.github/workflows/cloudflare-publish.yml # zizmor: ignore[self-repository]
     with:
       mode: preview
       pr: ${{ format('{0}', github.event.pull_request.number) }}
       sha: ${{ needs.tests.outputs.sha }}
       checksum: ${{ needs.tests.outputs.checksum }}
       artifact: ${{ needs.tests.outputs.artifact }}
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PREVIEW_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+      MONITORING_PREVIEW_API_TOKEN: ${{ secrets.MONITORING_PREVIEW_API_TOKEN }}
 
   production:
     name: Publish checked master revision
@@ -123,9 +128,14 @@ jobs:
       actions: read
       pull-requests: read
       deployments: write
-    uses: ./.github/workflows/cloudflare-publish.yml
+    # Retain GitHub's documented local reusable-workflow syntax.
+    uses: ./.github/workflows/cloudflare-publish.yml # zizmor: ignore[self-repository]
     with:
       mode: production
       sha: ${{ needs.tests.outputs.sha }}
       checksum: ${{ needs.tests.outputs.checksum }}
       artifact: ${{ needs.tests.outputs.artifact }}
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PRODUCTION_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+      MONITORING_PRODUCTION_API_TOKEN: ${{ secrets.MONITORING_PRODUCTION_API_TOKEN }}

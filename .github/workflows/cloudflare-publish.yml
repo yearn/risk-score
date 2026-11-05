@@ -18,6 +18,17 @@ on:
       artifact:
         type: string
         required: true
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID:
+        required: false
+      CLOUDFLARE_PREVIEW_API_TOKEN:
+        required: false
+      CLOUDFLARE_PRODUCTION_API_TOKEN:
+        required: false
+      MONITORING_PREVIEW_API_TOKEN:
+        required: false
+      MONITORING_PRODUCTION_API_TOKEN:
+        required: false
 
 permissions:
   contents: read
@@ -32,6 +43,9 @@ jobs:
        github.event.pull_request.head.repo.full_name == github.repository && inputs.pr != '') ||
       (inputs.mode == 'production' && github.event_name == 'push' && github.ref == 'refs/heads/master' && inputs.pr == '')
     runs-on: ubuntu-latest
+    concurrency:
+      group: cloudflare-publish-${{ inputs.mode }}-${{ inputs.pr || 'master' }}
+      cancel-in-progress: false
     # Owners configure required reviewers and prevent-self-review before enabling.
     environment: cloudflare-${{ inputs.mode }}
     steps:
@@ -49,7 +63,8 @@ jobs:
         with:
           artifact-ids: ${{ inputs.artifact }}
           path: incoming
-      - name: Validate release identity and publish
+      - name: Validate release identity and upload preview
+        if: inputs.mode == 'preview'
         run: node scripts/deploy_cloudflare.mjs
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -60,11 +75,24 @@ jobs:
           BUNDLE_PATH: incoming/bundle.json
           DEPLOY_RECORD_PATH: deployment.json
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # Select the key name first: a missing preview secret must stay empty,
-          # never fall through to a production or repository-wide token.
-          CLOUDFLARE_API_TOKEN: ${{ secrets[inputs.mode == 'preview' && 'CLOUDFLARE_PREVIEW_API_TOKEN' || 'CLOUDFLARE_PRODUCTION_API_TOKEN'] }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
           MONITORING_API_URL: ${{ vars.MONITORING_API_URL }}
-          MONITORING_API_TOKEN: ${{ secrets[inputs.mode == 'preview' && 'MONITORING_PREVIEW_API_TOKEN' || 'MONITORING_PRODUCTION_API_TOKEN'] }}
+          MONITORING_API_TOKEN: ${{ secrets.MONITORING_PREVIEW_API_TOKEN }}
+      - name: Validate release identity and publish production
+        if: inputs.mode == 'production'
+        run: node scripts/deploy_cloudflare.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pr }}
+          SOURCE_REVISION: ${{ inputs.sha }}
+          BUNDLE_CHECKSUM: ${{ inputs.checksum }}
+          ARTIFACT_ID: ${{ inputs.artifact }}
+          BUNDLE_PATH: incoming/bundle.json
+          DEPLOY_RECORD_PATH: deployment.json
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID || secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+          MONITORING_API_URL: ${{ vars.MONITORING_API_URL }}
+          MONITORING_API_TOKEN: ${{ secrets.MONITORING_PRODUCTION_API_TOKEN }}
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: ${{ inputs.mode }}-record-${{ inputs.sha }}-${{ github.run_id }}-${{ github.run_attempt }}

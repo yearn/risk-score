@@ -86,6 +86,12 @@ validated inputs. Cache errors fall through to live reads; there is no stale
 revalidation engine. `X-Monitoring-Cache: HIT|MISS` assists deployed verification.
 Do not confuse this with Static Assets caching or browser revalidation.
 
+Both Worker configurations explicitly enable persisted observability at full
+sampling for initial validation. Failed operations emit a category and operation
+label without exception messages, request headers, bodies or backend URLs.
+Cache failures are logged while the request continues against the upstream.
+Monitor log volume and adjust sampling in version control if usage warrants it.
+
 Plausible permits only `POST /proxy/plausible/api/event` to the fixed
 `https://plausible.io/api/event`, with a 16 KiB body bound, 5-second deadline,
 supported JSON/plain-text content types, and no redirect following. It forwards
@@ -130,6 +136,17 @@ must wait until this tooling has merged to master. A PR whose code has already
 passed CI can receive a current-head review, then have the pending environment
 job approved. If the job was rejected before review, rerun the full workflow
 after approval; publication requires the same attempt's validation and bundle.
+
+Each caller explicitly forwards only its environment's named secrets, and the
+reusable workflow declares those inputs. The protected environment supplies the
+matching values; missing preview credentials cannot select production values.
+Preview and production publication steps use literal secret names rather than
+computed indexing of the secrets context.
+
+Publication jobs serialize uploads for each target without cancelling an upload
+already in progress. Master pushes have separate validation runs, so a newer
+push cannot interrupt Wrangler while it is changing remote production state.
+Eligibility is checked again before upload; obsolete queued releases are rejected.
 
 | Setting | Preview environment | Production environment |
 | --- | --- | --- |

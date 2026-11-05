@@ -1,7 +1,7 @@
 import cdn from './cdn.ts';
 import monitoring from './monitoring.ts';
 import plausible from './plausible.ts';
-import { response, REVALIDATE, SECURITY_HEADERS } from './http.ts';
+import { response, reportFailure, REVALIDATE, SECURITY_HEADERS } from './http.ts';
 import type { Env } from './http.ts';
 
 const within = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
@@ -15,13 +15,22 @@ function finish(req: Request, env: Env, res: Response): Response {
 }
 
 export default {
-  async fetch(req: Request, env: Env, ctx: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
+  async fetch(
+    req: Request,
+    env: Env,
+    ctx: { waitUntil(promise: Promise<unknown>): void },
+  ): Promise<Response> {
     const url = new URL(req.url);
     let path: string;
-    try { path = decodeURIComponent(url.pathname); }
-    catch { return finish(req, env, response('invalid path', 400)); }
+    try {
+      path = decodeURIComponent(url.pathname);
+    } catch {
+      return finish(req, env, response('invalid path', 400));
+    }
     // Reject ambiguous encoding before ASSETS lookup (including double-encoded paths).
-    if (path.includes('%') || path.includes('\\') || path.includes('//') || /[\x00-\x1f\x7f]/.test(path)) {
+    // oxlint-disable-next-line no-control-regex -- Reject ASCII controls in request paths.
+    const hasControlCharacter = /[\x00-\x1f\x7f]/.test(path);
+    if (path.includes('%') || path.includes('\\') || path.includes('//') || hasControlCharacter) {
       return finish(req, env, response('not found', 404));
     }
     let res: Response;
@@ -34,7 +43,8 @@ export default {
       else if (within(path, '/api')) res = response('not found', 404);
       else if (within(path, '/proxy/plausible')) res = await plausible(req, env);
       else {
-        if (!['GET', 'HEAD'].includes(req.method)) return finish(req, env, response('bad method', 405, { allow: 'GET, HEAD' }));
+        if (!['GET', 'HEAD'].includes(req.method))
+          return finish(req, env, response('bad method', 405, { allow: 'GET, HEAD' }));
         // Exact assets normally never invoke the Worker. This also handles internal fallthrough.
         res = await env.ASSETS.fetch(req);
         if (res.status === 404 && !path.split('/').at(-1)?.includes('.')) {
@@ -45,10 +55,16 @@ export default {
         else if (res.ok || res.status === 304) {
           const headers = new Headers(res.headers);
           headers.set('cache-control', REVALIDATE);
-          res = new Response(req.method === 'HEAD' ? null : res.body, { status: res.status, headers });
+          res = new Response(req.method === 'HEAD' ? null : res.body, {
+            status: res.status,
+            headers,
+          });
         }
       }
-    } catch { res = response('internal server error', 500); }
+    } catch (error) {
+      reportFailure('request handling', error);
+      res = response('internal server error', 500);
+    }
     return finish(req, env, res);
   },
 };

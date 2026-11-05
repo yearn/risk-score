@@ -12,7 +12,7 @@ export function validateVaults(text, filename = 'vaults.json') {
   if (!data || Array.isArray(data) || typeof data !== 'object') throw new Error(`${filename}: expected vault object`);
   // JSON.parse alone silently drops duplicate keys. Scan the already-valid JSON's
   // root keys (including escaped characters) before accepting it for publication.
-  const tokens = [...text.matchAll(/"(?:[^"\\]|\\.)*"|[{}\[\]:,]/g)].map(m => m[0]);
+  const tokens = [...text.matchAll(/"(?:[^"\\]|\\.)*"|[{}[\]:,]/g)].map(m => m[0]);
   let depth = 0;
   const seen = new Set();
   for (let i = 0; i < tokens.length; i++) {
