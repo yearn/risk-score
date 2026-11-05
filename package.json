@@ -4,16 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro dev",
-    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro build",
-    "preview": "astro preview",
+    "build": "node scripts/update_stats.mjs && node scripts/check_bridges.mjs && node scripts/check_graphs.mjs && astro build && node --experimental-strip-types scripts/build_worker.mjs",
+    "preview": "wrangler dev --config config/wrangler.preview.json",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "update-stats": "node scripts/update_stats.mjs",
     "check-bridges": "node scripts/check_bridges.mjs --strict",
-    "check-graphs": "node scripts/check_graphs.mjs --strict"
+    "check-graphs": "node scripts/check_graphs.mjs --strict",
+    "test:worker": "node --experimental-strip-types --test tests/worker-runtime.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
-    "@astrojs/vercel": "11.0.14",
     "@plausible-analytics/tracker": "0.4.6",
     "@resvg/resvg-js": "2.6.2",
     "astro": "7.4.1",
@@ -23,5 +23,11 @@
     "js-yaml": "4.3.0",
     "marked": "18.1.1",
     "satori": "0.63.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "esbuild": "0.28.2",
+    "miniflare": "5.20261023.1-beta",
+    "wrangler": "4.154.0"
   }
 }

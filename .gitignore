@@ -39,6 +39,12 @@ htmlcov/
 
 .cursorrules
 .vercel
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env.*
+!.env.example
+release/
 
 # Astro
 node_modules/

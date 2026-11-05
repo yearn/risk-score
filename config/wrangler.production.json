@@ -1,0 +1,34 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "curation-production",
+  "main": "../release/worker.mjs",
+  "no_bundle": true,
+  "compatibility_date": "2026-10-23",
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": "../dist",
+    "binding": "ASSETS",
+    "html_handling": "none",
+    "not_found_handling": "none",
+    "run_worker_first": [
+      "/_data",
+      "/_data/*",
+      "/api",
+      "/api/*",
+      "/cdn",
+      "/cdn/*",
+      "/proxy/plausible",
+      "/proxy/plausible/*",
+      "/*%*"
+    ]
+  },
+  "vars": {
+    "ENVIRONMENT": "production",
+    "ANALYTICS_ENABLED": "true",
+    "SOURCE_REVISION": "unset"
+  },
+  "cache": {
+    "enabled": false
+  }
+}
