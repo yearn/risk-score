@@ -20,7 +20,7 @@ nodes:
     label: savETH (Senior Tranche)
     address: "0xDA06eE2dACF9245Aa80072a4407deBDea0D7e341"
     category: vault
-    note: ERC-4626 over avETH, immutable; 10,110.82 shares / 10,739.35 avETH; rate 1.062164; 24h cooldown (admin 0–90d)
+    note: ERC-4626 over avETH, immutable; 10,110.82 shares / 10,739.35 avETH; rate 1.062164; 24h cooldown (admin 0–90d for new/reset requests)
   - id: aveth
     label: avETH (Base Token)
     address: "0x9469470C9878bf3d6d0604831d9A3A366156f7EE"
@@ -69,7 +69,7 @@ nodes:
     label: Minter / Redeemer / Service EOA
     address: "0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2"
     category: governance
-    note: Hot operational key; cannot mint unbacked via minting contract
+    note: Hot key; cannot mint unbacked via minting contract, but combined price/settlement roles can drain 1,381.46 avETH from the current junior treasury
   - id: rewarder
     label: savETH Rewarder EOA
     address: "0xdb87e930065bc4c9cc4273672a64bf8e2761f1d8"
@@ -86,12 +86,17 @@ nodes:
     label: Avant ETH book (strategy wallets)
     address: "0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD"
     category: strategy
-    note: Self-reported NAV $30.46M (12,192.86 ETH, Oct 13 2026); $30.4M ETH/LST collateral, ~$40M stablecoin debt
+    note: October 28–29 reconciliation located 11,203.6 ETH net (91.75% of avETH supply); approximately 1,008 ETH remains unverified. Ethereum reads are block 26294115; remote reads are mixed-date
   - id: junior-treasury
     label: Junior treasury EOA
     address: "0xdD71CDd615f677E98C604bFF5679294cC7a6089b"
     category: strategy
-    note: Holds 1,381.46 avETH (+78.23 in 0x29b091B0b70D24FEd3BEC3f511B92CC54307c0F6)
+    note: Holds 1,381.46 avETH; grants RequestsManagerV2 maximum avETH allowance, exposing it to the service-key pricing/settlement path
+  - id: junior-legacy-treasury
+    label: Other junior treasury EOA
+    address: "0x29b091B0b70D24FEd3BEC3f511B92CC54307c0F6"
+    category: strategy
+    note: Holds 78.23 avETH; zero allowance to RequestsManagerV2 at the snapshot; direct EOA transfer authority remains
   - id: reserve-fund
     label: ETH Reserve Fund
     address: "0x4a6f696a6F921921dC959D19E911a2034063CFdA"
@@ -99,8 +104,58 @@ nodes:
     note: 38.01 savETH (40.37 avETH) — claim on the pool it protects
 
   # === External dependencies ===
+  - id: aave-v4-spoke
+    label: Aave V4 Spoke (upgradeable)
+    address: "0x94e7A5dCbE816e498b89aB752661904E2F56c485"
+    category: dependency
+    note: 4,167.75 WETH + 550 wstETH + 4,680.81 weETH (10,034.2 ETH gross); $14.22M debt; implementation 0xabd0e26fe17bde4f1f1187ed8aa80c274e03d8b5
+  - id: aave-v4-hub
+    label: Aave V4 Hub (upgradeable)
+    address: "0xcca852bc40e560adc3b1cc58ca5b55638ce826c9"
+    category: dependency
+    note: Custodies supplied assets and accounts for Spoke shares/debt; implementation 0xfe89fd96f270ac3c0f11921af0390dbb1340f704
+  - id: aave-v4-spoke-admin
+    label: V4 Spoke ProxyAdmin
+    address: "0xffeaccad70f4393701272212dacd791c01957f7f"
+    category: governance
+    note: ProxyAdmin.upgradeAndCall; owned by the V4 5-of-8 Safe
+  - id: aave-v4-hub-admin
+    label: V4 Hub ProxyAdmin
+    address: "0x55b71c0aed3c616162ee7c608c089a1055cea3bf"
+    category: governance
+    note: ProxyAdmin.upgradeAndCall; owned by the same V4 5-of-8 Safe
+  - id: aave-v4-safe
+    label: V4 upgrade Safe (5 of 8)
+    address: "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+    category: governance
+    note: Owns both ProxyAdmins and holds AccessManager ADMIN_ROLE; no enabled modules or mandatory timelock on its direct upgrade path at block 26294115
+  - id: aave-v4-authority
+    label: V4 AccessManager
+    address: "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01"
+    category: governance
+    note: Authority for Spoke/Hub; role 301 controls Spoke oracle/collateral configuration, role 101 controls Hub configuration. Snapshot evidence records holders and execution delays
+  - id: aave-v4-executor
+    label: V4 governance Executor
+    address: "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+    category: governance
+    note: Second AccessManager ADMIN_ROLE holder, alongside the upgrade Safe; owner is 0xdAbad81aF85554E9ae636395611C58F7eC1aAEc5. Upstream authority coverage is documented in the report
+  - id: aave-v4-safe-executor
+    label: V4 Safe-owned Executor
+    address: "0x14339e2178A954d5FB839D5Ff31644fE0F25F517"
+    category: governance
+    note: Owned by the V4 5-of-8 Safe; holds upstream Hub/Spoke configuration roles 200 and 400
+  - id: aave-v4-risk-steward
+    label: V4 RiskSteward
+    address: "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1"
+    category: governance
+    note: Roles 200/400; update functions restricted to RISK_COUNCIL with owner-configured per-parameter limits and debounce intervals. Owner is the governance Executor; remaining cumulative-risk checks are TODO in the report
+  - id: aave-v4-configurators
+    label: V4 configuration contracts
+    address: "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a"
+    category: governance
+    note: SpokeConfigurator holds role 301; HubConfigurator 0x1F0753480bB03EaA00863224602267B7E0525C3d holds role 101. Upstream restricted setters require roles 400 and 200 respectively
   - id: lenders
-    label: Aave / Spark / Morpho / Euler
+    label: Aave V3 / Spark / Morpho / Euler
     category: dependency
     note: ETH, weETH, wstETH collateral and stablecoin borrowing
   - id: lsts
@@ -196,6 +251,70 @@ edges:
     to: saveth
     kind: holds-role
     label: REWARDER_ROLE (transferInRewards)
+  - from: aave-v4-safe
+    to: aave-v4-spoke-admin
+    kind: controls
+    label: owner (5-of-8)
+  - from: aave-v4-safe
+    to: aave-v4-hub-admin
+    kind: controls
+    label: owner (5-of-8)
+  - from: aave-v4-spoke-admin
+    to: aave-v4-spoke
+    kind: controls
+    label: upgradeAndCall
+  - from: aave-v4-hub-admin
+    to: aave-v4-hub
+    kind: controls
+    label: upgradeAndCall
+  - from: aave-v4-safe
+    to: aave-v4-authority
+    kind: holds-role
+    label: Roles 0/200/400, zero AccessManager delay
+  - from: aave-v4-executor
+    to: aave-v4-authority
+    kind: holds-role
+    label: Roles 0/200/400, zero AccessManager delay
+  - from: aave-v4-safe
+    to: aave-v4-safe-executor
+    kind: controls
+    label: owner
+  - from: aave-v4-executor
+    to: aave-v4-risk-steward
+    kind: controls
+    label: owner (setConfig and restrictions)
+  - from: aave-v4-safe-executor
+    to: aave-v4-authority
+    kind: holds-role
+    label: Roles 200/400, zero AccessManager delay
+  - from: aave-v4-risk-steward
+    to: aave-v4-authority
+    kind: holds-role
+    label: Roles 200/400; exposed functions enforce steward bounds
+  - from: aave-v4-authority
+    to: aave-v4-spoke
+    kind: controls
+    label: authority (roles and configuration)
+  - from: aave-v4-authority
+    to: aave-v4-hub
+    kind: controls
+    label: authority (roles and configuration)
+  - from: aave-v4-authority
+    to: aave-v4-configurators
+    kind: controls
+    label: upstream setter roles 400/200; see report
+  - from: aave-v4-configurators
+    to: aave-v4-spoke
+    kind: holds-role
+    label: role 301 (oracle and collateral setters)
+  - from: aave-v4-configurators
+    to: aave-v4-hub
+    kind: holds-role
+    label: role 101 (Hub asset configuration)
+  - from: requests-manager
+    to: junior-treasury
+    kind: controls
+    label: maximum avETH allowance; service-key drain path
 
   # === Mint authority ===
   - from: minting
@@ -225,9 +344,17 @@ edges:
     kind: routes-through
     label: WETH to strategies
   - from: eth-book
+    to: aave-v4-spoke
+    kind: deposits-into
+    label: 10,034.2 ETH gross collateral
+  - from: aave-v4-spoke
+    to: aave-v4-hub
+    kind: routes-through
+    label: supplied assets and debt accounting
+  - from: eth-book
     to: lenders
     kind: deposits-into
-    label: $30.4M ETH/LST collateral
+    label: Other lending positions; Aave V4 shown separately
   - from: eth-book
     to: lsts
     kind: deposits-into
@@ -240,10 +367,18 @@ edges:
     to: curvance
     kind: deposits-into
     label: $3.06M hyAUSD + cAUSD
-  - from: avethx
+  - from: requests-manager
     to: junior-treasury
     kind: routes-through
-    label: 1,459.7 avETH first-loss
+    label: Junior deposits; current balance 1,381.46 avETH
+  - from: junior-treasury
+    to: aveth
+    kind: deposits-into
+    label: 1,381.46 avETH
+  - from: junior-legacy-treasury
+    to: aveth
+    kind: deposits-into
+    label: 78.23 avETH
   - from: reserve-fund
     to: saveth
     kind: deposits-into
