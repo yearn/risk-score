@@ -4,7 +4,9 @@
 - **Token:** fxUSD (f(x) USD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x085780639CC2cACd35E474e71f4d000e2405d8f6`](https://etherscan.io/address/0x085780639CC2cACd35E474e71f4d000e2405d8f6)
-- **Final Score: 2.1/5.0**
+- **Final Score: 2.25/5.0**
+
+- **Snapshot provenance:** Ethereum block [26,221,558](https://etherscan.io/block/26221558), hash `0xf7a5581c994ead3c7f9e0b673030cda90d7ef27188221cacdaa7d966e98f3aff`; Base block [52,781,286](https://basescan.org/block/52781286), hash `0x7e5c04b8562080a436c67a5e710f914b299493d0f1182dda2ca0996bee2cd121`. Both timestamps are October 18, 2026, 19:31:59 UTC. Historical permission and redemption reads were checked November 6, 2026; see [snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json) for role holders, implementation sources, read-only simulations and verification limits.
 
 ## Overview + Links
 
@@ -129,7 +131,8 @@ fxUSD uses the standard LayerZero V2 **lock-and-mint representation** model docu
 | Contract | Address | Configuration |
 |----------|---------|---------------|
 | Operational Multisig | [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF) | 6-of-9 Gnosis Safe (v1.3.0), 767 nonce |
-| Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | 3-of-4 Gnosis Safe (emergency pause), 455 nonce |
+| Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | 3-of-4 Gnosis Safe; pause, pool-oracle replacement and strategy funding without a timelock; 455 nonce |
+| fxSAVE Administrator | [`0xa0fb…4e99`](https://etherscan.io/address/0xa0fb1b11cca5871fb0225b64308e249b97804e99) | Separate 6-of-9 Safe with the same nine owner addresses as the operational Safe; holds fxSAVE `DEFAULT_ADMIN_ROLE` directly |
 
 ### DEX Liquidity Pools
 
@@ -230,7 +233,7 @@ In V2, all fxUSD position collateral is accounted for by the PoolManager contrac
 - **Oracle system:** Multi-source design:
   - **stETH/USD:** Chainlink ETH/USD + Uniswap V3 USDC/ETH (0.05% and 0.3% pools) + Curve stETH/ETH EMA + Uniswap V3 stETH/ETH. 1% deviation threshold.
   - **WBTC/USD:** Chainlink BTC/USD + Chainlink WBTC/BTC + Uniswap V3 pools (WBTC/USDC, WBTC/ETH, USDC/ETH). 2% deviation threshold.
-- **Admin minting:** The fxUSD contract is upgradeable (TransparentUpgradeableProxy, implementation `FxUSDRegeneracy` [`0xf729422D68c2cf00574fb5712972454cf402A9b1`](https://etherscan.io/address/0xf729422d68c2cf00574fb5712972454cf402a9b1), last upgraded February 17, 2026). ProxyAdmin is owned by the TimelockController, so any upgrade that introduced unbacked minting would be visible for 3 days before it could execute. Under the current implementation, fxUSD can only be minted against collateral through the PoolManager and ShortPoolManager.
+- **Admin minting:** The fxUSD contract is upgradeable (TransparentUpgradeableProxy, implementation `FxUSDRegeneracy` [`0xf729422D68c2cf00574fb5712972454cf402A9b1`](https://etherscan.io/address/0xf729422d68c2cf00574fb5712972454cf402a9b1), last upgraded February 17, 2026). ProxyAdmin is owned by the TimelockController, so any upgrade that introduced unbacked minting would be visible for 3 days before it could execute. The current implementation mints through PoolManager and ShortPoolManager using their collateral accounting and prices. An immediate malicious pool-oracle replacement can inflate that collateral valuation and enable economically unbacked borrowing without upgrading fxUSD (see Critical Permission Paths and Weakest Link).
 - **`isUnderCollateral` flag:** The fxUSD contract reports `isUnderCollateral() = false`; the remaining legacy V1 wstETH market holds only ~$10.0K. The active V2 system holds ~$108.10M collateral against ~80.93M fxUSD pool debt (~133.6% CR at NAV).
 - **No third-party verification** (no Chainlink PoR or custodian attestation needed — all on-chain)
 
@@ -248,26 +251,38 @@ In V2, all fxUSD position collateral is accounted for by the PoolManager contrac
 
 ### Governance
 
-- **All core contracts are upgradeable** via TransparentUpgradeableProxy, controlled by ProxyAdmin [`0x9b54b7703551d9d0ced177a78367560a8b2edda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4)
-- **3-day timelock on upgrades and core parameters (since April 20, 2026):** ProxyAdmin is owned by a TimelockController at [`0x68863fb8855b04509a835082478D6E3D0bE4E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a) with a 259,200-second (3-day) minimum delay. The timelock also holds `DEFAULT_ADMIN_ROLE` on fxUSD, PoolManager, ShortPoolManager, Configuration, fxSP, fxSAVE and PegKeeper — verified by `hasRole(0x00, timelock) == true` and `hasRole(0x00, multisig) == false` on each — and has owned both live price oracles since October 5, 2026. Parameter and oracle changes, not just upgrades, therefore go through the delay.
-- **The timelock is honored in practice.** On May 27, 2026 the multisig scheduled `updatePoolCapacity(xWBTC, 2000e8, 100_000_000e18)` (tx [`0x6e3b2e46…36115`](https://etherscan.io/tx/0x6e3b2e463ca6bc2e723196e95621049672e0b663a5d56033bc2c3216b5136115)) and executed it on May 30, 2026 (tx [`0x53e62749…9bbeca`](https://etherscan.io/tx/0x53e62749bcdbd2f70020693779a19589a85ee41e74656c793a2ea4a92f9bbeca)) — exactly the 3-day delay, no shortcut. Every later operation followed the same pattern: debt-ratio reductions (scheduled August 21, executed August 24, 2026), pool-capacity increases (September 3 → 7), legacy V1 wind-down upgrades (September 30 → October 3), revocation of an EOA's `EMERGENCY_ROLE` on the xWBTC pool (October 7 → 10), and `NO_INSTANT_REDEEM_FEE_ROLE` grants on fxSP to a Lagoon vault and an EOA (October 12 → 15), which waive the 1% instant-redeem fee for those holders. A further fxSP batch swapping one fee-waiver holder (tx [`0x4bdc4d2d…4e28`](https://etherscan.io/tx/0x4bdc4d2ded7a8d783cb461ed7db0545a841c96bb13e614af36bec196d44c4e28)) becomes executable on October 19, 2026. No `MinDelayChange` or `Cancelled` events have been emitted since the timelock was deployed.
-- **EXECUTOR_ROLE is granted to `address(0)`**, so execution after the delay is permissionless — anyone can push through a scheduled operation. PROPOSER and CANCELLER are held only by the 6/9 multisig; `TIMELOCK_ADMIN_ROLE` is held only by the timelock itself.
+- **Upgrades are timelocked.** ProxyAdmin [`0x9b54…dda4`](https://etherscan.io/address/0x9b54b7703551d9d0ced177a78367560a8b2edda4) is owned by the TimelockController [`0x6886…E61a`](https://etherscan.io/address/0x68863fb8855b04509a835082478D6E3D0bE4E61a), whose minimum delay is 259,200 seconds (3 days). No V2 core proxy has been upgraded since that ownership transfer on April 20, 2026.
+- **Core role administration has an fxSAVE exception.** The timelock holds `DEFAULT_ADMIN_ROLE` on fxUSD, PoolManager, ShortPoolManager, Configuration, fxSP, fxSAVE and PegKeeper. Reconstructed grant/revoke histories and `hasRole` checks show it is the sole holder on those contracts except fxSAVE, where the separate 6/9 Safe [`0xa0fb…4e99`](https://etherscan.io/address/0xa0fb1b11cca5871fb0225b64308e249b97804e99) also holds the role. Checking only the operational Safe's address misses that administrator ([snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json)).
+- **The timelock is honored in practice.** On May 27, 2026 the multisig scheduled `updatePoolCapacity(xWBTC, 2000e8, 100_000_000e18)` (tx [`0x6e3b2e46…36115`](https://etherscan.io/tx/0x6e3b2e463ca6bc2e723196e95621049672e0b663a5d56033bc2c3216b5136115)) and executed it on May 30, 2026 (tx [`0x53e62749…9bbeca`](https://etherscan.io/tx/0x53e62749bcdbd2f70020693779a19589a85ee41e74656c793a2ea4a92f9bbeca)) — exactly the 3-day delay, no shortcut. Other reviewed timelock operations include: debt-ratio reductions (scheduled August 21, executed August 24, 2026), pool-capacity increases (September 3 → 7), legacy V1 wind-down upgrades (September 30 → October 3), revocation of an EOA's `EMERGENCY_ROLE` on the xWBTC pool (October 7 → 10), and `NO_INSTANT_REDEEM_FEE_ROLE` grants on fxSP to a Lagoon vault and an EOA (October 12 → 15), which waive the 1% instant-redeem fee for those holders. A further fxSP batch swapping one fee-waiver holder (tx [`0x4bdc4d2d…4e28`](https://etherscan.io/tx/0x4bdc4d2ded7a8d783cb461ed7db0545a841c96bb13e614af36bec196d44c4e28)) becomes executable on October 19, 2026. No `MinDelayChange` or `Cancelled` events have been emitted since the timelock was deployed.
+- **Timelock roles:** PROPOSER and CANCELLER are held only by the operational 6/9 Safe. EXECUTOR is held by that Safe and `address(0)`, making execution permissionless after the delay. `TIMELOCK_ADMIN_ROLE` is held only by the timelock itself ([snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json)).
 
-**Price oracles are behind the timelock.** The two live price oracles, StETHPriceOracle [`0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb`](https://etherscan.io/address/0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb) and WBTCPriceOracle [`0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390`](https://etherscan.io/address/0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390) (confirmed as the pools' `priceOracle()`), are `Ownable2Step` contracts whose `owner()` has been the TimelockController since the April 20, 2026 `acceptOwnership()` batch (operation `0x0ac451c6…86dd0`) executed on October 5, 2026 (tx [`0x6d44a5bb…4d61`](https://etherscan.io/tx/0x6d44a5bb025cf28b04ac093cb42a4f15bc0824e770de8fd09f044c75e6984d61)); `pendingOwner()` is now zero. The owner-only `updateMaxPriceDeviation(...)` (currently 1% stETH and 2% WBTC, unchanged) and `updateOnchainSpotEncodings(...)` — which together could otherwise produce an arbitrary `getExchangePrice()` / `getLiquidatePrice()` — now require a public 3-day notice. A compromised 6/9 multisig would still need to schedule such a change in the open, giving users and monitors time to exit.
+**Existing oracle setters are timelocked; pool-oracle replacement is immediate.** The existing StETHPriceOracle [`0x0C5C…Abfb`](https://etherscan.io/address/0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb) and WBTCPriceOracle [`0xb3c9…6390`](https://etherscan.io/address/0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390) are owned by the timelock, with zero pending owners, following the October 5, 2026 [ownership-acceptance transaction](https://etherscan.io/tx/0x6d44a5bb025cf28b04ac093cb42a4f15bc0824e770de8fd09f044c75e6984d61). Their owner-only deviation and spot-encoding setters require the delay. However, both live long pools use the [snapshot pool implementation](https://etherscan.io/address/0x25739865593fa498e92d91e62019dbc051bdc993#code), where `BasePool.updatePriceOracle(address)` is gated by `EMERGENCY_ROLE`. The setter assigns the supplied address without an allowlist or delay. The operational 6/9 Safe [`0x26B2…7BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF), emergency 3/4 Safe [`0x28c9…eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) and timelock all hold this role on both pools. Historical `eth_call` simulations from each Safe successfully replaced each pool's oracle with its existing address; these calls did not persist state ([snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json)). Either Safe can instead select a malicious oracle, enabling unbacked borrowing or manipulated liquidations against both collateral legs. Ownership of the original oracles does not protect this replacement path.
 
-**Non-timelocked asset-management path.** `ASSET_MANAGER_ROLE` on both the PoolManager and the Stability Pool is held by the 6/9 multisig, the 3/4 emergency multisig and the timelock. That role's `manage(asset, amount)` moves funds into the already-configured strategy up to its capacity. Choosing the strategy (`alloc`) is `DEFAULT_ADMIN_ROLE` and therefore timelocked, which bounds the destination — but the configured wstETH capacity (100,000 wstETH) exceeds the entire wstETH collateral balance by ~19x, so either multisig could move the whole ETH collateral leg into Aave Prime without delay.
+**fxSAVE has a separate path to seize requested redemptions.** The 6/9 administrator [`0xa0fb…4e99`](https://etherscan.io/address/0xa0fb1b11cca5871fb0225b64308e249b97804e99) has the same owner address set as the operational Safe, but is a different contract and exercises fxSAVE admin authority without the timelock. Its [admin grant](https://etherscan.io/tx/0xc877b438f8406e6af366790fa5fe55c581848bcdd3d899240f4757f6fef5f659) remains active. `DEFAULT_ADMIN_ROLE` administers itself and `CLAIM_FOR_ROLE`; a historical read-only simulation confirms the Safe can grant itself the latter. In the [fxSAVE implementation](https://etherscan.io/address/0xe4031e271809d20074e4bef1caeefec5f710e8a6#code), `claimFor(owner, receiver)` passes the caller-selected receiver to the user's `LockedFxSaveProxy`, which redeems all matured fxSP shares to that receiver without the user's consent. The 60-minute cooldown delays maturity but does not constrain the eventual recipient. Across 49 users, 224,774.08 fxSP shares were requested and matured at the snapshot, redeemable for approximately 219,873.80 fxUSD plus 7,200.90 USDC (~$227,074.70). The exposure grows as further users request exits; this getter-based amount covers pending redemption proxies, not every fxSAVE share ([snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json)).
 
-- **Operational multisig:** 6-of-9 Gnosis Safe [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF)
-  - Known signers: Diligent Deer, Paul, chiaki644, Gordon, Guo Yu, Jamie, Martin Krung, Sharlyn Wu, vfat
-  - Mix of known and semi-anonymous contributors
-  - Holds PROPOSER, EXECUTOR and CANCELLER on the TimelockController (not TIMELOCK_ADMIN_ROLE), plus `EMERGENCY_ROLE` and `ASSET_MANAGER_ROLE` directly; owner set and threshold unchanged since the August 15, 2026 snapshot (no Safe owner or threshold events)
-- **Emergency multisig:** 3-of-4 Gnosis Safe [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62)
-  - Signers: Gordon, Guo Yu, Jamie, Sharlyn Wu (all team members)
-  - Holds `EMERGENCY_ROLE` on PoolManager and ShortPoolManager — can pause xPOSITION and sPOSITION operations directly, outside the timelock. Note the operational 6/9 multisig holds the same role, so pause authority is not exclusive to the emergency signer set.
-- **Governance voting:** Snapshot space `fxn.eth` using veFXN voting power. 32 proposals to date with low voter participation (4–16 voters, ~118–172K veFXN per vote). The most recent proposal, FIP-30, was created February 4, 2026 — more than eight months without governance activity, so the multisig is effectively the operating authority.
-- **Privileged roles:** The 6/9 multisig can propose to upgrade all contracts, change fee parameters, change oracle configuration and alter system addresses, all subject to the 3-day delay; it can pause positions and deploy collateral to the configured Aave strategies with no delay.
+**Non-timelocked asset management.** `ASSET_MANAGER_ROLE` on PoolManager and fxSP is held by both Safes and the timelock. `manage(asset, amount)` funds only the configured strategy up to its capacity; choosing the strategy via `alloc` requires `DEFAULT_ADMIN_ROLE`. The configured 100,000 wstETH capacity exceeds the entire ~5,170 wstETH leg, so either Safe can move that collateral into Aave Prime immediately. This destination bound does not constrain the separate pool-oracle and fxSAVE claim paths above.
 
-**Trust model:** The timelock covers upgrades, core parameters and oracle configuration, and has been respected in practice across every scheduled operation; no V2 core proxy has been upgraded since the transfer. Pause authority and strategy funding remain outside it. The non-timelocked paths can freeze positions or move the wstETH leg into the pre-configured Aave strategy, but cannot by themselves reprice collateral or redirect it to an arbitrary address. The residual worst case is a malicious 6/9 multisig scheduling an upgrade or oracle change in public, which users have three days to observe and react to.
+- **Operational Safe:** 6-of-9 [`0x26B2…7BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF). Known signers are Diligent Deer, Paul, chiaki644, Gordon, Guo Yu, Jamie, Martin Krung, Sharlyn Wu and vfat; attribution remains a mix of known and semi-anonymous contributors. Its owner address set and threshold match August 15, 2026. It proposes upgrades and timelocked parameters, and directly holds emergency and asset-management roles ([snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json)).
+- **Emergency Safe:** 3-of-4 [`0x28c9…eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62). Gordon, Guo Yu, Jamie and Sharlyn Wu are the established signer attribution; its four owner addresses are also owners of the operational and fxSAVE-admin Safes. Its owner set and threshold match August 15, 2026. It can pause managers, replace either long-pool oracle and fund configured strategies immediately ([snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json)). These Safes do not represent independent signer groups.
+- **Governance voting:** Snapshot space `fxn.eth` uses veFXN voting power. The previously checked 32 proposals had low participation (4–16 voters, ~118–172K veFXN per vote); the latest was FIP-30 on February 4, 2026. The multisigs are the effective operating authority.
+
+### Critical Permission Paths and Weakest Link
+
+The role inventory covers fxUSD, both managers, Configuration, fxSP, fxSAVE, PegKeeper, both Aave strategies, both long pools and the timelock. All 61 reconstructed role memberships were confirmed at the snapshot; full holder addresses and role hashes are in the [snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json). The following paths are material to deposited assets:
+
+| Capability and target | Current holder / control path | Safeguards | Assets exposed |
+|-----------------------|-------------------------------|------------|----------------|
+| Replace either long-pool oracle via `updatePriceOracle` | Emergency 3/4 Safe [`0x28c9…eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62), operational 6/9 Safe [`0x26B2…7BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF), or timelock; `EMERGENCY_ROLE` on each pool | No delay or oracle allowlist for either Safe; role administration and proxy upgrades are timelocked | ~5,170.45 wstETH (~$15.22M) and ~1,150.31 WBTC (~$92.89M) backing ~80.93M fxUSD debt |
+| Grant `CLAIM_FOR_ROLE`, then `fxSAVE.claimFor(owner, receiver)` | fxSAVE-admin 6/9 Safe [`0xa0fb…4e99`](https://etherscan.io/address/0xa0fb1b11cca5871fb0225b64308e249b97804e99), or timelock, through `DEFAULT_ADMIN_ROLE` | No delay for the Safe; cooldown must mature, but recipient is unrestricted | ~219,873.80 fxUSD + 7,200.90 USDC in matured exit requests; future requests add exposure |
+| Existing `fxSAVE.claimFor` permission | Router [`0x3363…c708`](https://etherscan.io/address/0x33636d49fbefbe798e15e7f356e8dbef543cc708) holds `CLAIM_FOR_ROLE` | TODO: enumerate router facets/controllers and verify caller/recipient constraints; direct admin grant above bypasses any router restriction | Same requested-redemption assets |
+| Upgrade core implementations or grant core roles | Operational 6/9 proposal → timelock → ProxyAdmin / core `DEFAULT_ADMIN_ROLE`; fxSAVE has the separate admin exception above | 3-day minimum on this path; permissionless execution after delay | V2 collateral, ~77.65M of fxSP reserves, and fxSAVE assets according to upgraded target |
+| Configure collateral/strategies, fees and core addresses | Timelock as core `DEFAULT_ADMIN_ROLE`; fxSAVE admin can also change its fee recipients, harvester and roles directly | Core setters delayed 3 days; fxSAVE setters are not exclusively timelocked | Target-specific collateral/reserves; fxSAVE rewards and redemption proceeds |
+| Fund configured Aave strategies through `manage` | Operational 6/9 Safe, emergency 3/4 Safe, or timelock, as `ASSET_MANAGER_ROLE` | Configured destination and capacity; direct Safe calls have no delay | Entire ~5,170.45 wstETH leg and ~2.46M USDC buffer fit within capacities |
+| Release Ethereum bridge escrow through hostile route configuration | Ethereum adapter owner: operational 6/9 Safe; Base OFT owner: separate 3/4 Safe [`0x44E4…D6d2`](https://basescan.org/address/0x44E4158d93ACCf19F7B97a28B88A26DfF3c3D6d2) | No owner timelock established; existing receive path requires 3 required + 1-of-3 optional DVNs | ~81,875.72 canonical fxUSD escrow; no canonical mint authority |
+
+**Weakest verified path to material loss:** the emergency 3/4 Safe can immediately replace either long pool's oracle, allowing manipulated pricing against ~$108.10M of accounted collateral. The separate fxSAVE-admin 6/9 Safe can seize matured requested redemptions through a role grant followed by `claimFor`. Neither action requires a timelock proposal. These powers exist alongside the timelocked upgrade path; users do not have a guaranteed three-day exit window.
+
+**TODO — permission coverage:** the direct role inventory is verified, but indirect controllers and execution constraints of router/keeper helpers, Convex booster/gauge administration, upstream oracle dependencies and legacy V1 roles are not fully enumerated. No exclusive claim that a weaker path is absent is made. Source and holder evidence for the confirmed paths above is available even while those gaps remain.
 
 ### Programmability
 
@@ -286,7 +301,7 @@ In V2, all fxUSD position collateral is accounted for by the PoolManager contrac
 - **Lido:** wstETH is the ETH collateral leg in V2 (~$15.22M, ~14% of collateral)
 - **LayerZero:** fxUSD has a live Ethereum↔Base LayerZero V2 route. The Ethereum [`FxUSDOFTAdaptor`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) locks canonical fxUSD and peers with the Base [`fxUSD OFT`](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5); both point to the canonical EndpointV2 and had exactly 81,875.719051 fxUSD escrow/supply at the snapshot. This is a **lock** model: the adapter cannot mint canonical Ethereum fxUSD, so bridge risk is bounded to the Base representation and escrow (0.10% of Ethereum supply), although a forged Base→Ethereum release could steal that escrow. The receive-side Ethereum route requires all three required DVNs (LayerZero Labs, Nethermind, Google) plus 1-of-3 optional DVNs (Horizen, Polyhedra zkBridge, Canary), with 20 confirmations — an effective **3 required + 1-of-3 optional** quorum (re-read October 18, 2026; Base send-side config matches). The operational 6-of-9 Safe owns the Ethereum adapter; a separate 3-of-4 Safe, with the same owner set as on August 15, 2026, owns the Base OFT.
 
-- **Katana deployments are locally issued, not identified bridge representations.** Two `fxUSD` / "f(x) USD" ERC-20s exist on Katana ([`0x4c03…FDF9`](https://explorer.katanarpc.com/address/0x4c03ff0f44A55e7098a09016E02a01d3cdC2FDF9), supply ~12,024; [`0x1364…9f86`](https://explorer.katanarpc.com/address/0x1364b238C668A2dec1294174e4798E8c09979f86), supply ~1,000,018). Each token exposes a local `poolManager()` (`0x27b3…f96a` and `0xFae3…3C68`, respectively), and each PoolManager's `fxUSD()` points back to its corresponding token. The verified `0x1364…9f86` implementation restricts minting to its PoolManager; local mint events, including a 10,000-token genesis mint for `0x4c03…FDF9`, corroborate local issuance. Neither token is a LayerZero OFT (`endpoint()` reverts), and neither is the canonical AggLayer/LxLy wrapper of mainnet fxUSD (`PolygonZkEVMBridgeV2.getTokenWrappedAddress(0, fxUSD)` returns the zero address on Katana). Both supplies are essentially static since the May 2026 check. This positive architecture evidence does not reveal a bridge path from Ethereum fxUSD to either Katana deployment. Because the `0x4c03…FDF9` implementation is not source-verified, a separate custom conversion path cannot be ruled out absolutely; reassess if one is identified rather than inferring a bridge from the shared name and symbol.
+- **Katana deployments are locally issued, not identified bridge representations.** Two `fxUSD` / "f(x) USD" ERC-20s exist on Katana ([`0x4c03…FDF9`](https://explorer.katanarpc.com/address/0x4c03ff0f44A55e7098a09016E02a01d3cdC2FDF9), supply ~12,024; [`0x1364…9f86`](https://explorer.katanarpc.com/address/0x1364b238C668A2dec1294174e4798E8c09979f86), supply ~1,000,018). Each token exposes a local `poolManager()` (`0x27b3…f96a` and `0xFae3…3C68`, respectively), and each PoolManager's `fxUSD()` points back to its corresponding token. The verified `0x1364…9f86` implementation restricts minting to its PoolManager; local mint events, including a 10,000-token genesis mint for `0x4c03…FDF9`, corroborate local issuance. Neither token is a LayerZero OFT (`endpoint()` reverts), and neither is the canonical AggLayer/LxLy wrapper of mainnet fxUSD (`PolygonZkEVMBridgeV2.getTokenWrappedAddress(0, fxUSD)` returns the zero address on Katana). **TODO:** these supply figures are carried forward from the May 2026 check; Katana RPC was not configured for the October snapshot, so supply continuity was not reverified. This positive architecture evidence does not reveal a bridge path from Ethereum fxUSD to either Katana deployment. Because the `0x4c03…FDF9` implementation is not source-verified, a separate custom conversion path cannot be ruled out absolutely; reassess if one is identified rather than inferring a bridge from the shared name and symbol.
 
 The protocol depends on multiple well-established DeFi protocols. Chainlink is the most critical dependency — oracle failure would impair pricing and liquidations. Aave exposure is capped and currently negligible. LayerZero is an optional, bounded bridge route rather than a dependency of Ethereum minting or collateral solvency.
 
@@ -310,10 +325,13 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | StETHPriceOracle | [`0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb`](https://etherscan.io/address/0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb) | `owner()` (must remain the timelock), `UpdateMaxPriceDeviation`, `updateOnchainSpotEncodings` calls |
 | WBTCPriceOracle | [`0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390`](https://etherscan.io/address/0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390) | `owner()` (must remain the timelock), `UpdateMaxPriceDeviation`, `updateMaxWBTCDeviation`, `updateOnchainSpotEncodings` calls |
 | Operational Multisig | [`0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF) | Governance parameter changes, new transactions |
-| Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | Pause events on PoolManager/ShortPoolManager |
+| Emergency Multisig | [`0x28c921adAC4c1072658eB01a28DA06b5F651eF62`](https://etherscan.io/address/0x28c921adAC4c1072658eB01a28DA06b5F651eF62) | Oracle replacements, asset-management calls, pause events, owner/threshold/module changes |
 | PoolManager | [`0x250893CA4Ba5d05626C785e8da758026928FCD24`](https://etherscan.io/address/0x250893CA4Ba5d05626C785e8da758026928FCD24) | Rebalance/Liquidation events, wstETH/WBTC balances, collateral ratio, `manage()` calls moving collateral into the Aave strategy |
 | Stability Pool (fxSP) | [`0x65C9A641afCEB9C0E6034e558A319488FA0FA3be`](https://etherscan.io/address/0x65C9A641afCEB9C0E6034e558A319488FA0FA3be) | USDC ratio (currently ~3.17%, below the 5% reference), deposit/withdrawal flows, `alloc`/`manage` calls, `NO_INSTANT_REDEEM_FEE_ROLE` grants |
-| fxSAVE | [`0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39`](https://etherscan.io/address/0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39) | Total assets, exchange rate changes |
+| fxSAVE | [`0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39`](https://etherscan.io/address/0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39) | `RoleGranted`/`RoleRevoked` for admin and claim-for roles, `claimFor` recipients, `RequestRedeem`/`Claim`, locked-proxy balances and matured requests |
+| fxSAVE-admin Safe | [`0xa0fb…4e99`](https://etherscan.io/address/0xa0fb1b11cca5871fb0225b64308e249b97804e99) | Owners, threshold, modules, role grants, fee/harvester setters and calls targeting fxSAVE |
+| xstETH pool | [`0x6ecfa38fee8a5277b91efda204c235814f0122e8`](https://etherscan.io/address/0x6ecfa38fee8a5277b91efda204c235814f0122e8) | `priceOracle()`, `UpdatePriceOracle`, `EMERGENCY_ROLE` grants/revocations |
+| xWBTC pool | [`0xab709e26fa6b0a30c119d8c55b887ded24952473`](https://etherscan.io/address/0xab709e26fa6b0a30c119d8c55b887ded24952473) | `priceOracle()`, `UpdatePriceOracle`, `EMERGENCY_ROLE` grants/revocations |
 | PegKeeper | [`0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70`](https://etherscan.io/address/0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70) | Peg maintenance events, funding level triggers |
 | Curve USDC/fxUSD | [`0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f`](https://etherscan.io/address/0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f) | Pool balance ratio, large swaps |
 | FxUSDOFTAdaptor | [`0xA07d8cc424421cC2bce0544a65481376f010A438`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) | Escrow balance, `SetPeer`, `SetReceiveLibrary`, `SetConfig`, ownership/delegate changes and unexpected releases |
@@ -328,7 +346,10 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 | Stability Pool USDC ratio | <5% of pool | Documented Funding Level I reference — currently ~3.17%; track `isFundingEnabled()` and PegKeeper USDC capacity |
 | Aggregate CR (either V2 pool) | <125% | Enhanced monitoring — aggregate LTV approaching the 85.5% opening cap and 88% per-position rebalance line (currently ~168.3% xstETH / ~129.2% xWBTC) |
 | Collateral Ratio (any market) | <100% | Critical — recapitalization mode |
-| Oracle `owner()` change | Any | Immediate investigation — ownership should remain with the timelock |
+| Pool `UpdatePriceOracle` / changed `priceOracle()` | Any on either long pool | Critical alert — either Safe can replace the pricing source without notice |
+| fxSAVE admin or `CLAIM_FOR_ROLE` grant | Any | Immediate investigation of holder, role admin and ability to redirect pending redemptions |
+| fxSAVE `claimFor(owner, receiver)` | Receiver differs from owner or an independently verified user-authorized destination | Critical alert — inspect routing and the recipient of both fxUSD and USDC |
+| Oracle `owner()` change | Any | Immediate investigation — existing oracle ownership should remain with the timelock; also monitor pool pointers |
 | `UpdateMaxPriceDeviation` / spot-encoding change on either oracle | Any (scheduled or executed) | Immediate investigation — timelocked path to reprice collateral |
 | TimelockController `CallScheduled` | Any | Investigate target/calldata; 3 days to react before execution |
 | TimelockController `MinDelayChange` | Any | Immediate investigation — delay reduction is a major risk event |
@@ -353,6 +374,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 - `PegKeeper.isBorrowAllowed()` / `.isRedeemAllowed()` / `.isFundingEnabled()` — the three EMA-gated protocol states
 - `PegKeeper.getFxUSDPrice()` — Curve EMA price driving those three gates
 - `StETHPriceOracle.owner()` / `WBTCPriceOracle.owner()` — should read as the TimelockController
+- `Pool.priceOracle()` — compare each pointer with its snapshot address and alert on any replacement
+- `fxSAVE.hasRole(DEFAULT_ADMIN_ROLE, holder)` / `.hasRole(CLAIM_FOR_ROLE, holder)` — reconcile full grant/revoke histories, not just the operational Safe
+- `fxSAVE.lockedProxy(owner)` / `fxSP.redeemRequests(proxy)` / `fxSP.balanceOf(proxy)` — enumerate request owners from events and quantify pending/matured redemption exposure
 - `Pool.getDebtRatioRange()` / `.getRebalanceRatios()` / `.getLiquidateRatios()` — per-position opening cap and rebalance/liquidation lines (85.5% / 88% / 95%)
 
 ### Recommended Monitoring Frequency
@@ -374,7 +398,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 │  │ Multisig (6/9)   │    │ Multisig (3/4)    │                  │
 │  │ 0x26B2...BbF     │    │ 0x28c9...eF62     │                  │
 │  └────────┬─────────┘    └────────┬──────────┘                  │
-│           │ proposes/             │ can pause                   │
+│           │ proposes/             │ pause / replace oracle      │
 │           │ executes              │                             │
 │  ┌────────▼─────────┐             │                             │
 │  │ TimelockController │           │                             │
@@ -440,12 +464,12 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 ```
 
 **Trust boundaries:**
-- The 6/9 multisig has full upgrade authority over all protocol contracts *and* `DEFAULT_ADMIN_ROLE`-gated parameters, but both are subject to a 3-day timelock (as of April 20, 2026) — this is the primary trust boundary
-- **Outside the timelock:** both multisigs hold `EMERGENCY_ROLE` (pause) and `ASSET_MANAGER_ROLE` (fund the configured Aave strategies) with no delay; oracle ownership has sat behind the timelock since October 5, 2026
-- The 3/4 emergency multisig can pause position operations immediately but cannot upgrade contracts
+- Core upgrades and most role administration require a 6/9 proposal and the 3-day timelock. fxSAVE also has a direct 6/9 administrator, so its parameters and role grants are an exception.
+- **Outside the timelock:** both operational/emergency Safes can replace either long-pool oracle, pause managers and fund configured Aave strategies. The separate fxSAVE-admin Safe can grant claim-for authority and redirect matured redemption proceeds.
+- The 3/4 emergency Safe can replace pool oracles immediately even though proxy upgrades remain timelocked.
 - Timelock execution is permissionless (`EXECUTOR_ROLE` granted to `address(0)`); only proposing and cancelling are multisig-gated
 - Keepers are permissionless (anyone can trigger rebalancing/liquidation for bounties)
-- Oracle data flows from Chainlink + Uniswap/Curve and is validated with deviation thresholds, which are owner-settable only through the timelock
+- Existing oracle configurations use Chainlink + Uniswap/Curve with timelocked owner setters; either privileged Safe can replace the entire oracle via the long pool without those checks.
 - The optional Base representation depends on LayerZero's route configuration and the two bridge-owner Safes. The Ethereum adapter uses a lock model and cannot mint canonical fxUSD, bounding current bridge exposure to its ~82K fxUSD escrow.
 
 ---
@@ -456,7 +480,7 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 
 - **Extensive audit history:** 21 audits from 3 firms (Secbit, Trail of Bits, OpenZeppelin) with continuous coverage since 2023
 - **Active security bounty:** AladdinDAO's self-hosted program explicitly covers f(x), with a $500,000 maximum critical payout
-- **3-day timelock covers upgrades, core parameters and both price oracles** (ProxyAdmin since April 20, 2026; oracles since October 5, 2026), honored on every scheduled operation; timelock execution is permissionless
+- **3-day timelock protects core upgrades and existing oracle-owner setters**, with permissionless execution after the delay. Direct pool-oracle replacement and fxSAVE administration remain exceptions.
 - **Reserves reconcile exactly:** total supply less V2 pool debt leaves 264 fxUSD of legacy issuance, confirming no unaccounted fxUSD
 - **Innovative peg mechanism:** 5-layer peg protection with onchain redemption as a floor near $0.995 during a depeg
 - **Fully onchain collateral:** All reserves verifiable in the PoolManager, NAV calculated algorithmically
@@ -468,7 +492,9 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 - **Collateral is concentrated in BTC with a thin aggregate margin.** WBTC is ~86% of collateral and ~89% of debt; xWBTC is ~129.2% aggregate CR (~77.4% LTV), about 12% of BTC downside from the 88% per-position rebalance line on aggregate. System CR is ~133.6%.
 - **Redemption is not an always-available exit.** It unlocks only when the Curve EMA falls below $0.998, so a large holder cannot rely on it while fxUSD trades at par.
 - **Structural concentration is high:** 92.9% of fxUSD sits in the Stability Pool and fxSAVE's assets equal 97.4% of fxSP shares, with only ~$9.09M of primary DEX depth (~11.2% of supply) as the main market exit. The Stability Pool USDC buffer is ~3.17%, below the documented 5% reference.
-- **Non-timelocked asset-management and pause authority:** both multisigs hold `ASSET_MANAGER_ROLE` (100,000 wstETH Aave capacity vs ~5,170 wstETH accounted for) and `EMERGENCY_ROLE`.
+- **Immediate oracle replacement by a 3/4 Safe:** `EMERGENCY_ROLE` on either long pool can install arbitrary pricing, exposing ~$108.10M of accounted collateral without a timelock exit window.
+- **Direct fxSAVE redemption-seizure path:** its additional 6/9 administrator can grant `CLAIM_FOR_ROLE` and redirect matured requested exits (~$227,075 at the snapshot).
+- **Immediate asset-management authority:** both operational/emergency Safes can fund pre-approved Aave strategies; the 100,000 wstETH capacity exceeds the full ETH collateral leg.
 - **Optional bridge dependency:** Base fxUSD relies on a LayerZero lock-and-mint route and two owner Safes. Current exposure is bounded to ~82K escrowed fxUSD (0.10% of supply), but a forged release or hostile configuration could impair that amount.
 - **Dormant governance:** no Snapshot proposal since February 4, 2026; participation historically 4–16 voters
 - **Keeper dependency:** Rebalancing and liquidation rely on external keepers; failure to act in time could lead to under-collateralization
@@ -484,9 +510,10 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 
 ### Critical Risk Gates
 
+- [ ] **Unverified contract source** — fxUSD implementation and the implementations supporting the confirmed material paths are source-verified; addresses and sources are recorded in the [snapshot evidence](https://github.com/yearn/risk-score/blob/e8e2cf29acecc361790644e1a22f44cecdef02a2/reports/evidence/fx-fxusd-2026-10-18.json) ✅
 - [ ] **No audit** — Protocol has 21 audits from 3 reputable firms ✅
 - [ ] **Unverifiable reserves** — All reserves verifiable on-chain ✅
-- [ ] **Total centralization** — 6-of-9 multisig (not single EOA) ✅
+- [ ] **Total centralization** — Confirmed material controllers require at least 3 Safe signers; incomplete indirect permission coverage is marked TODO above ✅
 
 **All gates pass.** Proceed to category scoring.
 
@@ -528,15 +555,13 @@ The protocol depends on multiple well-established DeFi protocols. Chainlink is t
 
 | Score | Contract Upgradeability | Timelock | Privileged Roles |
 |-------|------------------------|----------|-----------------|
-| **1** | Immutable or fully decentralized DAO | N/A or >3 days | No privileged roles or multi-party approval |
-| **2** | Multisig 7/11+ with timelock | 24+ hours | Limited roles, cannot seize funds |
-| **3** | Multisig 5/9 with timelock | 24+ hours | Some powerful roles, constrained by timelock |
+| **1** | Immutable or fully decentralized DAO | 48h+ timelock on critical operations | Multisig above 3/5 threshold, no EOA roles. Multi-party approval required |
+| **2** | Multisig 7/11+ with timelock | 24-48 hours | Limited roles, cannot seize funds |
+| **3** | Multisig 5/9 with timelock | 12-24 hours | Some powerful roles, constrained by timelock |
 | **4** | Multisig 3/5 or low threshold | <12 hours | Powerful admin roles with limited constraints |
 | **5** | EOA or <3 signers (CRITICAL GATE) | No timelock | Unlimited admin powers |
 
-**Score: 2.5/5** — ProxyAdmin, `DEFAULT_ADMIN_ROLE` on every core contract, and both live price oracles are controlled by a TimelockController with a 3-day (259,200s) minimum delay. The delay has been honored on every operation since April 2026, including the oracle `acceptOwnership()` batch executed October 5, 2026. Permissionless execution (`EXECUTOR_ROLE` = `address(0)`) and a 6/9 threshold sit better than the score-3 reference case, and the previously non-timelocked oracle-repricing path is closed.
-
-The subcategory does not reach 2.0 because the 6/9 Safe sits below the 7/11 reference and two direct powers remain outside the delay: both multisigs hold `EMERGENCY_ROLE` (instant pause) and `ASSET_MANAGER_ROLE`, the latter able to move the entire wstETH collateral leg into the pre-configured Aave strategy without delay. Those paths can freeze or relocate funds to a bounded, pre-approved destination but do not provide a direct seizure path. Known signers include reputable DeFi figures alongside semi-anonymous contributors.
+**Score: 4.0/5** — The weakest verified material path is the emergency 3/4 Safe's immediate `updatePriceOracle` authority over both long pools. It can replace the entire pricing source, enabling unbacked borrowing or manipulated liquidations against ~$108.10M of accounted collateral. This is an unconstrained oracle-control path even though ProxyAdmin and the existing oracles' owners are timelocked. The separate fxSAVE-admin 6/9 Safe can also grant itself claim-for permission and seize matured requested redemptions without delay. The score-4 reference fits low-threshold, powerful administration with limited constraints; no EOA or fewer-than-three-signer material path is established by the verified inventory. Known signer attribution and the timelocked upgrade path do not offset the immediate 3/4 oracle path. Further indirect permission coverage remains TODO above.
 
 **Subcategory B: Programmability**
 
@@ -562,9 +587,9 @@ The subcategory does not reach 2.0 because the 6/9 Safe sits below the 7/11 refe
 
 **Score: 3.0/5** — Multiple dependencies: Chainlink (critical for pricing), Curve (both the stETH/ETH EMA oracle and the USDC/fxUSD pool whose EMA *gates* minting, redemption and funding costs), Uniswap V3 (TWAP validation), Lido (wstETH), configured-but-unused Aave allocation paths, and an optional LayerZero route for Base fxUSD. These are established protocols and actual Aave exposure is negligible. The bridge is a lock model with only 0.10% of supply escrowed and a 3-required-plus-1-of-3-optional DVN receive quorum, so it adds bounded rather than system-wide risk. Chainlink still drives every liquidation and one ~$9.09M Curve pool decides whether users can mint or redeem. Score 3 holds.
 
-**Centralization Score = (2.5 + 1.5 + 3.0) / 3 = 2.33**
+**Centralization Score = (4.0 + 1.5 + 3.0) / 3 = 2.833… (2.83 displayed)**
 
-**Score: 2.33/5** — Strong programmability and a working timelock over upgrades, core parameters and oracles, offset by non-timelocked pause and asset-management roles and multiple critical dependencies.
+**Score: 2.83/5** — Strong programmability and timelocked upgrades, offset by immediate 3/4 pool-oracle replacement, direct 6/9 fxSAVE role administration and redemption seizure, and multiple critical dependencies.
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -629,17 +654,17 @@ The subcategory does not reach 2.0 because the 6/9 Safe sits below the 7/11 refe
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 1.5 | 20% | 0.30 |
-| Centralization & Control | 2.33 | 30% | 0.70 |
+| Centralization & Control | 2.833… | 30% | 0.85 |
 | Funds Management | 1.75 | 30% | 0.525 |
 | Liquidity Risk | 3.0 | 15% | 0.45 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **2.1** |
+| **Final Score** | | | **2.25** |
 
 **Optional Modifiers:**
 - Protocol live >2 years with no incidents: **-0.5** → Does not fully apply due to ChainSecurity vulnerability disclosure (though no exploitation occurred). Not applied.
 - TVL maintained >$500M for >1 year: Not applicable
 
-**Final Score: 2.1/5.0** — Raw weighted score 2.10. Upgrades, core parameters and both price oracles now sit behind a 3-day timelock, leaving pause and bounded asset-management powers as the only direct multisig controls (Governance 2.5). The main residual risks are BTC-concentrated collateral with a ~129% aggregate xWBTC CR, depeg-gated redemption, a ~3.17% Stability Pool USDC buffer, and 92.9% of supply held protocol-internally against ~$9.09M of primary DEX depth.
+**Final Score: 2.25/5.0** — Category averages are retained at full precision before weighting: 0.30 + 0.85 + 0.525 + 0.45 + 0.125 = 2.25. Governance is 4.0 because the emergency 3/4 Safe can replace either pool's oracle immediately; the fxSAVE-admin 6/9 Safe can also grant claim-for authority and redirect matured exits. Existing oracle ownership and core upgrades are timelocked, but these direct loss paths are not. Other material risks remain BTC concentration, a ~129% aggregate xWBTC CR, depeg-gated redemption and a ~3.17% Stability Pool USDC buffer. The final tier remains Low Risk under the weighted framework; the direct privileged loss paths require event-driven monitoring.
 
 ### Risk Tier
 
@@ -660,8 +685,9 @@ The subcategory does not reach 2.0 because the 6/9 Safe sits below the 7/11 refe
 - **Time-based**: Reassess in 6 months (April 2027)
 - **TVL-based**: Reassess if TVL changes by more than 50%, or sustains above $150M for >1 month
 - **Incident-based**: Reassess after any exploit, governance change, or collateral modification
-- **Oracle ownership (highest priority)**: Reassess immediately if either oracle's `owner()` changes to anything other than the TimelockController, or if a `maxPriceDeviation` / `onchainSpotEncodings` change is scheduled or executed.
-- **Governance**: Reassess if the timelock delay is reduced, ProxyAdmin ownership or any core `DEFAULT_ADMIN_ROLE` moves away from the TimelockController, or if multisig threshold is lowered
+- **Oracle control (highest priority)**: Reassess immediately on either pool's `UpdatePriceOracle`, a changed `priceOracle()` pointer, any `EMERGENCY_ROLE` holder change, an existing oracle's ownership change, or a scheduled/executed deviation or spot-encoding change.
+- **Governance**: Reassess on any core admin-role holder change, including fxSAVE's additional 6/9 administrator; on changes to Safe owners, thresholds or modules; or on reduced timelock delay or changed ProxyAdmin ownership.
+- **fxSAVE redemptions**: Reassess on claim-for grants or unexpected claim recipients; track matured locked-proxy balances (currently ~$227,075) and investigate unexplained transfers.
 - **Collateralization**: Reassess if system CR falls below 130%, or if the xWBTC pool aggregate CR falls below 125%
 - **Collateral custody**: Reassess if `manage()` is called on the PoolManager or Stability Pool and material balances move into the Aave strategies
 - **Liquidity**: Reassess if the primary Curve USDC/fxUSD pool falls below $5M, if fxSP's share of fxUSD supply exceeds 95%, or if the Stability Pool USDC buffer falls below 1%
@@ -675,4 +701,4 @@ The subcategory does not reach 2.0 because the 6/9 Safe sits below the 7/11 refe
 | March 29, 2026 | 2.5 | Initial assessment |
 | May 13, 2026 | 2.2 | Reassessment: 3-day TimelockController took ownership of ProxyAdmin (April 20, 2026); supply ~18.1M → ~53.9M, TVL ~$29M → ~$89M. Governance 4.0 → 2.5, Historical Track Record 2.5 → 2.0; Medium → Low Risk |
 | [August 15, 2026](https://github.com/yearn/risk-score/pull/352) | 2.15 | Reassessment and [issue #387](https://github.com/yearn/risk-score/issues/387) corrections (latest snapshot block 25,759,914): supply ~64.31M, TVL ~$95.9M, V2 CR ~135.6%, and primary Curve liquidity ~$7.52M. Verified the timelock holds `DEFAULT_ADMIN_ROLE` on all core contracts and was honored by the May 27–30 `updatePoolCapacity` operation, but both live price oracles remain owned by the operational 6-of-9 Safe; their scheduled ownership-transfer batch has been executable since April 23, 2026 but remains unexecuted, leaving a non-timelocked collateral-repricing path. Redemption remains Curve-EMA-gated and disabled, with its 20%-per-tick-per-call behavior clarified. Corrected active V2 collateral to wstETH/WBTC only, removed the uncorroborated $0.953 depeg, documented the $500K AladdinDAO bounty, corrected AladdinDAO-level contributor/backer attribution, and added the LayerZero Ethereum↔Base lock route with its route-specific DVN quorum. The Stability Pool USDC buffer recovered from 0.16% to ~10.65%, and snapshot-block Curve quotes show ~0.26% impact for a 4M fxUSD exit. Historical Track Record 2.0 → 1.5 and Governance 2.5 → 3.0 offset one another at the final-score level; Liquidity remains 3.0. The raw weighted score is 2.15, conservatively displayed as 2.2 (Low Risk). |
-| [October 18, 2026](https://github.com/yearn/risk-score/pull/539) | 2.1 | Reassessment (snapshot block 26,221,558): the scheduled `acceptOwnership()` batch executed on October 5, 2026, placing both live price oracles under the 3-day TimelockController and closing the non-timelocked oracle-repricing path; Governance 3.0 → 2.5, Centralization 2.5 → 2.33. Supply ~80.93M, TVL above $100M since August 18, 2026, V2 CR ~133.6% with xWBTC at ~129.2% aggregate CR; replaced the V1-era 130% Stability Mode framing with the V2 per-position 85.5%/88%/95% lines. Stability Pool USDC buffer ~3.17%, fxSP holds 92.9% of supply, primary Curve depth ~$9.09M; Liquidity remains 3.0. Timelocked changes since August: lower debt-ratio caps, higher pool capacities, legacy V1 wind-down upgrades and role updates; no V2 core proxy upgrades. Bridge escrow fell to ~81.9K fxUSD with an unchanged DVN quorum. |
+| [October 18, 2026](https://github.com/yearn/risk-score/pull/539) | 2.25 | Reassessment at Ethereum block 26,221,558 and Base block 52,781,286. Existing oracle ownership moved to the timelock October 5, but both long pools still permit immediate oracle replacement by the 3/4 emergency and 6/9 operational Safes. The separate fxSAVE-admin 6/9 Safe can grant claim-for authority and redirect matured requested exits (~$227,075). Review correction under the weakest-permission-path governance rule: Governance 3.0 → 4.0, Centralization 2.5 → 2.833…, Final 2.15 → 2.25, still Low Risk; the newly documented bypasses are pre-existing powers, not a new onchain deterioration. Supply ~80.93M, V2 CR ~133.6%, xWBTC ~129.2% aggregate CR, Stability Pool USDC buffer ~3.17%, primary Curve depth ~$9.09M. V2 per-position lines are 85.5%/88%/95%; timelocked debt-ratio reductions, capacity increases and legacy V1 wind-down upgrades were honored; no V2 core proxy upgrades. Bridge escrow ~81.9K fxUSD exactly matches Base supply. |

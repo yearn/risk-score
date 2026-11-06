@@ -31,7 +31,7 @@ nodes:
     label: fxSAVE (Auto-Compounding Vault)
     address: "0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39"
     category: vault
-    note: ~74.84M fxSP (~$75.6M); 97.4% of fxSP shares
+    note: ~74.84M fxSP (~$75.6M); 97.4% of fxSP shares; additional 6/9 admin can grant claim-for authority
   - id: fxSP
     label: fxSP (Stability Pool)
     address: "0x65C9A641afCEB9C0E6034e558A319488FA0FA3be"
@@ -77,12 +77,12 @@ nodes:
     label: StETHPriceOracle
     address: "0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb"
     category: infra
-    note: Live xstETH oracle; 1% max deviation; owner = Timelock since Oct 5 2026
+    note: Owner setters timelocked since Oct 5 2026; 1% max deviation; pool EMERGENCY_ROLE can replace this oracle immediately
   - id: wbtc-oracle
     label: WBTCPriceOracle
     address: "0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390"
     category: infra
-    note: Live xWBTC oracle; 2% max deviation; owner = Timelock since Oct 5 2026
+    note: Owner setters timelocked since Oct 5 2026; 2% max deviation; pool EMERGENCY_ROLE can replace this oracle immediately
   - id: aave-wsteth-strategy
     label: AaveV3Strategy (wstETH)
     address: "0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8"
@@ -99,6 +99,16 @@ nodes:
     category: infra
     note: Locks ~81,876 canonical fxUSD for Base; cannot mint Ethereum fxUSD
 
+  - id: fxsave-redemption-proxies
+    label: fxSAVE Redemption Proxies
+    category: infra
+    note: 49 users with ~224,774 matured fxSP shares (~219,874 fxUSD + 7,201 USDC); claim-for caller can choose recipient
+  - id: claim-router
+    label: Router with Claim-For Role
+    address: "0x33636d49fbefbe798e15e7f356e8dbef543cc708"
+    category: infra
+    note: Existing CLAIM_FOR_ROLE holder on fxSAVE; indirect facet/controller and recipient constraints remain TODO
+
   # === Governance ===
   - id: operational-multisig
     label: Operational Multisig (6-of-9)
@@ -109,7 +119,12 @@ nodes:
     label: Emergency Multisig (3-of-4)
     address: "0x28c921adAC4c1072658eB01a28DA06b5F651eF62"
     category: governance
-    note: Direct pause on xPOSITION/sPOSITION (no timelock)
+    note: Can replace both long-pool oracles, pause managers and fund configured strategies without delay; 4 owners overlap both 6/9 Safes
+  - id: fxsave-admin
+    label: fxSAVE Administrator (6-of-9)
+    address: "0xa0fb1b11cca5871fb0225b64308e249b97804e99"
+    category: governance
+    note: Same 9 owners as operational Safe; direct DEFAULT_ADMIN_ROLE on fxSAVE; can grant claim-for permission without delay
   - id: base-bridge-owner
     label: Base Bridge Owner (3-of-4)
     address: "0x44E4158d93ACCf19F7B97a28B88A26DfF3c3D6d2"
@@ -208,19 +223,59 @@ edges:
   - from: emergency-multisig
     to: pool-manager
     kind: holds-role
-    label: pause (no timelock)
+    label: EMERGENCY_ROLE + ASSET_MANAGER_ROLE (no timelock)
   - from: emergency-multisig
     to: short-pool-manager
     kind: holds-role
     label: pause (no timelock)
+  - from: emergency-multisig
+    to: xsteth-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: emergency-multisig
+    to: xwbtc-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: operational-multisig
+    to: xsteth-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: operational-multisig
+    to: xwbtc-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: fxsave-admin
+    to: fxSAVE
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE — grant CLAIM_FOR_ROLE; redirect matured exits (no timelock)
+  - from: claim-router
+    to: fxSAVE
+    kind: holds-role
+    label: CLAIM_FOR_ROLE (router constraints TODO)
+  - from: timelock
+    to: fxSAVE
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE (additional direct Safe admin exists)
+  - from: timelock
+    to: xsteth-pool
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + EMERGENCY_ROLE
+  - from: timelock
+    to: xwbtc-pool
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + EMERGENCY_ROLE
+  - from: operational-multisig
+    to: fxSP
+    kind: holds-role
+    label: ASSET_MANAGER_ROLE (no timelock)
   - from: timelock
     to: steth-oracle
     kind: controls
-    label: owner() (3d delay)
+    label: existing oracle owner setters (3d delay; pool can replace source)
   - from: timelock
     to: wbtc-oracle
     kind: controls
-    label: owner() (3d delay)
+    label: existing oracle owner setters (3d delay; pool can replace source)
   - from: operational-multisig
     to: pool-manager
     kind: holds-role
@@ -261,6 +316,16 @@ edges:
     to: operational-multisig
     kind: controls
     label: Snapshot signaling (fxn.eth)
+
+  # === Requested-redemption custody and routing ===
+  - from: fxSAVE
+    to: fxsave-redemption-proxies
+    kind: routes-through
+    label: requestRedeem moves fxSP to a user-specific cooldown proxy
+  - from: fxsave-redemption-proxies
+    to: fxSP
+    kind: routes-through
+    label: redeem to claimFor caller-selected receiver after cooldown
 
   # === Internal vault flow ===
   - from: fxSAVE
