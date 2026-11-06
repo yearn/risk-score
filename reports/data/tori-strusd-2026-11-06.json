@@ -1,0 +1,1158 @@
+{
+  "snapshot": {
+    "chain_id": 1,
+    "number": 26340122,
+    "hash": "0x9436fc1d4978c0f9d964a2890475c895be97898e6ee43c8295c4300cce7de8f8",
+    "timestamp": "2026-11-04T08:01:59Z"
+  },
+  "verification_date": "2026-11-06",
+  "method": {
+    "rpc": "Configured Ethereum RPC via scripts/env.py; endpoint omitted",
+    "reads": "cast call/storage/code at block 26340122; read-only eth_call simulations; no transactions broadcast",
+    "roles": "Etherscan v2 getLogs from block 0 through 26340122, paginated at 1000; reconcile RoleGranted/RoleRevoked and confirm every remaining privileged holder with hasRole",
+    "limits": "Remote-chain reconciliation and the private asset-manager inputs to Accountable were not revalidated. Accountable cryptographic proof blobs were not independently verified."
+  },
+  "contracts": {
+    "strusd": "0x280839980a7eD0D7717F64125fE241012E5F5815",
+    "trusd": "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+    "minting": "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+    "distributor": "0xa0C49fFa4B7941830235cde974d9B2a8420CD375",
+    "safe": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+    "timelock": "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+    "strusd-impl": "0x6561272e3ebc9f2e07cdb12b7c474db9132b977a",
+    "trusd-impl": "0xb1d133fe29255eb4ac9b05d647d49cd7f05ff631"
+  },
+  "reads": [
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "hasRole(bytes32,address)(bool)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "hasRole(bytes32,address)(bool)",
+        "0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6",
+        "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "hasRole(bytes32,address)(bool)",
+        "0xbeec13769b5f410b0584f69811bfd923818456d5edcf426b0e31cf90eed7a3f6",
+        "0xa0c49ffa4b7941830235cde974d9b2a8420cd375"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0xf988e4fb62b8e14f4820fed03192306ddf4d7dbfa215595ba1c6ba4b76b369ee"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "hasRole(bytes32,address)(bool)",
+        "0xf988e4fb62b8e14f4820fed03192306ddf4d7dbfa215595ba1c6ba4b76b369ee",
+        "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "hasRole(bytes32,address)(bool)",
+        "0xf988e4fb62b8e14f4820fed03192306ddf4d7dbfa215595ba1c6ba4b76b369ee",
+        "0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "hasRole(bytes32,address)(bool)",
+        "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5",
+        "0xa952453e39f77108ee37c1b92de593f1c59a6ef4"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "hasRole(bytes32,address)(bool)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "hasRole(bytes32,address)(bool)",
+        "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5",
+        "0xa952453e39f77108ee37c1b92de593f1c59a6ef4"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5",
+        "0xa952453e39f77108ee37c1b92de593f1c59a6ef4"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+        "0x2ba9857e5b1099f3809e0304a8f789659e7a8f70"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+        "0x7713ba984fdfd4053ace737761de903b10c351ab"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x9f2df0fed2c77648de5860a4cc508cd0818c85b8b8a1ab4ceeef8d981c8956a6",
+        "0xca4317c842b5d52fd0cb3a5b11d9f8fe8281fbce"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x44ac9762eec3a11893fefb11d028bb3102560094137c3ed4518712475b2577cc"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x44ac9762eec3a11893fefb11d028bb3102560094137c3ed4518712475b2577cc",
+        "0x3b45316d817a97e401d3e2649983d73e15a3471e"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x44ac9762eec3a11893fefb11d028bb3102560094137c3ed4518712475b2577cc",
+        "0xc885cfbb77414813dda6142db7aa8a957b533bc9"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x44ac9762eec3a11893fefb11d028bb3102560094137c3ed4518712475b2577cc",
+        "0xd5b369fbef4bbf8ac0b3c0faf4b3efde0bc2f3ec"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x3c63e605be3290ab6b04cfc46c6e1516e626d43236b034f09d7ede1d017beb0c"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x3c63e605be3290ab6b04cfc46c6e1516e626d43236b034f09d7ede1d017beb0c",
+        "0x5a54bbae78a3f043a1a41d6f9eb39fb2a1f766c7"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x3c63e605be3290ab6b04cfc46c6e1516e626d43236b034f09d7ede1d017beb0c",
+        "0xb0444060adcc379e57b72c5eb7e09530351b183d"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x85e8f2d6819d6b24108062d87ea08f54651bcb8960d98062d3faf96e7873b8b9"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x85e8f2d6819d6b24108062d87ea08f54651bcb8960d98062d3faf96e7873b8b9",
+        "0x39c9106e9be3622104a1ab97f3fcc88b65874213"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x8619cecd8b9e095ab43867f5b69d492180450fe862e6b50bfbfb24b75dd84c8a"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "hasRole(bytes32,address)(bool)",
+        "0x8619cecd8b9e095ab43867f5b69d492180450fe862e6b50bfbfb24b75dd84c8a",
+        "0x541d53bc10213ff7835b3393f6e74baaefca3cf6"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "hasRole(bytes32,address)(bool)",
+        "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+        "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "hasRole(bytes32,address)(bool)",
+        "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783",
+        "0x60226cbb34445143e5f923abe2d42e5df852d065"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "getRoleAdmin(bytes32)(bytes32)",
+        "0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "hasRole(bytes32,address)(bool)",
+        "0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63",
+        "0x039e71e865a34bcaaebfc641291bec6517ea0ce7"
+      ],
+      "result": "true"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "asset()(address)"
+      ],
+      "result": "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "totalAssets()(uint256)"
+      ],
+      "result": "64813065290486539053973043 [6.481e25]"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "totalSupply()(uint256)"
+      ],
+      "result": "62540168296036769404545404 [6.254e25]"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "convertToAssets(uint256)(uint256)",
+        "1000000000000000000"
+      ],
+      "result": "1036342994532584353 [1.036e18]"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "remainingDailyLoss()(uint256)"
+      ],
+      "result": "3240653264524326952698652 [3.24e24]"
+    },
+    {
+      "args": [
+        "call",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "nextLossAllowedAt()(uint256)"
+      ],
+      "result": "0"
+    },
+    {
+      "args": [
+        "call",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "minter()(address)"
+      ],
+      "result": "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
+    },
+    {
+      "args": [
+        "call",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "totalSupply()(uint256)"
+      ],
+      "result": "72799632793600532238844432 [7.279e25]"
+    },
+    {
+      "args": [
+        "call",
+        "0xa0C49fFa4B7941830235cde974d9B2a8420CD375",
+        "operator()(address)"
+      ],
+      "result": "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
+    },
+    {
+      "args": [
+        "call",
+        "0xa0C49fFa4B7941830235cde974d9B2a8420CD375",
+        "owner()(address)"
+      ],
+      "result": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
+    },
+    {
+      "args": [
+        "call",
+        "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "getThreshold()(uint256)"
+      ],
+      "result": "3"
+    },
+    {
+      "args": [
+        "call",
+        "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "getOwners()(address[])"
+      ],
+      "result": "[0x84e1091066Fbcd48f2F2d8A2b7F1726812d167b3, 0xfafE7fe2d5b7fFc92159df1d07ca4D27A6B99693, 0xb5afef3AE424336De90Ec1127fF7fEc239B02B72, 0x9A450E8787dd4c0d77F630d79469bBea64Eb5506, 0x53789955237a39024Fc740A4344102d0D5117E53]"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "getMinDelay()(uint256)"
+      ],
+      "result": "86400 [8.64e4]"
+    },
+    {
+      "args": [
+        "call",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "getCustodianAddresses()(address[])"
+      ],
+      "result": "[0x63392EaB47926f6Ee3E6ACA285B367A952001CC7]"
+    },
+    {
+      "args": [
+        "storage",
+        "0x280839980a7eD0D7717F64125fE241012E5F5815",
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+      ],
+      "result": "0x0000000000000000000000006561272e3ebc9f2e07cdb12b7c474db9132b977a"
+    },
+    {
+      "args": [
+        "storage",
+        "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697",
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+      ],
+      "result": "0x000000000000000000000000b1d133fe29255eb4ac9b05d647d49cd7f05ff631"
+    },
+    {
+      "args": [
+        "storage",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E",
+        "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc"
+      ],
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "code",
+        "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
+      ],
+      "result": "0x"
+    },
+    {
+      "args": [
+        "code",
+        "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
+      ],
+      "result": "0x"
+    },
+    {
+      "args": [
+        "call",
+        "0xa0C49fFa4B7941830235cde974d9B2a8420CD375",
+        "reportLoss(uint256)",
+        "3240653264524326952698652",
+        "--from",
+        "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
+      ],
+      "result": "0x"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "hasRole(bytes32,address)(bool)",
+        "0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63",
+        "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
+      ],
+      "result": "false"
+    },
+    {
+      "args": [
+        "call",
+        "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4",
+        "hasRole(bytes32,address)(bool)",
+        "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783",
+        "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
+      ],
+      "result": "false"
+    },
+    {
+      "args": [
+        "call",
+        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "balanceOf(address)(uint256)",
+        "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
+      ],
+      "result": "689651046857 [6.896e11]"
+    },
+    {
+      "args": [
+        "call",
+        "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+        "balanceOf(address)(uint256)",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
+      ],
+      "result": "100444279218 [1.004e11]"
+    },
+    {
+      "args": [
+        "call",
+        "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "balanceOf(address)(uint256)",
+        "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
+      ],
+      "result": "207734703186 [2.077e11]"
+    },
+    {
+      "args": [
+        "call",
+        "0xdAC17F958D2ee523a2206206994597C13D831ec7",
+        "balanceOf(address)(uint256)",
+        "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
+      ],
+      "result": "0"
+    },
+    {
+      "args": [
+        "call",
+        "0x25a637c80ad90177d0b3ff28aa2d3f74f7165ccb",
+        "get_dy(int128,int128,uint256)(uint256)",
+        "0",
+        "1",
+        "100000000000000000000000"
+      ],
+      "result": "103517219693448557733467 [1.035e23]"
+    },
+    {
+      "args": [
+        "call",
+        "0x25a637c80ad90177d0b3ff28aa2d3f74f7165ccb",
+        "get_dy(int128,int128,uint256)(uint256)",
+        "0",
+        "1",
+        "250000000000000000000000"
+      ],
+      "result": "258559923174473018205630 [2.585e23]"
+    },
+    {
+      "args": [
+        "call",
+        "0x25a637c80ad90177d0b3ff28aa2d3f74f7165ccb",
+        "get_dy(int128,int128,uint256)(uint256)",
+        "0",
+        "1",
+        "500000000000000000000000"
+      ],
+      "result": "515897830331727662781587 [5.158e23]"
+    },
+    {
+      "args": [
+        "call",
+        "0x25a637c80ad90177d0b3ff28aa2d3f74f7165ccb",
+        "get_dy(int128,int128,uint256)(uint256)",
+        "0",
+        "1",
+        "1000000000000000000000000"
+      ],
+      "result": "951825673376287350872562 [9.518e23]"
+    },
+    {
+      "args": [
+        "call",
+        "0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb",
+        "idToMarketParams(bytes32)(address,address,address,address,uint256)",
+        "0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1"
+      ],
+      "result": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48\n0x280839980a7eD0D7717F64125fE241012E5F5815\n0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4\n0x870aC11D48B15DB9a138Cf899d20F13F79Ba00BC\n860000000000000000 [8.6e17]"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "BASE_VAULT()(address)"
+      ],
+      "result": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "QUOTE_VAULT()(address)"
+      ],
+      "result": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "BASE_FEED_1()(address)"
+      ],
+      "result": "0x7fdA577c085330E69df3179A2A5867751A9D0cAA"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "BASE_FEED_2()(address)"
+      ],
+      "result": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "QUOTE_FEED_1()(address)"
+      ],
+      "result": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "QUOTE_FEED_2()(address)"
+      ],
+      "result": "0x0000000000000000000000000000000000000000"
+    },
+    {
+      "args": [
+        "call",
+        "0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4",
+        "price()(uint256)"
+      ],
+      "result": "1036671066645529588496521 [1.036e24]"
+    },
+    {
+      "args": [
+        "call",
+        "0x7fdA577c085330E69df3179A2A5867751A9D0cAA",
+        "description()(string)"
+      ],
+      "result": "\"RedStone Price Feed for strUSD_FUNDAMENTAL\""
+    },
+    {
+      "args": [
+        "call",
+        "0x7fdA577c085330E69df3179A2A5867751A9D0cAA",
+        "latestRoundData()(uint80,int256,uint256,uint256,uint80)"
+      ],
+      "result": "1\n103629122 [1.036e8]\n1793762987 [1.793e9]\n1793762987 [1.793e9]\n1"
+    },
+    {
+      "args": [
+        "call",
+        "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6",
+        "description()(string)"
+      ],
+      "result": "\"USDC / USD\""
+    },
+    {
+      "args": [
+        "call",
+        "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6",
+        "latestRoundData()(uint80,int256,uint256,uint256,uint80)"
+      ],
+      "result": "73786976294838206517 [7.378e19]\n99963359 [9.996e7]\n1793710171 [1.793e9]\n1793710187 [1.793e9]\n73786976294838206517 [7.378e19]"
+    }
+  ],
+  "roles": {
+    "strusd": {
+      "event_count": 135,
+      "holders": {
+        "DEFAULT_ADMIN_ROLE": [
+          "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+        ],
+        "REWARDER_ROLE": [
+          "0x0c6bbfd2d5666d44bf28580edeec0263692c8316",
+          "0xa0c49ffa4b7941830235cde974d9b2a8420cd375"
+        ],
+        "BLACKLIST_MANAGER_ROLE": [
+          "0x0c6bbfd2d5666d44bf28580edeec0263692c8316",
+          "0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169"
+        ],
+        "TIMELOCK_ADMIN_ROLE": [
+          "0xa952453e39f77108ee37c1b92de593f1c59a6ef4"
+        ]
+      },
+      "excluded_roles": [
+        "FULL_RESTRICTED_STAKER_ROLE holds restricted user accounts, not privileged operators"
+      ]
+    },
+    "trusd": {
+      "event_count": 4,
+      "holders": {
+        "DEFAULT_ADMIN_ROLE": [
+          "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+        ],
+        "TIMELOCK_ADMIN_ROLE": [
+          "0xa952453e39f77108ee37c1b92de593f1c59a6ef4"
+        ]
+      },
+      "excluded_roles": []
+    },
+    "minting": {
+      "event_count": 14,
+      "holders": {
+        "DEFAULT_ADMIN_ROLE": [
+          "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+        ],
+        "TIMELOCK_ADMIN_ROLE": [
+          "0xa952453e39f77108ee37c1b92de593f1c59a6ef4"
+        ],
+        "MINTER_ROLE": [
+          "0x2ba9857e5b1099f3809e0304a8f789659e7a8f70",
+          "0x7713ba984fdfd4053ace737761de903b10c351ab",
+          "0xca4317c842b5d52fd0cb3a5b11d9f8fe8281fbce"
+        ],
+        "REDEEMER_ROLE": [
+          "0x3b45316d817a97e401d3e2649983d73e15a3471e",
+          "0xc885cfbb77414813dda6142db7aa8a957b533bc9",
+          "0xd5b369fbef4bbf8ac0b3c0faf4b3efde0bc2f3ec"
+        ],
+        "GATEKEEPER_ROLE": [
+          "0x5a54bbae78a3f043a1a41d6f9eb39fb2a1f766c7",
+          "0xb0444060adcc379e57b72c5eb7e09530351b183d"
+        ],
+        "COLLATERAL_MANAGER_ROLE": [
+          "0x39c9106e9be3622104a1ab97f3fcc88b65874213"
+        ],
+        "WHITELISTER_ROLE": [
+          "0x541d53bc10213ff7835b3393f6e74baaefca3cf6"
+        ]
+      },
+      "excluded_roles": []
+    },
+    "timelock": {
+      "event_count": 9,
+      "holders": {
+        "DEFAULT_ADMIN_ROLE": [],
+        "PROPOSER_ROLE": [
+          "0x0c6bbfd2d5666d44bf28580edeec0263692c8316"
+        ],
+        "CANCELLER_ROLE": [
+          "0x60226cbb34445143e5f923abe2d42e5df852d065"
+        ],
+        "EXECUTOR_ROLE": [
+          "0x039e71e865a34bcaaebfc641291bec6517ea0ce7"
+        ]
+      },
+      "excluded_roles": []
+    }
+  },
+  "accountable": {
+    "source": "https://tori.accountable.capital:8443/dashboard",
+    "request_headers": {
+      "Accept": "application/json"
+    },
+    "dfid": "100000007",
+    "response_sha256": "ca55c955fb9bf9ae95da69a2cc5eaefc0c9827868e534a4b7b74b7f4b7a4e830",
+    "selection": "Selected public response fields; timeline, duplicated v2 payload and cryptographic proof blobs omitted. Their presence does not establish independent verification.",
+    "res": "ok",
+    "data": {
+      "ts": 1793937662208,
+      "collateralization": 1.002027,
+      "net": 149843.41,
+      "custodyBreakdown": {
+        "REGULATED CUSTODIAN BANKS": 80.82908134782646,
+        "REGULATED INVESTMENT BANKS": 9.664968297202151,
+        "ON-CHAIN CUSTODY": 9.50595035497139
+      },
+      "dataSources": {
+        "trUSD contract": {
+          "name": "trUSD contract",
+          "type": "Smart Contract",
+          "verificationLevel": 6,
+          "filter": "liabilities",
+          "status": "public",
+          "percentage": 100.0,
+          "frequency": "15 MIN",
+          "lastUpdated": "1793937602724",
+          "categories": [
+            "On-Chain Liabilities"
+          ]
+        },
+        "CEX": {
+          "name": "CEX",
+          "type": "CEX API",
+          "verificationLevel": 4,
+          "filter": "reserves",
+          "status": "private",
+          "percentage": 0.0,
+          "frequency": "15 MIN",
+          "lastUpdated": "1793937601283",
+          "categories": [
+            "Cash at Bank",
+            "Cash & Equivalents"
+          ]
+        },
+        "Payment Service provider": {
+          "name": "Payment Service provider",
+          "type": "Secondary Account Statement",
+          "verificationLevel": 2,
+          "filter": "reserves",
+          "status": "private",
+          "percentage": 0.13,
+          "frequency": "Periodic",
+          "lastUpdated": "1790336100000",
+          "categories": [
+            "Cash at Bank",
+            "Cash & Equivalents"
+          ]
+        },
+        "Blockchain Wallets": {
+          "name": "Blockchain Wallets",
+          "type": "Onchain data",
+          "verificationLevel": 6,
+          "filter": "reserves",
+          "status": "public",
+          "percentage": 1.41,
+          "frequency": "15 MIN",
+          "lastUpdated": "1793937602809",
+          "categories": [
+            "Ethereum",
+            "ETH",
+            "USDT",
+            "USDC",
+            "AUSD",
+            "On-chain Liquidity",
+            "Base"
+          ]
+        },
+        "Payment Rail": {
+          "name": "Payment Rail",
+          "type": "Payment Rail API",
+          "verificationLevel": 4,
+          "filter": "reserves",
+          "status": "private",
+          "percentage": 0.0,
+          "frequency": "15 MIN",
+          "lastUpdated": "1793937601970",
+          "categories": [
+            "Cash at Bank",
+            "Cash & Equivalents"
+          ]
+        },
+        "DeFi Protocols": {
+          "name": "DeFi Protocols",
+          "type": "Onchain data",
+          "verificationLevel": 6,
+          "filter": "reserves",
+          "status": "public",
+          "percentage": 8.1,
+          "frequency": "15 MIN",
+          "lastUpdated": "1793937603759",
+          "categories": [
+            "USDC - Morpho (Tori token collateral)",
+            "AUSD - AUSD",
+            "Ethereum",
+            "On-chain Liquidity",
+            "AUSD - Morpho (Tori token collateral)",
+            "USDC - Morpho (other collateral: cbBTC)",
+            "Base",
+            "Monad"
+          ]
+        },
+        "Asset Manager": {
+          "name": "Asset Manager",
+          "type": "Asset Manager API",
+          "verificationLevel": 4,
+          "filter": "reserves",
+          "status": "private",
+          "percentage": 90.36,
+          "frequency": "15 MIN",
+          "lastUpdated": "1793937604119",
+          "categories": [
+            "Delta-Neutral Equity Arbitrage",
+            "Bank deposits",
+            "Overnight",
+            "In Transit",
+            "Term",
+            "Cash & Equivalents",
+            "Short single-stock futures",
+            "Net equity delta",
+            "Long book",
+            "Cash at Bank",
+            "Derivatives Margin",
+            "Money Markets",
+            "Overnight reverse repo (Treasury-collateralised)"
+          ]
+        }
+      },
+      "attestation_reports": [
+        {
+          "date": "2026-10-30",
+          "pdfUrl": "https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-30.pdf?v=20261031",
+          "label": "Signed proof-of-reserves letter \u2014 30 October 2026",
+          "provider": "HT Digital Services Ltd"
+        },
+        {
+          "date": "2026-10-23",
+          "pdfUrl": "https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029",
+          "label": "Signed proof-of-reserves letter \u2014 23 October 2026",
+          "provider": "HT Digital Services Ltd"
+        },
+        {
+          "date": "2026-10-16",
+          "pdfUrl": "https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-16.pdf?v=20261029",
+          "label": "Signed proof-of-reserves letter \u2014 16 October 2026",
+          "provider": "HT Digital Services Ltd"
+        }
+      ],
+      "reserves": {
+        "verifiability": "100",
+        "interval": "live",
+        "total_reserves": {
+          "value": 74070623.2,
+          "name": "Total Reserves"
+        },
+        "total_supply": {
+          "name": "Total Supply",
+          "value": 73920779.79,
+          "fx": 1
+        },
+        "supply_split": [
+          {
+            "value": 73920779.79,
+            "name": "Ethereum"
+          }
+        ],
+        "nested_split": {
+          "Money Markets": {
+            "Money Market Instruments": {
+              "status": "private",
+              "value": 53054219.9
+            }
+          },
+          "Delta-Neutral Equity Arbitrage": {
+            "Delta-Neutral Equity Arbitrage": {
+              "status": "private",
+              "value": 6716205.36
+            }
+          },
+          "Cash & Equivalents": {
+            "Bank Cash": {
+              "status": "private",
+              "value": 100179.0226748607
+            },
+            "FX Collateral": {
+              "status": "private",
+              "value": 7158902.25
+            },
+            "OTC & Exchange Reserve": {
+              "status": "private",
+              "value": 0
+            }
+          },
+          "Ethereum": {
+            "USDC - Morpho (other collateral: cbBTC)": 2557722.39069497,
+            "USDC": 824780.6354860583,
+            "USDT": 207511.180994995,
+            "USDC - Morpho (Tori token collateral)": 126199.4831704387,
+            "AUSD": 12163.0684216829,
+            "ETH": 490.5450527990904
+          },
+          "Monad": {
+            "AUSD - Morpho (Tori token collateral)": 3312168.90914745,
+            "AUSD - AUSD": 74.927567162976
+          },
+          "Base": {
+            "ETH": 5.52865034052579,
+            "USDC - Morpho (other collateral: cbBTC)": 1.00140196274785e-06
+          }
+        },
+        "underlying_exposure": {
+          "Money Markets": {
+            "Overnight reverse repo (Treasury-collateralised)": {
+              "status": "private",
+              "value": 36293512.93
+            },
+            "Bank deposits": {
+              "Overnight": {
+                "status": "private",
+                "value": 2541206.65
+              },
+              "Term": {
+                "status": "private",
+                "value": 14191525.67,
+                "tag": "Avg. maturity 29.4 days"
+              }
+            }
+          },
+          "Delta-Neutral Equity Arbitrage": {
+            "Long book": {
+              "status": "private",
+              "value": 6037990.66
+            },
+            "Short single-stock futures": {
+              "memo": true,
+              "value": -6062912.55,
+              "status": "private"
+            },
+            "Net equity delta": {
+              "memo": true,
+              "value": -24921.89,
+              "status": "private"
+            }
+          },
+          "Cash & Equivalents": {
+            "Cash at Bank": {
+              "status": "private",
+              "value": 101270.94
+            },
+            "Derivatives Margin": {
+              "status": "private",
+              "value": 7868191.73
+            }
+          },
+          "On-chain Liquidity": {
+            "Ethereum": {
+              "USDC - Morpho (other collateral: cbBTC)": 2557722.39069497,
+              "USDC": 824780.6354860583,
+              "USDT": 207511.180994995,
+              "USDC - Morpho (Tori token collateral)": 126199.4831704387,
+              "AUSD": 12163.0684216829,
+              "ETH": 490.5450527990904
+            },
+            "Monad": {
+              "AUSD - Morpho (Tori token collateral)": 3312168.90914745,
+              "AUSD - AUSD": 74.927567162976
+            },
+            "Base": {
+              "ETH": 5.52865034052579,
+              "USDC - Morpho (other collateral: cbBTC)": 1.00140196274785e-06
+            }
+          }
+        },
+        "underlying_exposure_as_of": "2026-11-04"
+      }
+    },
+    "derived": {
+      "tori_collateral_morpho_usd": 3438368.3923178883,
+      "share_of_reserves_pct": 4.642013586187686,
+      "zero_recovery_stress_coverage_pct": 95.55128477856944,
+      "interpretation": "The stress case excludes reported Tori-collateral Morpho claims; it is not a measured shortfall or independently verified position valuation. Market IDs, positions and recovery remain TODO."
+    }
+  },
+  "ht_digital": {
+    "url": "https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029",
+    "sha256": "c503a24eb3b744509fe8f86bb360b1f0d5c99727d6aac93460b19dd165439be1",
+    "letter_date": "2026-10-23",
+    "onchain_read_time": "2026-10-23T14:00:00Z",
+    "offchain_balance_date": "2026-10-22",
+    "reported_collateral_usd": 73079000,
+    "reported_trusd_supply": 72781000,
+    "reported_coverage_pct": 100.41,
+    "scope": "Sight of collateral and management representation of designated reserve accounts; ownership and controls ISAE 3000 assurance described as future work."
+  }
+}
