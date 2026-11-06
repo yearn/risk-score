@@ -5,6 +5,11 @@ description: Focused procedure for refreshing existing risk reports by validatin
 
 # Reassessing risk reports
 
+## Contents
+
+- [Check current state](#check-current-state)
+- [Editing](#editing)
+
 Refresh `reports/report/<slug>.md` in place. Follow [AGENTS.md](../../../AGENTS.md).
 Re-derive static background or scores only when verified changes justify it.
 
@@ -15,6 +20,14 @@ triggers. Verify:
 
 - Privileged roles and holders, timelock delays, proxy implementations/admins,
   and mint-authority paths with [onchain verification](../verifying-onchain-data/SKILL.md).
+- The material permission inventory and weakest-link conclusion: recheck
+  direct fund-moving powers, role-admin and upgrade paths, effective Safe
+  thresholds, timelock bypasses, caps, and assets exposed. Update the conclusion
+  when a holder, control path, or enforceable limit changes; mark incomplete
+  re-enumeration `TODO` rather than treating old holders as current. If the
+  report lacks the template's Critical Permission Paths and Weakest Link
+  section, add it, covering only permissions that can cause a material loss;
+  mark contracts you could not enumerate `TODO`.
 - Multisig changes using the [governance standard](../verifying-onchain-data/references/governance.md).
 - TVL and trend: `uv run reports/scripts/fetch_defillama_tvl.py <slug> --days 30`.
 - Strategy/farm/collateral allocations and report-specific monitoring values:
@@ -30,6 +43,12 @@ graph when sufficient report evidence exists. For added, removed, or changed
 cross-chain exposure, use the [bridge skill](../assessing-bridge-dependencies/SKILL.md)
 to keep the index consistent.
 
+When Yearn usage changes, maintain the external dependency list in
+[reassessment.json](../../../reports/reassessment.json) under the
+[eligibility rules](../../../reports/README.md#scheduled-reassessment). Include
+approved but unfunded integrations; remove an entry only when no qualifying
+Yearn use remains. Yearn asset reports named `yearn-*.md` are included automatically.
+
 ## Editing
 
 - Preserve structure and update affected sections in place. Describe current facts
@@ -42,6 +61,9 @@ to keep the index consistent.
 - Keep incidents, depegs, and large historical TVL changes as dated facts in
   Historical Track Record, not comparisons with the previous assessment.
 - Change scores only under the [scoring framework](../../../reports/README.md).
+  If a score changes because the rubric changed rather than the protocol, say
+  so in the Assessment History notes, e.g. `Rescored under weakest-link
+  governance rule; no onchain change`.
   Update dependent summaries, final tier, concentration discussion, and
   graph-related appendices when their supporting facts change.
 
