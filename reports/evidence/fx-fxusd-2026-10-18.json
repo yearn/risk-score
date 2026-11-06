@@ -1,0 +1,863 @@
+{
+  "description": "Read-only verification of the October 18, 2026 report snapshot. Simulations use eth_call and do not persist state. Amounts are integer base units unless labeled otherwise. Role logs cover deployment through the snapshot, with all reconstructed holders confirmed using hasRole.",
+  "ethereum": {
+    "chainId": 1,
+    "block": 26221558,
+    "hash": "0xf7a5581c994ead3c7f9e0b673030cda90d7ef27188221cacdaa7d966e98f3aff",
+    "timestamp": "2026-10-18T19:31:59+00:00"
+  },
+  "base": {
+    "chainId": 8453,
+    "block": 52781286,
+    "hash": "0x7e5c04b8562080a436c67a5e710f914b299493d0f1182dda2ca0996bee2cd121",
+    "timestamp": "2026-10-18T19:31:59+00:00"
+  },
+  "contracts": {
+    "token": "0x085780639CC2cACd35E474e71f4d000e2405d8f6",
+    "manager": "0x250893CA4Ba5d05626C785e8da758026928FCD24",
+    "shortmanager": "0xaCDc0AB51178d0Ae8F70c1EAd7d3cF5421FDd66D",
+    "config": "0x16b334f2644cc00b85DB1A1efF0C2C395e00C28d",
+    "fxsp": "0x65C9A641afCEB9C0E6034e558A319488FA0FA3be",
+    "fxsave": "0x7743e50F534a7f9F1791DdE7dCD89F7783Eefc39",
+    "peg": "0x50562fe7e870420F5AAe480B7F94EB4ace2fcd70",
+    "timelock": "0x68863fb8855b04509a835082478D6E3D0bE4E61a",
+    "admin": "0x9b54b7703551d9d0ced177a78367560a8b2edda4",
+    "stethoracle": "0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb",
+    "wbtcoracle": "0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390",
+    "stethpool": "0x6ecfa38fee8a5277b91efda204c235814f0122e8",
+    "wbtcpool": "0xab709e26fa6b0a30c119d8c55b887ded24952473",
+    "curve": "0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f",
+    "op": "0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF",
+    "emergency": "0x28c921adAC4c1072658eB01a28DA06b5F651eF62",
+    "adapter": "0xA07d8cc424421cC2bce0544a65481376f010A438",
+    "wstethstrategy": "0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8",
+    "usdcstrategy": "0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f",
+    "fxsaveadmin": "0xa0fb1b11cca5871fb0225b64308e249b97804e99"
+  },
+  "roleInventory": {
+    "token": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "MIGRATOR_ROLE": {
+        "role": "0x600e5f1c60beb469a3fa6dd3814a4ae211cc6259a6d033bae218a742f2af01d3",
+        "holders": [
+          "0x33636d49fbefbe798e15e7f356e8dbef543cc708"
+        ]
+      }
+    },
+    "manager": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "0x97667070c54ef182b0f5858b034beac1b6f3089aa2d3188bb1e8929f4fa9b929": {
+        "role": "0x97667070c54ef182b0f5858b034beac1b6f3089aa2d3188bb1e8929f4fa9b929",
+        "holders": [
+          "0x33636d49fbefbe798e15e7f356e8dbef543cc708"
+        ]
+      },
+      "HARVESTER_ROLE": {
+        "role": "0x3fc733b4d20d27a28452ddf0e9351aced28242fe03389a653cdb783955316b9b",
+        "holders": [
+          "0x11e91bb6d1334585aa37d8f4fde3932c7960b938"
+        ]
+      },
+      "ASSET_MANAGER_ROLE": {
+        "role": "0xb1fadd3142ab2ad7f1337ea4d97112bcc8337fc11ce5b20cb04ad038adf99819",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "EMERGENCY_ROLE": {
+        "role": "0xbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b26",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "DEBT_REDUCER_ROLE": {
+        "role": "0x1be5d1ebf823e636f9019a4a28b5fb56a6c9c490fea63cb140cde243b9045b53",
+        "holders": [
+          "0xf32ffd90133c7ec15e1519b9f7de8143310961ac"
+        ]
+      }
+    },
+    "shortmanager": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "HARVESTER_ROLE": {
+        "role": "0x3fc733b4d20d27a28452ddf0e9351aced28242fe03389a653cdb783955316b9b",
+        "holders": [
+          "0x11e91bb6d1334585aa37d8f4fde3932c7960b938"
+        ]
+      },
+      "DEBT_REDUCER_ROLE": {
+        "role": "0x1be5d1ebf823e636f9019a4a28b5fb56a6c9c490fea63cb140cde243b9045b53",
+        "holders": [
+          "0x2ac0a3b5cb25d6071f05e9729922261bdf8e7cb4"
+        ]
+      },
+      "0xfd96ca7a6c7f01e5a66091060058768505cfa54b5c8d0a65e34a4850c3466568": {
+        "role": "0xfd96ca7a6c7f01e5a66091060058768505cfa54b5c8d0a65e34a4850c3466568",
+        "holders": [
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "EMERGENCY_ROLE": {
+        "role": "0xbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b26",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "ASSET_MANAGER_ROLE": {
+        "role": "0xb1fadd3142ab2ad7f1337ea4d97112bcc8337fc11ce5b20cb04ad038adf99819",
+        "holders": [
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      }
+    },
+    "config": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      }
+    },
+    "fxsp": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "ASSET_MANAGER_ROLE": {
+        "role": "0xb1fadd3142ab2ad7f1337ea4d97112bcc8337fc11ce5b20cb04ad038adf99819",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "NO_INSTANT_REDEEM_FEE_ROLE": {
+        "role": "0x522a3e82a506d706a025772fecc3caa3af4986c00ba0d31cb2fa5d31b66b296d",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x33636d49fbefbe798e15e7f356e8dbef543cc708",
+          "0x4ef75e307f7edbf0462c679192c1ff7e911c389a",
+          "0x547090eb068220b3da1f7b611ef21723caa4121e",
+          "0xa0fb1b11cca5871fb0225b64308e249b97804e99",
+          "0xc40549aa1d05c30af23a1c4a5af6ba11fcafe23f",
+          "0xfc08757c505ea28709df66e54870fb6de09f0c5e"
+        ]
+      }
+    },
+    "fxsave": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a",
+          "0xa0fb1b11cca5871fb0225b64308e249b97804e99"
+        ]
+      },
+      "CLAIM_FOR_ROLE": {
+        "role": "0x24927c918ee933e498c4f4704c8c8c5997712350624a2ab5df3edca55f9ac033",
+        "holders": [
+          "0x33636d49fbefbe798e15e7f356e8dbef543cc708"
+        ]
+      }
+    },
+    "peg": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "BUYBACK_ROLE": {
+        "role": "0xa7c777b85fc58675e1f97f547c6d0658b5454f6e82d1930f8a36716c5ac0de05",
+        "holders": [
+          "0x4215f2014239cf0e1a8617b31fcaf88aac6e4779",
+          "0x87d5e4caaf4358a4337c10859c7107c7aef4f8ce"
+        ]
+      },
+      "STABILIZE_ROLE": {
+        "role": "0x90ba4e11ad240e3543d2e8a32e330be1330b184ccfcddfdcf9cefb7f695dc7ca",
+        "holders": [
+          "0x4215f2014239cf0e1a8617b31fcaf88aac6e4779",
+          "0x87d5e4caaf4358a4337c10859c7107c7aef4f8ce"
+        ]
+      }
+    },
+    "wstethstrategy": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "HARVESTER_ROLE": {
+        "role": "0x3fc733b4d20d27a28452ddf0e9351aced28242fe03389a653cdb783955316b9b",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x4215f2014239cf0e1a8617b31fcaf88aac6e4779"
+        ]
+      }
+    },
+    "usdcstrategy": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      }
+    },
+    "timelock": {
+      "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5": {
+        "role": "0x5f58e3a2316349923ce3780f8d587db2d72378aed66a8261c916544fa6846ca5",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1": {
+        "role": "0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf"
+        ]
+      },
+      "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783": {
+        "role": "0xfd643c72710c63c0180259aba6b2d05451e3591a24e58b62239378085726f783",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf"
+        ]
+      },
+      "0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63": {
+        "role": "0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63",
+        "holders": [
+          "0x0000000000000000000000000000000000000000",
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf"
+        ]
+      }
+    },
+    "stethpool": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "EMERGENCY_ROLE": {
+        "role": "0xbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b26",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1": {
+        "role": "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1",
+        "holders": [
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62"
+        ]
+      }
+    },
+    "wbtcpool": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "EMERGENCY_ROLE": {
+        "role": "0xbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b26",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1": {
+        "role": "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1",
+        "holders": [
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62"
+        ]
+      }
+    }
+  },
+  "permissionReadsAndSimulations": {
+    "fxsaveadmin getThreshold()(uint256)": 6,
+    "fxsaveadmin getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x8EcAB7B8ed8215cA52500cbf1548B9239173ef82, 0xeF0Ca09fbf9a5f61E657Fb208b46b8685c1d4766, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xcdF067F306E7a511Ef701588AFCdcff292B19282, 0xC8Be49a9b1ca1A1cc654491a7cBbD27aBfA06A81, 0x18411aB626c9b3B3Dd5b7356574D8ff396436744, 0x74390470F4001Ca85D93bD546A4Ab1724359654B]",
+    "fxsaveadmin getModulesPaginated(address,uint256)(address[],address)": "[]\n0x0000000000000000000000000000000000000001",
+    "op getThreshold()(uint256)": 6,
+    "op getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B, 0xeF0Ca09fbf9a5f61E657Fb208b46b8685c1d4766, 0x8EcAB7B8ed8215cA52500cbf1548B9239173ef82, 0x18411aB626c9b3B3Dd5b7356574D8ff396436744, 0xcdF067F306E7a511Ef701588AFCdcff292B19282, 0xC8Be49a9b1ca1A1cc654491a7cBbD27aBfA06A81]",
+    "op getModulesPaginated(address,uint256)(address[],address)": "[]\n0x0000000000000000000000000000000000000001",
+    "emergency getThreshold()(uint256)": 3,
+    "emergency getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B]",
+    "emergency getModulesPaginated(address,uint256)(address[],address)": "[]\n0x0000000000000000000000000000000000000001",
+    "fxsaveadmin grant CLAIM_FOR_ROLE": "0x",
+    "stethpool updatePriceOracle from emergency": "0x",
+    "stethpool updatePriceOracle from op": "0x",
+    "wbtcpool updatePriceOracle from emergency": "0x",
+    "wbtcpool updatePriceOracle from op": "0x"
+  },
+  "snapshotReads": {
+    "stethoracle owner()(address)": "0x68863fb8855b04509a835082478D6E3D0bE4E61a",
+    "token totalSupply()(uint256)": "80931869145462125858467205 [8.093e25]",
+    "admin owner()(address)": "0x68863fb8855b04509a835082478D6E3D0bE4E61a",
+    "timelock getMinDelay()(uint256)": "259200 [2.592e5]",
+    "token isUnderCollateral()(bool)": false,
+    "token nav()(uint256)": "1000000000000000000 [1e18]",
+    "stethoracle pendingOwner()(address)": "0x0000000000000000000000000000000000000000",
+    "wbtcoracle pendingOwner()(address)": "0x0000000000000000000000000000000000000000",
+    "wbtcoracle owner()(address)": "0x68863fb8855b04509a835082478D6E3D0bE4E61a",
+    "stethpool priceOracle()(address)": "0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb",
+    "stethpool getRebalanceRatios()(uint256,uint256)": "880000000000000000 [8.8e17]\n25000000 [2.5e7]",
+    "stethpool getDebtRatioRange()(uint256,uint256)": "100000000000000 [1e14]\n855000000000000000 [8.55e17]",
+    "stethpool getLiquidateRatios()(uint256,uint256)": "950000000000000000 [9.5e17]\n40000000 [4e7]",
+    "wbtcpool getRebalanceRatios()(uint256,uint256)": "880000000000000000 [8.8e17]\n25000000 [2.5e7]",
+    "wbtcpool priceOracle()(address)": "0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390",
+    "wbtcpool getDebtRatioRange()(uint256,uint256)": "100000000000000 [1e14]\n855000000000000000 [8.55e17]",
+    "manager getPoolInfo(address)(uint256,uint256,uint256,uint256,uint256) 0x6ecfa38fee8a5277b91efda204c235814f0122e8": "500000000000000000000000 [5e23]\n5170452048510917162452 [5.17e21]\n6445200380407885600805 [6.445e21]\n150000000000000000000000000 [1.5e26]\n9043534840940583023377866 [9.043e24]",
+    "wbtcpool getLiquidateRatios()(uint256,uint256)": "950000000000000000 [9.5e17]\n40000000 [4e7]",
+    "fxsp totalSupply()(uint256)": "76865426536289854126594543 [7.686e25]",
+    "manager getPoolInfo(address)(uint256,uint256,uint256,uint256,uint256) 0xab709e26fa6b0a30c119d8c55b887ded24952473": "3000000000000 [3e12]\n115031136300 [1.15e11]\n1150311362978614289096 [1.15e21]\n200000000000000000000000000 [2e26]\n71888070246337261189234132 [7.188e25]",
+    "fxsp totalYieldToken()(uint256)": "75189689345025646643365716 [7.518e25]",
+    "fxsp totalStableToken()(uint256)": "2462472326438 [2.462e12]",
+    "peg getFxUSDPrice()(uint256)": "1000417264574042588 [1e18]",
+    "fxsave totalAssets()(uint256)": "74838618834418778714400450 [7.483e25]",
+    "peg isRedeemAllowed()(bool)": false,
+    "token balanceOf(address)(uint256) 0xA07d8cc424421cC2bce0544a65481376f010A438": "81875719051000000000000 [8.187e22]",
+    "peg isFundingEnabled()(bool)": false,
+    "op getThreshold()(uint256)": 6,
+    "op getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B, 0xeF0Ca09fbf9a5f61E657Fb208b46b8685c1d4766, 0x8EcAB7B8ed8215cA52500cbf1548B9239173ef82, 0x18411aB626c9b3B3Dd5b7356574D8ff396436744, 0xcdF067F306E7a511Ef701588AFCdcff292B19282, 0xC8Be49a9b1ca1A1cc654491a7cBbD27aBfA06A81]",
+    "emergency getThreshold()(uint256)": 3,
+    "emergency getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B]",
+    "fxsave admin hasRole DEFAULT_ADMIN_ROLE": true
+  },
+  "fxsavePendingRedemptions": {
+    "requestEventCount": 2074,
+    "claimEventCount": 1958,
+    "pendingOwners": 49,
+    "pendingFxspShares": "224774084083804668523867",
+    "maturedFxspShares": "224774084083804668523867",
+    "pendingFxusdWei": "219873801742253501725596",
+    "pendingUsdcMicro": "7200896250",
+    "maturedFxusdWei": "219873801742253501725596",
+    "maturedUsdcMicro": "7200896250",
+    "requests": [
+      {
+        "owner": "0xde640ee016b512479766400fe2b2eca2293871c3",
+        "proxy": "0x3dC282150857aaE5C52d4b9422921fd79Fc7a1c3",
+        "requestTransaction": "0xabc5642880b92effd089b3be937f0d313da80c1d81b255e0908cfefb1e98cafa",
+        "fxspShares": "14579425144758395314364",
+        "fxspBalance": "14579425144758395314364",
+        "unlockAt": 1745374283,
+        "matured": true
+      },
+      {
+        "owner": "0x19f184b42f59ec220d11bfee1096465fd2e0c4b5",
+        "proxy": "0x63323F85b01E4126d9366E39b620fbE5165Cd7Dc",
+        "requestTransaction": "0xede03c326aecd40b8014aadeeb288ef9ddc08e021de3569dfdcb87b60533ff3f",
+        "fxspShares": "7752434526603825851",
+        "fxspBalance": "7752434526603825851",
+        "unlockAt": 1749189155,
+        "matured": true
+      },
+      {
+        "owner": "0x1fca3222a1dc90e02637b75440dd8a9dea3dba48",
+        "proxy": "0xb6F7ebF28Dc956AE0468b4c940A4Bc56537516Bc",
+        "requestTransaction": "0x37af584edd019ca01a8abdcd5fa207b06eeacde37640e5efd63b33e3c35e124c",
+        "fxspShares": "111668206540709540536",
+        "fxspBalance": "111668206540709540536",
+        "unlockAt": 1749460631,
+        "matured": true
+      },
+      {
+        "owner": "0xe3137ad66f739c0e6df4753e4a6a9665bc50ae9f",
+        "proxy": "0x9956A213D14D4fdb2a87Bac86c630ff4C9DC0c16",
+        "requestTransaction": "0x4009264a8b90f496aff54273ee090a90f75f85c0fcb5e7ba5350fa9566c7cbfd",
+        "fxspShares": "101618630549256926",
+        "fxspBalance": "101618630549256926",
+        "unlockAt": 1749545483,
+        "matured": true
+      },
+      {
+        "owner": "0x28ef7b4252ac35266f5a16af86046356ce60fad0",
+        "proxy": "0x6497984D29638206fF4f97e5a6b1b3D150804bf3",
+        "requestTransaction": "0x1c4666b328c12b78413e15abfb8c8041b41564b0615d13d77eb4d05f06c51e8c",
+        "fxspShares": "83932304022930910496",
+        "fxspBalance": "83932304022930910496",
+        "unlockAt": 1752564239,
+        "matured": true
+      },
+      {
+        "owner": "0xd29c64cfeda42e90690483036987a352fa4e8306",
+        "proxy": "0x938fFCB3291567c6783be943006244Bd9B7C45F9",
+        "requestTransaction": "0xc064ee3cc9b163f04c80d6169e36b5455149131f6c66ef92f5d1825b6f1eee0d",
+        "fxspShares": "2994165325881766750",
+        "fxspBalance": "2994165325881766750",
+        "unlockAt": 1753240787,
+        "matured": true
+      },
+      {
+        "owner": "0x81136654a5d75f0f8bc96281c5b7237813b0fe27",
+        "proxy": "0x4498Fa1de334b85985b42F2c3dA2515CC6142247",
+        "requestTransaction": "0x1ab627c0e92b35f4902cc95bb10971dbca71e3366befcaea5a5a989eb6fac53c",
+        "fxspShares": "997949292749673639533",
+        "fxspBalance": "997949292749673639533",
+        "unlockAt": 1753767851,
+        "matured": true
+      },
+      {
+        "owner": "0xcedebd491fa205c97a9bde76a6ecba13ada31243",
+        "proxy": "0xF12aEF0b498Ff2d6012df20D0FD874910D6F90f5",
+        "requestTransaction": "0x83ae4b48410161928b5c29fe80c3545f37b905e6378665ccb2926e0e68da5312",
+        "fxspShares": "394373981229923256685",
+        "fxspBalance": "394373981229923256685",
+        "unlockAt": 1754207147,
+        "matured": true
+      },
+      {
+        "owner": "0x3a2cbfd3b7cf757c4b1653bca04ec96d2f7dac5e",
+        "proxy": "0x21De20752136D0cF2e94a0EA657549014422159a",
+        "requestTransaction": "0xfe9783f979d52798351e619cc1297fd3f2538802981a55bd1e0a54c2ffc4050f",
+        "fxspShares": "308916859482560591575",
+        "fxspBalance": "308916859482560591575",
+        "unlockAt": 1754402279,
+        "matured": true
+      },
+      {
+        "owner": "0x9f47991b8963b1f77fc1d7508919e6072ced318a",
+        "proxy": "0x8d13b7dEa675314Af6C90DCE87BCd671723D33c3",
+        "requestTransaction": "0xee192a85bdf4b63458b362867d21675b3d6ef4aa42628e0064b4c36612ceb8ba",
+        "fxspShares": "10807293718059891717",
+        "fxspBalance": "10807293718059891717",
+        "unlockAt": 1755597839,
+        "matured": true
+      },
+      {
+        "owner": "0x6b3fd65d4f21ae54793a3436b904fe6b8297aa4c",
+        "proxy": "0x785eeD2E138883d232893E1847bef6b4f5BAf0aa",
+        "requestTransaction": "0x453637482fe58898eb34be29029b11b6133822af9b38af39a5d7d58398c81116",
+        "fxspShares": "16511119595252202834919",
+        "fxspBalance": "16511119595252202834919",
+        "unlockAt": 1757415287,
+        "matured": true
+      },
+      {
+        "owner": "0x18f026e51e8ee579557a63e3e1caf177afc9eaa6",
+        "proxy": "0xF73454A4e28C3aF07222481470EAa7FDEA02A4Fd",
+        "requestTransaction": "0xcf950109e30e9c00c2cf3392779cfd5c772ba1a14a9bc393d21713bcdccf2301",
+        "fxspShares": "506541676650075225207",
+        "fxspBalance": "506541676650075225207",
+        "unlockAt": 1758281387,
+        "matured": true
+      },
+      {
+        "owner": "0xf36693a2c461b4bcb7a015dc5db86de64ed873b3",
+        "proxy": "0xd0F35bD03Bb0D09CA257eDc731a53cfdcdC45fd5",
+        "requestTransaction": "0x1511ba2fe465de84f0adf986a4c517b318a979c0dce08eea7c388fc79231ea45",
+        "fxspShares": "105843077594747899904",
+        "fxspBalance": "105843077594747899904",
+        "unlockAt": 1760807939,
+        "matured": true
+      },
+      {
+        "owner": "0x032419e602e2aeee537e91d867938354e5274d5b",
+        "proxy": "0x5256580D1ae476de8b47e36b793CCb0C0f34380b",
+        "requestTransaction": "0xd093ec838de63115110a3e749d8e533185b67d2c2596352210c90f09e58f47e2",
+        "fxspShares": "10006165384668865645",
+        "fxspBalance": "10006165384668865645",
+        "unlockAt": 1761815435,
+        "matured": true
+      },
+      {
+        "owner": "0x4bf1e6471ae826a1ffac3f5e8d23ade47a6c69bb",
+        "proxy": "0xf70f0f77DdF205d2F5688B5bF41dD2f11cc504B6",
+        "requestTransaction": "0xb85b631702c5f71dd6013dd2508637c57456657e27527c96192ac7f81ae79f7e",
+        "fxspShares": "7863884661607350960",
+        "fxspBalance": "7863884661607350960",
+        "unlockAt": 1761907943,
+        "matured": true
+      },
+      {
+        "owner": "0x74f7d8e0b8f3151b1bd0726bd4cc7c7b06e06c92",
+        "proxy": "0x2CF5fd201096Ab001F3319ae646425c4C1538D16",
+        "requestTransaction": "0xd1a4da9dc0135b5079a701a7d004febc03f7db32fc16278502c87840eb035be2",
+        "fxspShares": "190538460309711759873",
+        "fxspBalance": "190538460309711759873",
+        "unlockAt": 1762169255,
+        "matured": true
+      },
+      {
+        "owner": "0x11d67fa925877813b744abc0917900c2b1d6eb81",
+        "proxy": "0xd4f9F9af7c543B7Eb2B5D0b7Fa5251c0c317bc1B",
+        "requestTransaction": "0xaf18c130c73f8728e923c570db59667f1b4811ed6697a8ae10e1dc86f079a8ef",
+        "fxspShares": "102868282166177040934402",
+        "fxspBalance": "102868282166177040934402",
+        "unlockAt": 1762178483,
+        "matured": true
+      },
+      {
+        "owner": "0x4441d41ff545a49668ee77a78b196c27dc2dd109",
+        "proxy": "0x66EE714d5fD1dA39644C2C4beE8fa9Fc22d26724",
+        "requestTransaction": "0xa59634dbb24791f8c83cf65877d9af06df35cfc179ba3736b345a09537d93d44",
+        "fxspShares": "145942867003706509548",
+        "fxspBalance": "145942867003706509548",
+        "unlockAt": 1763034095,
+        "matured": true
+      },
+      {
+        "owner": "0x00484026cc9b84acfbdc011978c7a8d97a59b220",
+        "proxy": "0x1712849CDeEE22fABeF6FCe0D505b135B11f5eBb",
+        "requestTransaction": "0xd6268ac78a29db6af4e7b1fa3a995f4b9342a286d4f13974c50e385d4672069d",
+        "fxspShares": "8084655357590537259323",
+        "fxspBalance": "8084655357590537259323",
+        "unlockAt": 1763708147,
+        "matured": true
+      },
+      {
+        "owner": "0xaba7adcade9754304e558970089af59824135bdc",
+        "proxy": "0x3f586A31dDe670C62D9662834a3F22C962cEDf80",
+        "requestTransaction": "0x2484cb92d38c1bf3aaa57689899f75e2a5776d15654cc08c17e7eba0fc1e45d5",
+        "fxspShares": "9978569438122598011",
+        "fxspBalance": "9978569438122598011",
+        "unlockAt": 1764054167,
+        "matured": true
+      },
+      {
+        "owner": "0x54cd90567d11ca52d030df724ef2e1250aaea97c",
+        "proxy": "0xC334795e2D449790b5FaF39e9008354C4F4eF1bb",
+        "requestTransaction": "0x3e68be7b957d340c2f11ecd62e958083d3faaf4ef915d99571619e086ab21362",
+        "fxspShares": "77148647156353028809",
+        "fxspBalance": "77148647156353028809",
+        "unlockAt": 1764840995,
+        "matured": true
+      },
+      {
+        "owner": "0x6d7ac63aaa7ba8925dcb3e44be6355261dcf688f",
+        "proxy": "0x73ddF07710B995f197D917F4357CA3BCf40CebC4",
+        "requestTransaction": "0xdffc726bf6ab3ac77fa11f658ff0353899840c99be4ad46bc92325deb5176edd",
+        "fxspShares": "48005826620581319116735",
+        "fxspBalance": "48005826620581319116735",
+        "unlockAt": 1764883067,
+        "matured": true
+      },
+      {
+        "owner": "0x38a93e70b0d8343657f802c1c3fdb06ac8f8fe99",
+        "proxy": "0x88Fe2b61C82c86DD461ad4B4F86C5E0a638B1D98",
+        "requestTransaction": "0x11f294da808efe1901db285364ffcbe454d2149abfa971cd1423ba8890a01bd8",
+        "fxspShares": "10691796724293455736",
+        "fxspBalance": "10691796724293455736",
+        "unlockAt": 1765284407,
+        "matured": true
+      },
+      {
+        "owner": "0x7b8cfa6c487faf86c28fcfc39468b870ce08089c",
+        "proxy": "0x35Cfae3359135A4315ee4230c5c02cE3Bc00D425",
+        "requestTransaction": "0x240ed03b5d9ed9af26491b07e2b7a62e20293e496ec57af639b076e5cf26c44f",
+        "fxspShares": "1268672954794955649239",
+        "fxspBalance": "1268672954794955649239",
+        "unlockAt": 1765449839,
+        "matured": true
+      },
+      {
+        "owner": "0xbb5a794bd453fc664d4b720a359c6236cb026b17",
+        "proxy": "0xb53E7418E658995f0c606477870999f405f4e224",
+        "requestTransaction": "0x2928d724d996017d5b2645e55709060e9f4c43d79c8f5deb520028b207c85819",
+        "fxspShares": "1078278929559540115",
+        "fxspBalance": "1078278929559540115",
+        "unlockAt": 1765451675,
+        "matured": true
+      },
+      {
+        "owner": "0x3e10fe4101e211702e3c0d79a00ae6f3f79bcad3",
+        "proxy": "0x63ab365336769D1DB3830D311DEd327b253b51D7",
+        "requestTransaction": "0x4be0c03fd133ffa0107c7b22341826a6825407860f2b88d28838aec6408b3880",
+        "fxspShares": "736393813176942366644",
+        "fxspBalance": "736393813176942366644",
+        "unlockAt": 1766777555,
+        "matured": true
+      },
+      {
+        "owner": "0x5fd6b51613a475f6e80c0e4e8169c84aa71d90f3",
+        "proxy": "0x3dDdB68194543441C20E5a05ce7fB78b10eb1bB6",
+        "requestTransaction": "0x73f0974d237ce2bce1a67c49241c1451e020a1327995bd56fe666ed09068e40d",
+        "fxspShares": "30582717427243880",
+        "fxspBalance": "30582717427243880",
+        "unlockAt": 1768094615,
+        "matured": true
+      },
+      {
+        "owner": "0x4a9ae3ba9453770dd11f790ba4ac7e630a59f2b9",
+        "proxy": "0x9E7C4Bd43c2E12187647Df34Ab4F733e5fB0B1B2",
+        "requestTransaction": "0x7c41fde43db0d19637e4e0038cebdd39fdc81021a6ff99fb158155b8ba9fec02",
+        "fxspShares": "362744367156204765246",
+        "fxspBalance": "362744367156204765246",
+        "unlockAt": 1768488899,
+        "matured": true
+      },
+      {
+        "owner": "0xa0edfc6adb23f6abba4f1813db3f3be22e94bf5e",
+        "proxy": "0x793786322bcF60c65f7d49E8dC5019fEA4D79a10",
+        "requestTransaction": "0xf9bb8220e509b24266abf1f77116c17f53b5b4c1f9e64156d812eaf711750590",
+        "fxspShares": "890522924959842349504",
+        "fxspBalance": "890522924959842349504",
+        "unlockAt": 1769660651,
+        "matured": true
+      },
+      {
+        "owner": "0xcdfaf9e5004df3b14d0ba06feb45a7aa4da08db9",
+        "proxy": "0x12De2414d77a950061632dF7cA26721A99025a3f",
+        "requestTransaction": "0x6ff56740b4ace370756ecedd5ca8fe710d12075ef1de6dece4fcaf4d15c837d6",
+        "fxspShares": "1352921842881438935844",
+        "fxspBalance": "1352921842881438935844",
+        "unlockAt": 1769884415,
+        "matured": true
+      },
+      {
+        "owner": "0x217f79c13279ac743e906018560a0c0757f6cf9c",
+        "proxy": "0x712A09047eCee4e37E220cFe03c51256fDC98608",
+        "requestTransaction": "0xc51acd9bfb4bc2637a46223831f83960ea345edac37d4deaaa5c8e2e5dc942f4",
+        "fxspShares": "2434672717434775609",
+        "fxspBalance": "2434672717434775609",
+        "unlockAt": 1770423815,
+        "matured": true
+      },
+      {
+        "owner": "0xdc1330ef8dc913c39bd29f9523418eeeacef03d6",
+        "proxy": "0x052a38Bb6b117dAB76ce96b1E963a83a4580d664",
+        "requestTransaction": "0x70f0a0baf07f64d976e3d26d44a9be3cd77438d99acb13945b68a64af7ec0f23",
+        "fxspShares": "94053636967741724349",
+        "fxspBalance": "94053636967741724349",
+        "unlockAt": 1771889903,
+        "matured": true
+      },
+      {
+        "owner": "0x9ece79369e159069b2f794f7b20a608986243d04",
+        "proxy": "0x2003809465a174b6D1B152c7e2221Db841200DBb",
+        "requestTransaction": "0x0e55553ab7e00c4d0914a91e3115eecdc9c2b929a8bc340fc23df3e4a1d80e58",
+        "fxspShares": "51919428797639651791",
+        "fxspBalance": "51919428797639651791",
+        "unlockAt": 1776222815,
+        "matured": true
+      },
+      {
+        "owner": "0x026c0746d68a8cb3d09b454c792df73ff72a12c3",
+        "proxy": "0x4731E424786F679367853314174856d752ec70c1",
+        "requestTransaction": "0x3dea7c41bbfbd3ca01b4dd87dae2362d53ac2ccfce57f3d6cb76970d9305214a",
+        "fxspShares": "8103198232073680909651",
+        "fxspBalance": "8103198232073680909651",
+        "unlockAt": 1777518551,
+        "matured": true
+      },
+      {
+        "owner": "0x61b4f7087a9aa04e583a190b5451735fa7d9a77d",
+        "proxy": "0xB0677226DB57A9af4272bbef04a0dEE9DCd26C51",
+        "requestTransaction": "0x24feb2a8d892bde4539ebf07881ec2b9e2d161b67da0c96c707736655ba1b3cf",
+        "fxspShares": "21778975859274112611",
+        "fxspBalance": "21778975859274112611",
+        "unlockAt": 1780509503,
+        "matured": true
+      },
+      {
+        "owner": "0x55f06392b218c64c506fa5a73e30e22605243e21",
+        "proxy": "0x1Bba46aEE1875A0B0a698B8B8dB4B234cD0f1F06",
+        "requestTransaction": "0x6168c284d7bd3e2ebed478c68bd253b7cfc59f7248c9e26bd4f837cca1456fa0",
+        "fxspShares": "544611388605013782",
+        "fxspBalance": "544611388605013782",
+        "unlockAt": 1780591223,
+        "matured": true
+      },
+      {
+        "owner": "0xb1bb137f6f2778008616cd9fe4c30bb87c9c9616",
+        "proxy": "0x623eD8398C27B442855CbF63c6a62c29f4D4A5b2",
+        "requestTransaction": "0x01f21fb6515f89221fcb3f4dd1b15ccaba5ac29bddbfa0b27742bc971ed1927e",
+        "fxspShares": "990537382452274857471",
+        "fxspBalance": "990537382452274857471",
+        "unlockAt": 1781024447,
+        "matured": true
+      },
+      {
+        "owner": "0x5afed6b5de5949b6d2f364dd610caea7ecf5626a",
+        "proxy": "0x450802787f0EDF5e58E8eBC02C5E21c5c6118474",
+        "requestTransaction": "0x9348165b24889f32ceda252a626eda28edd04daad0e38b01c8a08e92e6dfe10a",
+        "fxspShares": "5635038347785444641938",
+        "fxspBalance": "5635038347785444641938",
+        "unlockAt": 1781045063,
+        "matured": true
+      },
+      {
+        "owner": "0x4088bb91794eedc95fecfe789b8526eb15f37875",
+        "proxy": "0xDD088444A0Ae0c79285A739A1C3d7193CA768623",
+        "requestTransaction": "0xfcf42a1c441d3cf1d69c3ecaecd6172169aa9be58944961f5d56d55959c3afa4",
+        "fxspShares": "21000294122279838261",
+        "fxspBalance": "21000294122279838261",
+        "unlockAt": 1782754715,
+        "matured": true
+      },
+      {
+        "owner": "0x5bc81274740a73d33ec8539182c326b8b58004c2",
+        "proxy": "0xf649401F9EAea84eFF713E4A8CEf79EEBA187309",
+        "requestTransaction": "0xdf95668607b1f1df26e845b75fca1a30ab15d2a19c731fe250a7ca5aecfe01ff",
+        "fxspShares": "494857043470167754847",
+        "fxspBalance": "494857043470167754847",
+        "unlockAt": 1784199779,
+        "matured": true
+      },
+      {
+        "owner": "0x696cec82cef6fcd51bcdfd5b62767ed0d8c1c8eb",
+        "proxy": "0x2EAC4Bd10c7bBE94d73193d6a11d75Da730d3696",
+        "requestTransaction": "0x5bb967ca61c405b386ed5d8ba42761c81975c23b537d4aba67524e6be06b2d90",
+        "fxspShares": "299225524219507312526",
+        "fxspBalance": "299225524219507312526",
+        "unlockAt": 1785613367,
+        "matured": true
+      },
+      {
+        "owner": "0x6479b617aa31485a833df045d3edf3f7fdf3c970",
+        "proxy": "0x74650033CFE4b8551dc07CD26C52Eb7F926Fbec7",
+        "requestTransaction": "0x30689e7f459c10de452d71e3cfee0fb3c7e592f9b22eff324d04fd45f907b66f",
+        "fxspShares": "1450873914713729962",
+        "fxspBalance": "1450873914713729962",
+        "unlockAt": 1789611611,
+        "matured": true
+      },
+      {
+        "owner": "0xad0f19ba6735cb7f6669a07b6600b5cc14ab9c3a",
+        "proxy": "0x6a2e53F27C9e72fBF1b8AaDa2Ad0192F29EE9034",
+        "requestTransaction": "0x680d1fb3c3ce6de161f15411baff22386f598c0cdc22263ac7c99af8068b46b8",
+        "fxspShares": "611986845817178403",
+        "fxspBalance": "611986845817178403",
+        "unlockAt": 1787214863,
+        "matured": true
+      },
+      {
+        "owner": "0x126dc4e3078aed79b3dfc06873f008b05c195792",
+        "proxy": "0xc539D4D9040680E1871DEEBB92523d1b270d1D47",
+        "requestTransaction": "0x34520ab68f1740b7d8a6adffa56535a8acf17cd41b2f68bcc350304b3ef6059f",
+        "fxspShares": "10312702258299915042",
+        "fxspBalance": "10312702258299915042",
+        "unlockAt": 1788718247,
+        "matured": true
+      },
+      {
+        "owner": "0xc0292f6330a335f94b63fdc503c10b3730be0eed",
+        "proxy": "0xd32AB3B167a1Ab97f91d11408424C1fD885Cd7a2",
+        "requestTransaction": "0xbbee01687bb3f6ce86097b9c458d9c29b2bf2e752829f84a00c3725fc6de24d0",
+        "fxspShares": "919794302695052530750",
+        "fxspBalance": "919794302695052530750",
+        "unlockAt": 1789570667,
+        "matured": true
+      },
+      {
+        "owner": "0x0b02f6c9fc6d49e537cfa5b3283758f9c8ba4046",
+        "proxy": "0x4BAa4fA35AfD9c6395C5823F5751FcB4189AC8DA",
+        "requestTransaction": "0x71f91119f3e4c136a9400dcc14f336e6693de20034d0cecf25ff89ca8d235e6f",
+        "fxspShares": "110738614492792961",
+        "fxspBalance": "110738614492792961",
+        "unlockAt": 1789716527,
+        "matured": true
+      },
+      {
+        "owner": "0xa83fc939af055906e2e51741159f1ad3fd031fad",
+        "proxy": "0x4F741b5701F3F3CA9103bb3004F83a8cF00f9Ca5",
+        "requestTransaction": "0xa19dec45347f81a76f9ab557fb8d1f0a892e1387ce7701db1e15bd08364ee703",
+        "fxspShares": "7414156787730759437",
+        "fxspBalance": "7414156787730759437",
+        "unlockAt": 1789939499,
+        "matured": true
+      },
+      {
+        "owner": "0x32fb1743426f37d40d0d50a30cdda1b158e6ba24",
+        "proxy": "0xECeB5B5ce630e0048ad140754bF9FD54D6bfF41B",
+        "requestTransaction": "0x72bb82f8f48d5f95e514af349f7d7072635c496e1ad1851e71dd2c354f520ff5",
+        "fxspShares": "247002046208603299",
+        "fxspBalance": "247002046208603299",
+        "unlockAt": 1792077887,
+        "matured": true
+      },
+      {
+        "owner": "0x7fac93869f67356e218622faaa18cb5ef30d1bf9",
+        "proxy": "0xa75e8A37f27dB86C621b0a85498bD757B93f485a",
+        "requestTransaction": "0xbaf1547ccaf7c805951dba5bdeac19f101a1a134ee9da61024f0e7153d0282db",
+        "fxspShares": "10474829220662256737200",
+        "fxspBalance": "10474829220662256737200",
+        "unlockAt": 1792347551,
+        "matured": true
+      }
+    ],
+    "method": "Paginate all RequestRedeem and Claim logs from deployment through the snapshot; order by block number and log index; retain owners with a request after their last claim. Read lockedProxy(owner), fxSP.redeemRequests(proxy), and balanceOf(proxy) at the snapshot. Pro-rata outputs use totalYieldToken, totalStableToken, and totalSupply. This quantifies requested cooldown exits, not all fxSAVE vault assets."
+  },
+  "verificationLimits": [
+    "Not a complete enumeration of gateway diamond facets, Convex booster/gauge administration, oracle dependencies, or legacy V1 roles.",
+    "Katana supplies were not re-read for this snapshot.",
+    "DVN settings retain the original PR verification; this correction did not independently repeat it."
+  ],
+  "verifiedOn": "2026-11-06",
+  "implementationSources": {
+    "token": {
+      "address": "0xf729422d68c2cf00574fb5712972454cf402a9b1",
+      "contractName": "FxUSDRegeneracy",
+      "sourceUrl": "https://etherscan.io/address/0xf729422d68c2cf00574fb5712972454cf402a9b1#code"
+    },
+    "manager": {
+      "address": "0xa70dddb8ddd06b1c26061d998e041748b18ecf85",
+      "contractName": "PoolManager",
+      "sourceUrl": "https://etherscan.io/address/0xa70dddb8ddd06b1c26061d998e041748b18ecf85#code"
+    },
+    "shortmanager": {
+      "address": "0x73a7b27308f2c8b3769fb88734f561c23a4afb66",
+      "contractName": "ShortPoolManager",
+      "sourceUrl": "https://etherscan.io/address/0x73a7b27308f2c8b3769fb88734f561c23a4afb66#code"
+    },
+    "fxsp": {
+      "address": "0x9cfefd90d4c8428d4cbac9baaa6d52c6ba7897f9",
+      "contractName": "FxUSDBasePool",
+      "sourceUrl": "https://etherscan.io/address/0x9cfefd90d4c8428d4cbac9baaa6d52c6ba7897f9#code"
+    },
+    "fxsave": {
+      "address": "0xe4031e271809d20074e4bef1caeefec5f710e8a6",
+      "contractName": "SavingFxUSD",
+      "sourceUrl": "https://etherscan.io/address/0xe4031e271809d20074e4bef1caeefec5f710e8a6#code"
+    },
+    "config": {
+      "address": "0x67a94c63689cda730e99491d29e56acd247e5430",
+      "contractName": "PoolConfiguration",
+      "sourceUrl": "https://etherscan.io/address/0x67a94c63689cda730e99491d29e56acd247e5430#code"
+    },
+    "peg": {
+      "address": "0x17e2e8ca0b35aa750771e000d1e926417b97f29d",
+      "contractName": "PegKeeper",
+      "sourceUrl": "https://etherscan.io/address/0x17e2e8ca0b35aa750771e000d1e926417b97f29d#code"
+    },
+    "stethpool": {
+      "address": "0x25739865593fa498e92d91e62019dbc051bdc993",
+      "contractName": "AaveFundingPool",
+      "sourceUrl": "https://etherscan.io/address/0x25739865593fa498e92d91e62019dbc051bdc993#code"
+    },
+    "wbtcpool": {
+      "address": "0x25739865593fa498e92d91e62019dbc051bdc993",
+      "contractName": "AaveFundingPool",
+      "sourceUrl": "https://etherscan.io/address/0x25739865593fa498e92d91e62019dbc051bdc993#code"
+    }
+  },
+  "fxsaveAdministratorGrant": "https://etherscan.io/tx/0xc877b438f8406e6af366790fa5fe55c581848bcdd3d899240f4757f6fef5f659"
+}

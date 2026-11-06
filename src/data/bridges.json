@@ -298,7 +298,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero V2 OFT Adapter (Ethereum ↔ Base)",
-          "detail": "Ethereum adapter [`0xA07d…A438`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) escrows 308,980.654349 canonical fxUSD, exactly matching the Base OFT supply at [`0x5538…42C5`](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5) (0.48% of Ethereum supply). The adapter cannot mint canonical fxUSD; compromise is bounded to the Base representation and escrow.",
+          "detail": "Ethereum adapter [`0xA07d…A438`](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438) escrows 81,875.719051 canonical fxUSD, exactly matching the Base OFT supply at [`0x5538…42C5`](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5) (0.10% of Ethereum supply). The adapter cannot mint canonical fxUSD; compromise is bounded to the Base representation and escrow.",
           "security": {
             "label": "4-of-6",
             "confirmations": 20,
@@ -313,7 +313,7 @@
             "route": "Base→Ethereum (escrow-release side)",
             "note": "3 required DVNs plus 1-of-3 optional DVNs",
             "weak": false,
-            "verifiedAt": "2026-08-15",
+            "verifiedAt": "2026-10-18",
             "link": "https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438"
           },
           "owner": "Ethereum adapter owner: 6-of-9 Safe [`0x26B2…7BbF`](https://safe.yaudit.dev/1/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF/). Base OFT owner: 3-of-4 Safe [`0x44E4…D6d2`](https://basescan.org/address/0x44E4158d93ACCf19F7B97a28B88A26DfF3c3D6d2)."
