@@ -1,16 +1,16 @@
 # Protocol Risk Assessment: Tori Finance
 
-- **Assessment Date:** November 4, 2026
-- **Onchain Snapshot:** Ethereum block [26340122](https://etherscan.io/block/26340122) (November 4, 2026 08:01 UTC); DeFiLlama, GeckoTerminal, and remote-chain supplies fetched the same day; Accountable live PoR via `GET https://tori.accountable.capital:8443/dashboard` (`Accept: application/json`, DFID `100000007`) at report `ts` **2026-11-04 10:46:00 UTC** (11:46 Europe/Zagreb); HT Digital letters 2026-10-16/23/30 also linked from the feed
+- **Assessment Date:** November 4, 2026 (Updated: November 6, 2026)
+- **Onchain Snapshot:** Ethereum block [26340122](https://etherscan.io/block/26340122), hash `0x9436fc1d4978c0f9d964a2890475c895be97898e6ee43c8295c4300cce7de8f8` (November 4, 2026 08:01:59 UTC); permissions, proxy slots, supply, and Curve quotes revalidated November 6 at this fixed block. DeFiLlama and GeckoTerminal figures retain their November 4 observation dates. Accountable is a separate **November 6, 2026 04:01:02.208 UTC** observation. Remote-chain snapshot provenance remains TODO; see Cross-Chain Bridge.
 - **Token:** strUSD (Staked trUSD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x280839980a7eD0D7717F64125fE241012E5F5815`](https://etherscan.io/address/0x280839980a7eD0D7717F64125fE241012E5F5815)
 - **Final Score: 5.00/5.0**
-- **Status:** GATED — capped by the material-EOA / Total centralization critical gate (Distributor `operator` EOA can `reportLoss` without Safe or timelock); ungated weighted score is **3.59** (Elevated). No realized loss event.
+- **Status:** GATED — capped by the material-EOA / Total centralization critical gate (Distributor `operator` EOA can `reportLoss` without Safe or timelock); ungated weighted score is **3.60** (Elevated). No realized loss event.
 
 ## Overview + Links
 
-Tori Finance issues **trUSD**, a synthetic dollar whose reserves are held in custody and deployed in hedged, market-neutral trading positions (futures basis / calendar spreads / money-market hedges), and **strUSD**, an Ethena-style ERC-4626 share of staked trUSD. Rewards from the trading book are streamed into the vault with an 8-hour vesting period; the share price (`totalAssets / totalSupply`) rises as rewards vest. Unstaking is gated by a **7-day cooldown**; cooled assets sit in a silo until the user claims.
+Tori Finance issues **trUSD**, a synthetic dollar backed primarily by custodial money-market instruments, hedged equity positions and cash, alongside onchain lending/liquidity, and **strUSD**, an ERC-4626 share of staked trUSD. Reserve composition is disclosed through Accountable, with verification limits described below. Rewards are streamed into the vault with an 8-hour vesting period; the share price (`totalAssets / totalSupply`) rises as rewards vest. Unstaking is gated by a **7-day cooldown**; cooled assets sit in a silo until the user claims.
 
 This assessment covers **holding and using strUSD on Ethereum**, including the Morpho strUSD/USDC collateral use case described in issue #576. Economic risk is dominated by **trUSD's offchain delta-neutral backing**, not by the ERC-4626 staking wrapper itself. A separate critical control risk is the **Distributor `operator` EOA**, which can burn deposited vault trUSD via `reportLoss` (≤5% of `totalAssets` per day, repeatable) with no Safe approval and no timelock.
 
@@ -28,9 +28,9 @@ This assessment covers **holding and using strUSD on Ethereum**, including the M
 | First DeFiLlama TVL ≥ $1M | **2026-06-26** | DeFiLlama history |
 | Token creation | Block [25,275,301](https://etherscan.io/block/25275301) (**2026-06-08**, ~148 days before snapshot) | Etherscan `getcontractcreation` |
 
-**wsrUSD / Reservoir:** No wsrUSD, Reservoir, or recursive srUSD-style exposure was found in Tori's mint path, vault assets, custodian holdings, or documented strategy. Flagged here per Yearn convention because that exposure class is disallowed.
+**wsrUSD / Reservoir:** No such exposure was identified in the reviewed core mint/vault contracts or public reserve disclosures. This does not establish its absence from private asset-manager positions. Separately, Accountable explicitly reports **Morpho loans against Tori-token collateral**; this is a circular backing risk described under Collateralization.
 
-**Yearn / Morpho context (issue #576):** Create / use an strUSD/USDC Morpho market with strUSD as collateral. A live Morpho market already uses RedStone `strUSD_FUNDAMENTAL` (≈ ERC-4626 exchange rate) × Chainlink USDC/USD — that oracle is a **market** dependency, not part of the core mint path. Secondary DEX **inventory** is ~$5.3M across three pools, but usable exit liquidity is thinner (Curve `get_dy`: 1M strUSD → ~951,826 trUSD at snapshot). `reportLoss` (≤5% of `totalAssets` / day, callable by an EOA operator) is the main way the fundamental feed can fall.
+**Yearn / Morpho context ([issue #576](https://github.com/yearn/risk-score/issues/576)):** Create / use an strUSD/USDC Morpho market with strUSD as collateral. The existing [86% LLTV market](https://app.morpho.org/ethereum/variable/0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1/usdc-strusd) uses RedStone `strUSD_FUNDAMENTAL` divided by Chainlink USDC/USD, with decimal scaling. This fundamental price does not independently mark trUSD's market peg or offchain reserve losses; see Oracles. Secondary DEX **inventory** is ~$5.3M across three pools, but usable exit liquidity is thinner (Curve `get_dy`: 1M strUSD → ~951,826 trUSD at snapshot).
 
 **Links:**
 
@@ -45,6 +45,7 @@ This assessment covers **holding and using strUSD on Ethereum**, including the M
 - [HT Digital PoR letter (23 Oct 2026)](https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029)
 - [GitHub — tori-contracts](https://github.com/Tori-Finance/tori-contracts)
 - [DeFiLlama](https://defillama.com/protocol/tori-finance)
+- [November 6 verification evidence](https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json): pinned Ethereum reads, role-holder reconciliation, and selected dated Accountable fields. Private reserve inputs and cryptographic proof blobs were not independently verified.
 
 ## Contract Addresses
 
@@ -56,7 +57,7 @@ This assessment covers **holding and using strUSD on Ethereum**, including the M
 | trUSD | [`0xd058…1697`](https://etherscan.io/address/0xd0580192E98eA6CEB9c7b6191Ed2E27560911697) | UUPS proxy; impl [`0xb1d1…f631`](https://etherscan.io/address/0xb1d133fE29255EB4Ac9B05d647d49cd7F05ff631) |
 | Minting | [`0xe16b…3F1E`](https://etherscan.io/address/0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E) | Sole `minter` on trUSD; **directly deployed** (EIP-1967 impl slot = 0; not a UUPS proxy) |
 | Staking Rewards Distributor | [`0xa0C4…D375`](https://etherscan.io/address/0xa0C49fFa4B7941830235cde974d9B2a8420CD375) | Holds `REWARDER_ROLE` on strUSD; Ownable → Admin Safe; `operator` = EOA |
-| Distributor `operator` | [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) | **EOA** (`extcodesize` = 0 at block 26,340,122 and at tip); can call `reportLoss` / `transferInRewards` |
+| Distributor `operator` | [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) | **EOA** (`extcodesize` = 0 at block 26,340,122); can call `reportLoss` / `transferInRewards` |
 | trUSD Silo | [`0xF7c0…60B4`](https://etherscan.io/address/0xF7c0d8853E69DCD37ee7599c6280d2632F3360B4) | Holds cooled trUSD (~618.3k at snapshot) |
 | ToriTimelock (24h) | [`0xA952…6ef4`](https://etherscan.io/address/0xA952453E39F77108Ee37C1b92de593F1C59A6ef4) | `getMinDelay() = 86,400`; replaced prior TL on 15 Sep 2026 per docs |
 | Admin Safe (3/5) | [`0x0C6B…8316`](https://etherscan.io/address/0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316) | Gnosis Safe; `DEFAULT_ADMIN` on core contracts; Timelock `PROPOSER` only |
@@ -72,7 +73,7 @@ This assessment covers **holding and using strUSD on Ethereum**, including the M
 
 Remote Burn & Mint representations (Monad, Pharos, Arbitrum, Solana) are listed in [docs](https://docs.tori.finance/resources/contracts). Pool `owner()` on both Ethereum pools = Admin Safe.
 
-All core Ethereum contracts above are **verified** on Etherscan. Source matches [Tori-Finance/tori-contracts](https://github.com/Tori-Finance/tori-contracts).
+Core contract source, including the token proxy implementations, is **verified** on Etherscan. Published protocol source is available at [Tori-Finance/tori-contracts](https://github.com/Tori-Finance/tori-contracts); the operator is an EOA, not a source-verifiable contract.
 
 ## Audits and Due Diligence Disclosures
 
@@ -98,7 +99,7 @@ Docs state every finding was fixed or formally acknowledged. Architecture is mod
 
 ## Funds Management
 
-Ultimate backing for strUSD is **trUSD**, which is itself backed by **offchain hedged trading positions** held with institutional custodians, continuously attested via [Accountable](https://tori.accountable.capital). Onchain at snapshot, the registered minting custodian EOA [`0x6339…1CC7`](https://etherscan.io/address/0x63392EaB47926f6Ee3E6ACA285B367A952001CC7) held only **~$689.7k USDC + ~$207.7k USDT** — not the bulk of the ~$72.8M liability. Nearly all economic backing is therefore **offchain**.
+Ultimate backing for strUSD is **trUSD**, supported by a predominantly offchain reserve portfolio disclosed through [Accountable](https://tori.accountable.capital). At the Ethereum snapshot, the registered minting custodian EOA [`0x6339…1CC7`](https://etherscan.io/address/0x63392EaB47926f6Ee3E6ACA285B367A952001CC7) held **~$689.7k USDC + ~$207.7k USDT**. This account is not the complete reserve inventory: the separate November 6 Accountable observation also reports onchain Morpho positions and other wallet assets, totaling **9.51%** of reserves. The remaining **90.49%** is reported in custodial bank/investment-bank custody.
 
 ### Accessibility
 
@@ -117,25 +118,26 @@ Ultimate backing for strUSD is **trUSD**, which is itself backed by **offchain h
 | Address | Can Mint trUSD | Role / Mechanism | Notes |
 |---------|:--------------:|------------------|-------|
 | [`Minting 0xe16b…3F1E`](https://etherscan.io/address/0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E) | ✓ | Sole `minter()` on trUSD | Whitelist + EIP-712 + per-block caps |
-| Minter EOAs `0x2ba9…`, `0x7713…`, `0xca43…` | via Minting | `MINTER_ROLE` | Submit user-signed orders only |
-| Redeemer EOAs `0x3b45…`, `0xc885…`, `0xd5b3…` | burn path | `REDEEMER_ROLE` | Symmetric redeem path |
+| Minter EOAs [`0x2ba9…f70`](https://etherscan.io/address/0x2ba9857e5b1099f3809e0304a8f789659e7a8f70), [`0x7713…1ab`](https://etherscan.io/address/0x7713ba984fdfd4053ace737761de903b10c351ab), [`0xca43…bce`](https://etherscan.io/address/0xca4317c842b5d52fd0cb3a5b11d9f8fe8281fbce) | via Minting | `MINTER_ROLE` | Submit user-signed orders; stablecoin collateral transfers atomically to registered custodians |
+| Redeemer EOAs [`0x3b45…71e`](https://etherscan.io/address/0x3b45316d817a97e401d3e2649983d73e15a3471e), [`0xc885…bc9`](https://etherscan.io/address/0xc885cfbb77414813dda6142db7aa8a957b533bc9), [`0xd5b3…3ec`](https://etherscan.io/address/0xd5b369fbef4bbf8ac0b3c0faf4b3efde0bc2f3ec) | burn path | `REDEEMER_ROLE` | User-signed order burns approved trUSD and transfers available collateral |
 
 **Rate limits:** Global + per-collateral mint/redeem per-block caps as above; `stablesDeltaLimit = 0` at snapshot.
 
 ### Collateralization
 
-Offchain delta-neutral book (docs: money markets, futures arb, calendar spreads). Not onchain blue-chip collateral. **Live transparent attestation obtained** this assessment using the same public JSON approach as Yearn monitoring ([`utils/accountable.py`](https://github.com/yearn/monitoring/blob/main/utils/accountable.py) `fetch_report`: `GET` the feed `dashboard_url` with `Accept: application/json`):
+Predominantly offchain reserves, with an onchain lending and liquidity sleeve. The public [Accountable feed](https://tori.accountable.capital:8443/dashboard) was fetched with `Accept: application/json`; [selected response fields and calculations](https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json) are retained so the dated evidence survives changes to the live endpoint:
 
 - **Endpoint:** [`https://tori.accountable.capital:8443/dashboard`](https://tori.accountable.capital:8443/dashboard) (SPA config `dashboardUrl`; DFID **`100000007`**; UI [tori.accountable.capital](https://tori.accountable.capital/)).
-- **Report timestamp (`data.ts`):** **2026-11-04 10:46:00.162 UTC** (11:46 Europe/Zagreb).
-- **Totals:** `total_reserves.value` **$73,156,847.25**; `total_supply.value` **$72,899,632.79** (`fx: 1`); reported `collateralization` **1.003528** (**100.3528%**); `net` **$257,214.45**; `reserves.verifiability` **100**; `reserves.interval` **live**.
-- **Composition (`reserves.nested_split`, USD):** Money Market Instruments **$53.00M**; Delta-Neutral Equity Arbitrage **$6.71M**; FX Collateral **$7.20M**; Bank Cash **~$0.10M**; on-chain sleeves (Monad Morpho AUSD / Ethereum USDC·USDT / Base) making up the remainder of the book. Custody mix (`custodyBreakdown`): regulated custodian banks **~81.8%**, regulated investment banks **~9.8%**, on-chain custody **~8.4%**.
-- **Data sources (share of reserves):** Asset Manager API **91.48%** (verification level 4, private); DeFi Protocols **6.7%** (level 6, public); Blockchain Wallets **1.69%** (level 6); Payment Service provider **0.14%** (level 2); others ~0. Feed includes Nitro TEE / merkle / ZKP attestation blobs and links HT Digital letters dated **2026-10-16 / 10-23 / 10-30**.
-- **Cross-check letter:** HT Digital Services Ltd, **23 October 2026 14:00 UTC** ([PDF](https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029)): sight of **$73.079M** collateral vs **72.781M** trUSD (block 26,255,786); **100.41%** CR. Review of sighted collateral, not ISAE 3000 assurance (future engagement planned per letter).
+- **Report timestamp (`data.ts`):** **2026-11-06 04:01:02.208 UTC**. This is separate from the November 4 Ethereum snapshot; the feed's `underlying_exposure_as_of` is November 4.
+- **Totals (`data.reserves`):** `total_reserves.value` **$74,070,623.20**; `total_supply.value` **$73,920,779.79** (`fx: 1`); reported `data.collateralization` **1.002027** (**100.2027%**); `data.net` **$149,843.41**. Feed labels `verifiability = 100`, `interval = live` are provider-reported metadata.
+- **Composition (`reserves.nested_split`, USD):** Money Market Instruments **$53.05M**; Delta-Neutral Equity Arbitrage **$6.72M**; FX Collateral **$7.16M**; Bank Cash **~$0.10M**; onchain sleeves **~$7.04M**. Custody mix: regulated custodian banks **80.83%**, regulated investment banks **9.66%**, onchain custody **9.51%**.
+- **Circular backing:** The feed explicitly labels **$3,312,168.91** of Monad AUSD loans and **$126,199.48** of Ethereum USDC loans as **Morpho (Tori token collateral)**: **$3,438,368.39**, or **4.64% of reported reserves**. A Tori collateral impairment can therefore cause bad debt in assets counted as trUSD backing. As an illustrative zero-recovery stress, excluding these claims gives **95.55%** coverage of the same reported liabilities. This is a stress calculation, not a measured shortfall. **TODO:** identify reserve-holder positions and market IDs, verify allocations onchain at pinned chain-specific blocks, and quantify recoverable collateral; the feed alone does not establish those facts.
+- **Data sources (share of reserves):** Asset Manager API **90.36%** (provider level 4, private); DeFi Protocols **8.10%** (level 6, public); Blockchain Wallets **1.41%** (level 6); Payment Service provider **0.13%** (level 2). The response contains cryptographic attestation blobs, but their validity and the private inputs were not independently verified.
+- **Cross-check letter:** HT Digital Services Ltd, **23 October 2026 14:00 UTC** ([PDF](https://stablecoin.accountable.capital/file/HTDS_Tori_BVI_PoR_Letter_2026-10-23.pdf?v=20261029)): sight of **$73.079M** collateral vs **72.781M** trUSD (block [26,255,786](https://etherscan.io/block/26255786)); **100.41%** CR. Offchain balances are dated **October 22**, while the token read is October 23. The letter relies on management's statement that accounts are designated for reserves; controls and asset-ownership assurance under ISAE 3000 are described as future work.
 
 ### Exchange Rate
 
-Onchain ERC-4626 rate only. No admin `setExchangeRate`. Rate moves via reward vesting (8h) and `reportLoss`. Morpho markets may use RedStone `strUSD_FUNDAMENTAL` ≈ this rate (market dependency).
+ERC-4626 accounting has no direct admin `setExchangeRate`. Rewards vest over 8h and `reportLoss` burns underlying; direct donations and privileged share burns through `redistributeLockedAmount(from, address(0))` can also change PPS. Morpho's RedStone fundamental feed is a separately updated observation, rather than an atomic read of the vault's current conversion rate.
 
 ### Residual Value
 
@@ -148,25 +150,25 @@ After a severe trading loss, residual value equals whatever Accountable-attested
 | Role | Contract | Holder(s) at snapshot | Delay |
 |------|----------|----------------------|-------|
 | `DEFAULT_ADMIN_ROLE` | strUSD, trUSD, Minting | Admin Safe 3/5 | **None** — includes pause, grant/revoke ops roles, disable collateral, set per-block caps, **and** `redistributeLockedAmount` / `seizeCooldown` on strUSD |
-| `TIMELOCK_ADMIN_ROLE` | strUSD, trUSD, Minting | Timelock [`0xA952…6ef4`](https://etherscan.io/address/0xA952453E39F77108Ee37C1b92de593F1C59A6ef4) | **24h** — upgrades on **strUSD/trUSD proxies**; on Minting: add collateral, add custodian, `setMinter`, `setStablesDeltaLimit` (Minting itself is **not** upgradeable) |
+| `TIMELOCK_ADMIN_ROLE` | strUSD, trUSD, Minting | Timelock [`0xA952…6ef4`](https://etherscan.io/address/0xA952453E39F77108Ee37C1b92de593F1C59A6ef4) | **24h** — upgrades on **strUSD/trUSD proxies** and `trUSD.setMinter`; on Minting: add/enable collateral, `addCustodianAddress`, `setStablesDeltaLimit` (Minting itself is **not** upgradeable) |
 | Timelock `PROPOSER_ROLE` | Timelock | Admin Safe **only** | — |
 | Timelock `EXECUTOR_ROLE` | Timelock | EOA [`0x039e…0ce7`](https://etherscan.io/address/0x039e71e865a34bcaaebfc641291bec6517ea0ce7) **only** | `hasRole(EXECUTOR, Safe) = false` at block 26,340,122 |
 | Timelock `CANCELLER_ROLE` | Timelock | EOA [`0x6022…d065`](https://etherscan.io/address/0x60226cbb34445143e5f923abe2d42e5df852d065) **only** | `hasRole(CANCELLER, Safe) = false` at block 26,340,122 |
 | `REWARDER_ROLE` | strUSD | Safe + Distributor | Can `reportLoss` ≤5%/day / `transferInRewards` |
 | Distributor `operator` | Distributor | EOA [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) | **No delay**; calls Distributor → vault `reportLoss` / rewards |
 | `BLACKLIST_MANAGER_ROLE` | strUSD | Safe + EOA [`0xb1e5…a169`](https://etherscan.io/address/0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169) | `addToBlacklist` / `removeFromBlacklist` (grants `FULL_RESTRICTED_STAKER_ROLE`) |
-| `GATEKEEPER_ROLE` | Minting | 2 addresses (`0x5a54…`, `0xb044…`) | Can only strip powers / disable mint-redeem |
-| `WHITELISTER_ROLE` | Minting | `0x541d…cf6` | Controls mint/redeem whitelist |
-| `COLLATERAL_MANAGER_ROLE` | Minting | `0x39c9…213` | `transferToCustody` to timelock-registered custodians only |
+| `GATEKEEPER_ROLE` | Minting | [`0x5a54…66c7`](https://etherscan.io/address/0x5a54bbae78a3f043a1a41d6f9eb39fb2a1f766c7), [`0xb044…183d`](https://etherscan.io/address/0xb0444060adcc379e57b72c5eb7e09530351b183d) | Can only strip powers / disable mint-redeem |
+| `WHITELISTER_ROLE` | Minting | [`0x541d…cf6`](https://etherscan.io/address/0x541d53bc10213ff7835b3393f6e74baaefca3cf6) | Controls mint/redeem whitelist |
+| `COLLATERAL_MANAGER_ROLE` | Minting | [`0x39c9…213`](https://etherscan.io/address/0x39c9106e9be3622104a1ab97f3fcc88b65874213) | `transferToCustody` to timelock-registered custodians only |
 
-Safe owners (3-of-5): `0x84e1…`, `0xfafE…`, `0xb5af…`, `0x9A45…`, `0x5378…`.
+Safe `getThreshold() = 3`; `getOwners()` returns five addresses, retained in the [snapshot evidence](https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json). Public signer identities were not established. Protocol [roles documentation](https://docs.tori.finance/security/roles) describes several keys, including the reward operator, as MPC-controlled; the provider policy and approval threshold were not independently verified. A no-code address does not establish how its key is held, but this path has no onchain multiparty approval requirement.
 
-**Immediate confiscation (no 24h timelock):** After a address is blacklisted (`FULL_RESTRICTED_STAKER_ROLE`), Admin Safe as `DEFAULT_ADMIN` can call:
+**Immediate confiscation (no 24h timelock):** After an address is blacklisted (`FULL_RESTRICTED_STAKER_ROLE`), Admin Safe as `DEFAULT_ADMIN` can call:
 
 - `redistributeLockedAmount(from, to)` — burns all of `from`'s strUSD shares and mints them to `to` (or burns with no mint when `to == address(0)`, raising PPS for remaining stakers).
 - `seizeCooldown(from, to)` — moves `from`'s cooled silo trUSD to `to`.
 
-Blacklisting alone does not move funds; the Safe's immediate `DEFAULT_ADMIN` calls do. Neither path is timelocked.
+Blacklisting alone does not move funds; the Safe's immediate `DEFAULT_ADMIN` calls do. Neither path is timelocked. Both functions and their access checks are in the [verified strUSD implementation](https://etherscan.io/address/0x6561272e3EbC9f2e07cDB12B7c474Db9132b977a#code).
 
 **Trust note:** Docs say the Timelock executor is the 3/5 Safe. Onchain at block 26,340,122, `hasRole(EXECUTOR_ROLE, Safe) = false` and `hasRole(CANCELLER_ROLE, Safe) = false`; the listed EOAs return `true` for their respective roles. Safe remains the sole `PROPOSER`. Execution of a queued operation still requires a previously Safe-proposed, 24h-ready operation, but the executor key is an EOA, not the Safe.
 
@@ -178,30 +180,36 @@ A **material loss** here is loss of deposited trUSD in the strUSD vault (or conf
 |-----------------------|-------------------------------|------------|----------------|
 | `Distributor.reportLoss` → `strUSD.reportLoss` burns vault trUSD | Operator EOA [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) (`extcodesize=0`); Distributor owned by Safe (can replace operator) | `MAX_DAILY_LOSS_BPS = 500` (5%/day) + daily cooldown; **no** Safe approval, **no** timelock; repeatable daily | ~**64.81M** vault trUSD (`totalAssets`); max single-day burn ~**3.24M** trUSD at snapshot |
 | `strUSD.reportLoss` directly | Admin Safe via `REWARDER_ROLE` | Same 5%/day cap; 3/5 Safe | Same vault assets |
-| Blacklist → `redistributeLockedAmount` / `seizeCooldown` | Blacklist: Safe + EOA `0xb1e5…`; redistribute/seize: Safe `DEFAULT_ADMIN` | No timelock; requires prior blacklist on `from` | Targeted user's shares / cooled silo assets |
+| Blacklist → `redistributeLockedAmount` / `seizeCooldown` | Blacklist: Safe + EOA [`0xb1e5…a169`](https://etherscan.io/address/0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169); redistribute/seize: Safe `DEFAULT_ADMIN` | No timelock; requires prior blacklist on `from` | Targeted user's shares / cooled silo assets (~618.3k trUSD across silo users) |
 | UUPS upgrade strUSD / trUSD | Timelock `TIMELOCK_ADMIN` → executor EOA after Safe proposes | 24h delay; Safe proposes | Full token/vault logic |
-| Minting parameter / custody expansion (`addCustodian`, `setMinter`, add collateral) | Timelock `TIMELOCK_ADMIN` (Minting **not** upgradeable) | 24h delay | Mint/redeem path / custody set |
+| `trUSD.setMinter` changes canonical mint authority | Timelock `TIMELOCK_ADMIN` on trUSD | 24h delay | Entire trUSD supply; replacement minter can issue unbacked tokens |
+| Minting parameter / custody expansion (`addCustodianAddress`, `addAllowedToken`, `setStablesDeltaLimit`) | Timelock `TIMELOCK_ADMIN` (Minting **not** upgradeable) | 24h delay | Mint/redeem path / custody set |
+| `Minting.transferToCustody` → registered custodian | Collateral manager [`0x39c9…213`](https://etherscan.io/address/0x39c9106e9be3622104a1ab97f3fcc88b65874213); Safe can grant this role | Destination allowlist; no timelock or per-call/per-day amount cap | ~100.4k USDC held in Minting at snapshot; subsequent collateral inflows |
+| Transfers from the registered custodian account | Custodian EOA [`0x6339…1CC7`](https://etherscan.io/address/0x63392EaB47926f6Ee3E6ACA285B367A952001CC7) | No onchain threshold, recipient restriction, or amount cap after funds arrive | ~689.7k USDC + ~207.7k USDT at snapshot; offchain reserve-account permissions **TODO** |
 
-**Weakest credible path to material loss:** Distributor **operator EOA** [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) calling `reportLoss`. At block 26,340,122 the address has no code; a read-only simulation accepts burning the maximum ~3.24M deposited trUSD in one call. The 5%/day cap is code-enforced per period but does **not** bound lifetime cumulative loss — repeated daily calls can drain the vault. There is no Safe threshold and no timelock on this path. Comparably severe but higher-threshold: Safe 3/5 immediate `redistributeLockedAmount` / `seizeCooldown` after blacklist (targeted confiscation, no TL).
+**Weakest verified vault path to material loss:** Distributor **operator EOA** [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) calling `reportLoss`. The [verified Distributor source](https://etherscan.io/address/0xa0C49fFa4B7941830235cde974d9B2a8420CD375#code) forwards operator-selected amounts to the vault. At block 26,340,122 the address has no code; a [read-only simulation](https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json) accepts burning the maximum ~3.24M deposited trUSD in one call. The code-enforced 5% limit and 24h interval still allow material repeated losses. There is no onchain Safe threshold or timelock on this path. The registered custodian EOA is another immediate material path over collateral already received (~$897k at snapshot). The Safe's higher-threshold confiscation path can affect targeted shares and cooled assets without a timelock.
+
+**Inventory limits:** Grant/revoke histories and current privileged holders were reconciled for strUSD, trUSD, Minting, and Timelock; Distributor owner/operator and the Safe owner set were read directly. **TODO:** complete CCIP pool/lockbox/token-admin and remote mint-control inventories, Safe module/guard controls, and offchain custody-account approval policies. These gaps do not remove the verified operator gate, but a globally exclusive weakest-path claim is not established.
 
 ### Upgradeability
 
 - **strUSD / trUSD:** UUPS proxies. `_authorizeUpgrade` gated by `TIMELOCK_ADMIN_ROLE` → 24h timelock.
-- **Minting:** **Not upgradeable.** EIP-1967 implementation slot is zero; verified source is a directly deployed contract with no `upgradeTo` / `_authorizeUpgrade` entrypoint. Timelocked `TIMELOCK_ADMIN` permissions on Minting cover **parameters and custody set** only (add collateral, add custodian, `setMinter`, `setStablesDeltaLimit`), not implementation upgrades.
+- **Minting:** **Not upgradeable.** EIP-1967 implementation slot is zero; [verified source](https://etherscan.io/address/0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E#code) is a directly deployed contract with no upgrade entrypoint. Timelocked permissions cover **parameters and custody set** (`addAllowedToken`, `enableAllowedToken`, `addCustodianAddress`, `setStablesDeltaLimit`). `setMinter` belongs to **trUSD**, not Minting.
 - **CCIP pools:** Chainlink LockReleaseTokenPool 2.0.0; `owner` = Admin Safe (no additional Timelock on pool owner calls observed).
 
 ## Oracles
 
-- **Core protocol:** No price oracle for mint/redeem (whitelist NAV). Vault rate is pure ERC-4626 accounting.
-- **Morpho market path (context):** RedStone `strUSD_FUNDAMENTAL` + Chainlink USDC/USD via MorphoChainlinkOracleV2 — see overview. Compromise or stale push affects Morpho liquidations, not trUSD minting.
+- **Core protocol:** No market-price oracle in the verified mint/redeem path. `verifyStablesLimit` compares decimal-normalized stablecoin collateral and trUSD amounts against `stablesDeltaLimit` (zero at snapshot). User signatures and the role/whitelist checks do not independently value offchain backing.
+- **Morpho market path:** Market [USDC/strUSD, 86% LLTV](https://app.morpho.org/ethereum/variable/0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1/usdc-strusd) has oracle [`0x1506…A6A4`](https://etherscan.io/address/0x1506c98cE61aC63c8438B710C054a51c5dD9A6A4#code). Its `BASE_FEED_1` is RedStone [`strUSD_FUNDAMENTAL`](https://etherscan.io/address/0x7fdA577c085330E69df3179A2A5867751A9D0cAA); `QUOTE_FEED_1` is Chainlink [`USDC/USD`](https://etherscan.io/address/0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6); both vault fields and second feeds are zero. Price is the **base feed divided by the quote feed**, with decimal scaling. At snapshot, RedStone reports 1.03629122 and Chainlink reports 0.99963359; the resulting price is ~1.03667107 USDC/strUSD. The fundamental feed does not independently reflect a trUSD market depeg or unreported reserve loss. Stale or compromised data affects Morpho liquidation/accounting; it is not used by core Minting.
 
 ## Dependencies
 
 1. **Offchain trading / custody stack** — critical; economic solvency of trUSD.
 2. **Accountable** continuous attestation — live JSON feed at `:8443/dashboard` (DFID 100000007) as cited above; not a hard onchain solvency gate.
-3. **Chainlink CCIP** — lock/release hub; remote Burn & Mint on Monad / Pharos / Arbitrum / Solana (~13.23M strUSD and ~0.68M trUSD escrowed at snapshot; remote supplies reconcile to lockboxes within ~100 wei dust across verified chains).
+3. **Chainlink CCIP** — lock/release hub; remote Burn & Mint on Monad / Pharos / Arbitrum / Solana (~13.23M strUSD and ~0.68M trUSD escrowed in the original assessment). Remote-supply reconciliation requires retained per-chain snapshots; see Cross-Chain Bridge.
 4. **USDC / USDT** — mint collateral.
 5. **RedStone** (Morpho use only).
+6. **Morpho reserve loans** — Accountable reports ~$3.44M of backing claims against Tori-token collateral; collateral impairment can feed back into reserve losses. Specific market and holder attribution remains TODO.
 
 ## Liquidity Assessment
 
@@ -214,22 +222,55 @@ A **material loss** here is loss of deposited trUSD in the strUSD vault (or conf
 | Curve | frxUSD / trUSD | [`0xd1d9…a6ff`](https://etherscan.io/address/0xd1d954bc94c843815ec7b8119f2de00af27fa6ff) | **~$1.09M** | ~$212k |
 | **Total secondary inventory (ETH)** | | | **~$5.3M** | |
 
-**Executable Curve exit quotes** (`get_dy`, block 26,340,122; coins[0]=strUSD, coins[1]=trUSD; pool balances ~1.048M strUSD / ~0.981M trUSD; PPS ~1.0363):
+**Executable Curve exit quotes** (`get_dy`, block 26,340,122; coins[0]=strUSD, coins[1]=trUSD; pool balances ~1.048M strUSD / ~0.981M trUSD; PPS ~1.036343):
 
-| Size (strUSD in) | trUSD out (`get_dy`) | vs PPS fair (~1.0363×) |
+| Size (strUSD in) | trUSD out (`get_dy`) | vs PPS fair (~1.036343×) |
 |------------------|----------------------|-------------------------|
 | 100,000 | **103,517.22** | −0.11% |
 | 250,000 | **258,559.92** | −0.20% |
-| 500,000 | **515,897.83** | −0.43% |
+| 500,000 | **515,897.83** | −0.44% |
 | 1,000,000 | **951,825.67** | **−8.15%** |
 
-Selling 1M strUSD on Curve returns only ~951,826 trUSD before any further conversion to USDC — usable exit liquidity is far below headline pool inventory. Fluid DexT1 (`0x97f3…ee9c`) inventory is ~$2.09M; Fluid quote helpers reverted with `FluidDexError(51002)` at this snapshot, so trUSD→USDC executable size was not measured onchain here. Secondary Curve frxUSD/trUSD path: 100k/250k/500k trUSD → frxUSD stay near 1:1, but 1M trUSD → only ~578k frxUSD (thin opposite-side depth).
+Selling 1M strUSD on Curve returns only ~951,826 trUSD before any further conversion to USDC — usable exit liquidity is far below headline pool inventory. Fluid DexT1 ([`0x97f3…ee9c`](https://etherscan.io/address/0x97f32e5091d0e6aee24beb398e6592ae111dee9c)) inventory is ~$2.09M; the original assessment's Fluid quote-helper attempts reverted with `FluidDexError(51002)`, so trUSD→USDC executable size remains unmeasured. Secondary Curve frxUSD/trUSD quotes remain near 1:1 through 500k trUSD, but 1M trUSD returns only ~578k frxUSD. **TODO:** full USDC exit quotes and LP concentration; neither pool TVL nor the first hop establishes final cash exit capacity.
 
 Primary exit for verified parties: whitelist redeem of trUSD (rate-limited). strUSD holders first endure a **7-day cooldown**, then need secondary markets or a whitelist redeem of trUSD. CCIP moves inventory across chains but does not create USD liquidity.
 
 ## Cross-Chain Bridge
 
-**Model: lock (Ethereum canonical) / mint (remotes)** via Chainlink CCIP CCT. See bridges.json `ccip` dependency `tori-strusd`. At snapshot, Ethereum lockboxes held ~13.23M strUSD and ~0.68M trUSD; summed remote supplies (Monad + Pharos + Arbitrum + Solana) matched within dust. Lane rate limit per docs: 1.5M tokens / 6h refill. Solana mint authority is 1-of-2 SPL multisig (pool signer **or** Tori MPC wallet with blocking policy); freeze/admin keys are Tori-controlled wallets per docs.
+**Model: lock (Ethereum canonical) / mint (remotes)** via Chainlink CCIP CCT. See bridges.json `ccip` dependency `tori-strusd`. The original November 4 assessment records Ethereum escrow of ~13.23M strUSD and ~0.68M trUSD and remote supplies matching within dust. **TODO:** retain Monad/Pharos/Arbitrum block numbers, hashes, timestamps and raw supply reads, plus the exact Solana slot; that reconciliation was not independently revalidated on November 6 and cannot be reproduced from a day-only timestamp. Lane rate limit per docs: 1.5M tokens / 6h refill. Solana mint authority is documented as a 1-of-2 SPL multisig (pool signer **or** Tori MPC wallet); the wallet's blocking policy is an offchain claim, not an onchain second approval. Freeze/admin keys are Tori-controlled wallets per [contract documentation](https://docs.tori.finance/resources/contracts).
+
+## Monitoring
+
+Use the linked addresses in Contract Addresses and the permission table as targets. Ethereum values below refer to block 26,340,122; Accountable must be checked on its own timestamp.
+
+| Target | Observable checks | Alert / frequency |
+|--------|-------------------|-------------------|
+| Distributor and strUSD | `operator()`, `owner()`, `OperatorUpdated`, `LossReported`, `remainingDailyLoss()`, `nextLossAllowedAt()` | Every block: any operator/owner change or loss report; recompute exposed trUSD and remaining cap |
+| strUSD / trUSD proxies, Minting, Timelock | Implementation slots, `RoleGranted` / `RoleRevoked`, timelock `CallScheduled` / `CallExecuted`, `getMinDelay()`, `minter()` | Every block: any authority/implementation change; delay below 86,400s; new custodian/collateral or delta-limit change |
+| Admin Safe and strUSD confiscation | `getOwners()`, `getThreshold()`, `LockedAmountRedistributed`, `CooldownSeized` | Every block: any signer-set/threshold change or confiscation event; include Safe module/guard enumeration in the pending inventory |
+| Minting and custodian | `getCustodianAddresses()`, stablecoin `balanceOf`, `paused()`, mint/redeem events and per-block limits | Hourly balances; immediate pause or custody/limit change; investigate sharp liquidity outflows |
+| Accountable | `data.ts`, `reserves.total_reserves`, `reserves.total_supply`, `collateralization`, Tori-collateral Morpho sleeves | Hourly: reported coverage <100%, timestamp age >48h, or growth in circular backing; distinguish reported totals from independent-reserve stress coverage |
+| Curve pools and Morpho oracle | Repeat `get_dy` at 100k/250k/500k/1M; oracle `price()`, both feeds' `latestRoundData`, compare to vault conversion and market peg | Hourly: exit impact >3% at intended liquidation size or unexpected price/feed divergence; feed freshness limit must be set from verified publisher heartbeat/deviation rules (**TODO**) |
+| CCIP lockboxes and remotes | Canonical `balanceOf(lockbox)`, normalized remote supply at separately pinned blocks | Daily reconciliation; **TODO:** establish retained remote snapshots and decimal-rounding tolerance before treating dust-only matching as verified |
+
+## Appendix: Contract Architecture
+
+```text
+USDC / USDT -- user-signed mint --> Minting --> registered custodian
+                                      |              |
+                                      | mints        +--> predominantly offchain reserves
+                                      v              +--> Morpho reserve loans (some Tori collateral)
+                                    trUSD
+                                      | deposit / rewards
+                                      v
+                                   strUSD -- cooldown --> Silo --> user claim
+
+Operator EOA --> Distributor.reportLoss --> strUSD burns deposited trUSD
+Admin Safe --> immediate role grants / blacklist + confiscation / operator replacement
+Admin Safe --> Timelock proposal --> executor EOA after 24h --> token upgrades / parameters
+trUSD / strUSD --> CCIP canonical lockboxes <--> remote token representations
+Accountable --> public reserve observations; does not enforce solvency onchain
+```
 
 ## Risk Score Assessment
 
@@ -239,8 +280,8 @@ Primary exit for verified parties: whitelist redeem of trUSD (rate-limited). str
 
 - [ ] **No audit** — Sherlock + Nethermind public reports
 - [ ] **Unverified contract source** — core contracts verified
-- [ ] **Unverifiable reserves** — Restored and evaluated with **obtained** Accountable data. Live feed `GET https://tori.accountable.capital:8443/dashboard` (`Accept: application/json`, same pattern as yearn/monitoring `utils/accountable.py`) returned `res=ok` at `ts` **2026-11-04 10:46:00 UTC**: reserves **$73,156,847.25**, supply **$72,899,632.79**, CR **100.3528%**, composition + custody breakdown + TEE attestations present; HT Digital letters 2026-10-16/23/30 linked. Gate **passes** under "onchain **or** transparent attestation". Reserves remain predominantly offchain (FM scores), but they are **not** unverifiable.
-- [x] **Total centralization** — **TRIGGERED** under the weakest-link / material-EOA rule ([TEMPLATE](../TEMPLATE.md) / #568): Distributor `operator` EOA [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) can burn deposited vault trUSD via `reportLoss` without Safe approval or timelock. Per-day 5% cap is not a qualifying lifetime bound; repeated calls are a material cumulative-loss path. Admin Safe 3/5 + 24h timelock on upgrades do **not** cover this operator path.
+- [ ] **Unverifiable reserves** — The [captured Accountable response](https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json) has `res=ok`, `data.ts` **2026-11-06 04:01:02.208 UTC**, **$74,070,623.20** reserves / **$73,920,779.79** liabilities and reported CR **100.2027%**, with composition/custody disclosures and dated HT Digital letters. This passes the template's transparent-attestation route. It does not establish independent collateral quality, private-account ownership, or cryptographic-proof validity; the circular reserve claims and assurance limits remain material Funds Management risks.
+- [x] **Total centralization** — **TRIGGERED** under the [weakest-link / material-EOA rule](https://github.com/yearn/risk-score/blob/13af7f1/reports/TEMPLATE.md): Distributor `operator` EOA [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) can burn deposited vault trUSD via `reportLoss` without onchain multiparty approval or timelock. The 5%/24h cap permits a material ~3.24M trUSD loss in one call and further daily losses. No independently verified MPC approval threshold was obtained. The registered custodian's unrestricted control of received collateral is another material EOA path. The Safe and upgrade timelock do not enforce approval on either transfer/loss path.
 
 **Gate triggered → Final Score capped at 5.00 (Status: GATED).** Category scores below are the ungated rubric result for transparency.
 
@@ -260,15 +301,15 @@ Two reputable firm audits with public PDFs, $1M critical bounty (private email c
 
 **Dependencies: 4.0/5** — Many critical deps (offchain book, custodians, CCIP, attestation). Offchain solvency is a practical single point of failure for economic value.
 
-**Centralization = (5.0 + 4.0 + 4.0) / 3 = 4.33**
+**Centralization = (5.0 + 4.0 + 4.0) / 3 = 4.333…** (retain full precision in the weighted total).
 
 **Score: 4.33/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
-**Collateralization: 3.5/5** — Live Accountable feed shows **100.3528%** CR ($73.16M reserves / $72.90M supply at 2026-11-04 10:46 UTC) with disclosed sleeves (money markets, delta-neutral equity arb, FX collateral, on-chain). Not onchain blue-chip collateral; ~91% of reserves via private Asset Manager API (level 4).
+**Collateralization: 3.5/5** — Accountable reports **100.2027%** CR ($74.07M / $73.92M at November 6 04:01 UTC). Reserves are predominantly custodial/private-source assets; **4.64%** are reported Morpho loans against Tori-token collateral. Independent-reserve coverage under zero recovery of those claims would be **95.55%**, rather than the headline ratio. This stress exposure and private-account limitations constrain confidence in backing.
 
-**Provability: 3.0/5** — strUSD `totalAssets` is onchain trUSD; trUSD backing is continuously attested via Accountable public JSON (`:8443/dashboard`, DFID 100000007) with TEE/ZKP blobs and HT Digital letters. Onchain custodian balances remain a tiny fraction of supply; most economic backing is offchain-attested rather than wallet-readable.
+**Provability: 3.0/5** — strUSD accounting is onchain; trUSD backing has public Accountable disclosures and a dated HT Digital collateral-sighting letter. **90.36%** of the feed's reserves derive from private Asset Manager API inputs. Cryptographic blobs were not independently verified, and the letter does not provide completed ownership/controls assurance. Retained response fields make this assessment's public figures reproducible.
 
 **Funds Management = (3.5 + 3.0) / 2 = 3.25**
 
@@ -295,11 +336,11 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 4.33 | 30% | 1.299 |
+| Centralization & Control | 4.333… | 30% | 1.30 |
 | Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Ungated weighted (floored)** | | | **3.59/5.0** |
+| **Ungated weighted (floored)** | | | **3.60/5.0** |
 | **Final Score (gate-capped)** | | | **5.00/5.0** |
 
 ### Risk Tier
@@ -312,15 +353,16 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
 | **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: High Risk (5.00/5.0, GATED)** — ungated weighted **3.59** would be Elevated.
+**Final Risk Tier: High Risk (5.00/5.0, GATED)** — ungated weighted **3.60** would be Elevated.
 
-strUSD's onchain wrapper is conventional and (for upgrades) timelocked, but (1) an EOA operator can socialize vault losses via `reportLoss` without Safe/timelock, (2) Safe can immediately confiscate blacklisted users' shares/cooled assets, and (3) economic value sits in an offchain delta-neutral book. Secondary exit depth is thin vs inventory headlines. Enhanced monitoring of Distributor `operator`, `reportLoss` events, Accountable coverage, custodian / timelock queues, CCIP lockboxes, and Morpho oracle feeds is appropriate. **No wsrUSD/Reservoir recursive exposure.**
+The final score reflects the operator's material EOA loss path. Additional risks are immediate Safe confiscation, unrestricted custodian transfers, predominantly private-source backing, and circular Morpho reserve claims backed by Tori collateral. Secondary exit capacity is limited relative to pool inventory. No wsrUSD/Reservoir exposure was identified in the reviewed public evidence; private positions were not exhaustively verified.
 
 ## Reassessment Triggers
 
 - Time-based: ~60–90 days, or when asset age crosses 12 months
 - TVL: DeFiLlama TVL < $40M or > $150M
 - Accountable coverage ratio published below 100%, or attestation outage > 48h
+- Growth or impairment of Tori-collateral Morpho reserve claims; complete market/holder attribution and independent-reserve stress analysis
 - Distributor `operator` change, or `reportLoss` invocation
 - Timelock queue: unexpected upgrade, new custodian, or `setMinter`
 - Pause / gatekeeper `disableMintRedeem`; blacklist → redistribute/seize events
@@ -332,4 +374,4 @@ strUSD's onchain wrapper is conventional and (for upgrades) timelocked, but (1) 
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [November 4, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.59) | Review fix: material-EOA `reportLoss` operator path; restore Unverifiable-reserves gate; **Accountable live JSON obtained** (`:8443/dashboard`, ts 2026-11-04 10:46 UTC, CR 100.3528%); Safe not TL executor/canceller; Minting non-UUPS; confiscation; Curve exit quotes vs inventory |
+| [November 4, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.60) | Initial assessment; November 6 validation retains the material-EOA gate, captures dated reserve evidence, identifies Tori-collateral Morpho backing claims, and corrects permission targets, oracle construction and intermediate score rounding. |

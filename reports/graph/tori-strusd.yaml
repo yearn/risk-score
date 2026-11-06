@@ -5,12 +5,10 @@ chain: ethereum
 categories:
   - id: vault
     label: Vault / Token
-  - id: minting
-    label: Minting / Custody
+  - id: infra
+    label: Minting / Custody / Bridges
   - id: governance
     label: Governance
-  - id: bridge
-    label: Bridge
   - id: dependency
     label: External Dependency
 
@@ -28,12 +26,12 @@ nodes:
   - id: silo
     label: trUSD Silo
     address: "0xF7c0d8853E69DCD37ee7599c6280d2632F3360B4"
-    category: vault
+    category: infra
     note: "Cooldown escrow; ~618.3k trUSD at snapshot"
   - id: distributor
     label: Staking Rewards Distributor
     address: "0xa0C49fFa4B7941830235cde974d9B2a8420CD375"
-    category: vault
+    category: infra
     note: "REWARDER_ROLE on strUSD; Ownable → Safe; forwards operator calls"
   - id: dist-operator
     label: Distributor Operator EOA
@@ -44,13 +42,18 @@ nodes:
   - id: minting
     label: Minting
     address: "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
-    category: minting
+    category: infra
     note: "Directly deployed (not UUPS); whitelist EIP-712 mint/redeem; USDC/USDT"
   - id: custodian
     label: Custodian EOA
     address: "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
-    category: minting
-    note: "Registered custodian; ~$897k USDC+USDT onchain (bulk backing offchain)"
+    category: governance
+    note: "Registered no-code custodian; unrestricted control over ~$897k USDC+USDT received; offchain account policies TODO"
+  - id: collateral-manager
+    label: Collateral Manager
+    address: "0x39c9106e9be3622104a1ab97f3fcc88b65874213"
+    category: governance
+    note: "transferToCustody: registered destinations only, no amount cap; Safe can grant role"
 
   - id: admin-safe
     label: Admin Safe (3/5)
@@ -81,32 +84,34 @@ nodes:
   - id: strusd-pool
     label: strUSD CCIP LockRelease Pool
     address: "0x63AAEFD6e9F8a306ad6AD60f18f882Ee7Da866b9"
-    category: bridge
+    category: infra
     note: "LockReleaseTokenPool 2.0.0"
   - id: trusd-pool
     label: trUSD CCIP LockRelease Pool
     address: "0x6823666FD0869050a0530eB15BA568936234d463"
-    category: bridge
+    category: infra
     note: "LockReleaseTokenPool 2.0.0"
   - id: strusd-lockbox
     label: strUSD LockBox
     address: "0xc1A9e4BBb58573B8971C9b3C24e17f9851268F86"
-    category: bridge
+    category: infra
     note: "~13.23M strUSD escrowed"
   - id: trusd-lockbox
     label: trUSD LockBox
     address: "0x8D21EB2945c6084797De85D7AE0c163e1971a37f"
-    category: bridge
+    category: infra
     note: "~0.68M trUSD escrowed"
 
   - id: dep-offchain
-    label: Offchain delta-neutral book
+    label: Reserve Portfolio
     category: dependency
-    note: "Custodied hedged positions; economic backing of trUSD"
-  - id: dep-accountable
-    label: Accountable PoR
+    link: "https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json"
+    note: "Predominantly offchain reserves; also onchain lending and liquidity. Accountable observation: 2026-11-06"
+  - id: dep-reserve-morpho
+    label: Tori-Collateral Morpho Loans
     category: dependency
-    note: "Live :8443/dashboard JSON (DFID 100000007); CR 100.35% at 2026-11-04 10:46 UTC"
+    link: "https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json"
+    note: "Feed reports $3.438M (4.64% of reserves) in loans against Tori-token collateral; circular backing risk. Holder/market attribution TODO"
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency
@@ -176,8 +181,12 @@ edges:
 
   - from: minting
     to: trusd
-    kind: holds-role
+    kind: mints
     label: sole minter()
+  - from: collateral-manager
+    to: minting
+    kind: holds-role
+    label: COLLATERAL_MANAGER (registered destinations)
   - from: minting
     to: custodian
     kind: routes-through
@@ -242,9 +251,9 @@ edges:
     kind: allocates-to
     label: offchain hedges
   - from: dep-offchain
-    to: dep-accountable
-    kind: manages
-    label: continuous attestation
+    to: dep-reserve-morpho
+    kind: deposits-into
+    label: "4.64% of reported reserves (2026-11-06)"
   - from: trusd
     to: dep-offchain
     kind: deposits-into
