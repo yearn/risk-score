@@ -1035,3 +1035,17 @@ protocols:
     infrastructure:
     - LayerZero
     - Chainlink
+
+  tori_strusd:
+    name: Tori Finance (strUSD)
+    chain: ethereum
+    type: stablecoin
+    address: '0x280839980a7eD0D7717F64125fE241012E5F5815'
+    report: reports/report/tori-strusd.md
+    collateral:
+    - asset: trUSD
+      address: '0xd0580192E98eA6CEB9c7b6191Ed2E27560911697'
+    infrastructure:
+    - Chainlink CCIP
+    - Accountable
+    - Curve
