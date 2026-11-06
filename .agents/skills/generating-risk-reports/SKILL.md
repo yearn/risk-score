@@ -5,6 +5,13 @@ description: Procedure for producing a new or substantially updated Yearn risk a
 
 # Generating risk assessment reports
 
+## Contents
+
+- [Investigation](#investigation)
+- [Negative claims and liquidity](#negative-claims-and-liquidity)
+- [Tools and completion](#tools-and-completion)
+- [Source-fetching recipes](references/fetching-sources.md)
+
 Follow [AGENTS.md](../../../AGENTS.md). The [scoring framework](../../../reports/README.md) and
 [template](../../../reports/TEMPLATE.md) define the output and scoring rules.
 Create `reports/report/<slug>.md`.
@@ -67,3 +74,13 @@ Read [source-fetching recipes](references/fetching-sources.md) only when a linke
 Google Doc, Notion page, or GitBook page cannot be retrieved normally.
 
 Create or update the [dependency graph](../generating-dependency-graphs/SKILL.md).
+
+Check [scheduled reassessment eligibility](../../../reports/README.md#scheduled-reassessment).
+Yearn asset reports named `yearn-*.md` are included automatically. For an external
+protocol/asset used by Yearn, including collateral and approved but unfunded
+integrations, add its slug to [reassessment.json](../../../reports/reassessment.json)
+in sorted order. Record the qualifying Yearn use and supporting evidence in the
+report or PR. A requested or completed assessment alone does not qualify; mark
+unclear usage `TODO` rather than assuming approval. When updating a Yearn vault's
+allocations, check eligibility of its added and removed dependencies too; retain
+an external slug while any other qualifying Yearn use remains.
