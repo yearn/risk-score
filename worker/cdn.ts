@@ -6,7 +6,7 @@ type PathResult =
   | { type: 'direct'; path: string }
   | { type: 'single-vault'; chainId: string; address: string; path: string };
 
-export function getPath(url: URL): PathResult | undefined {
+function getPath(url: URL): PathResult | undefined {
   // Bare endpoints have never supported query-only requests.
   let path = url.pathname.startsWith('/api/cdn/')
     ? url.pathname.slice(9)

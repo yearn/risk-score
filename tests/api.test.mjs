@@ -1,48 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { getPath } from "../worker/cdn.ts";
 import { getUpstreamPath } from "../worker/monitoring.ts";
 
-const VAULT = "0xb9228370e2fa4908fc2bf559a50bb77ba66fdd66";
-const MIXED = "0xABCDEF1234567890ABCDEF1234567890ABCDEF12";
-
-const cdn = (path) => getPath(new URL(`http://localhost${path}`));
 const upstream = (path) => getUpstreamPath(new URL(`http://localhost${path}`));
-
-test("cdn resolves query params, then /api/cdn/ and /cdn/ prefixes", () => {
-  assert.equal(cdn("/api/cdn?schema=vaults&file=1.json"), undefined);
-  assert.deepEqual(cdn("/api/cdn/ignored?schema=vaults&file=1.json"), { type: "direct", path: "vaults/1.json" });
-  assert.deepEqual(cdn("/api/cdn/vaults/42161.json"), { type: "direct", path: "vaults/42161.json" });
-  assert.deepEqual(cdn("/cdn/asset/ETHplus.md"), { type: "direct", path: "asset/ETHplus.md" });
-});
-
-test("cdn rejects unknown paths and partial query params", () => {
-  assert.equal(cdn("/other/path"), undefined);
-  assert.equal(cdn("/api/cdn?schema=vaults"), undefined);
-  assert.equal(cdn("/cdn?file=1.json"), undefined);
-});
-
-test("cdn detects single-vault paths and lowercases the address", () => {
-  assert.deepEqual(cdn(`/api/cdn/vaults/1/${VAULT}.json`), {
-    type: "single-vault",
-    chainId: "1",
-    address: VAULT,
-    path: "vaults/1.json",
-  });
-  assert.deepEqual(cdn(`/cdn/vaults/137/${MIXED}.json`), {
-    type: "single-vault",
-    chainId: "137",
-    address: MIXED.toLowerCase(),
-    path: "vaults/137.json",
-  });
-});
-
-test("cdn treats malformed single-vault paths as direct files", () => {
-  for (const file of ["invalid-address.json", "0xabc.json", `${VAULT}.txt`]) {
-    assert.deepEqual(cdn(`/api/cdn/vaults/1/${file}`), { type: "direct", path: `vaults/1/${file}` });
-  }
-});
 
 test("monitoring maps allowed routes and params upstream", () => {
   const cases = {

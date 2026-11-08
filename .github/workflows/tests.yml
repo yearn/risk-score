@@ -58,7 +58,7 @@ jobs:
       - run: npm run test:worker
       - name: Record validated bundle checksum
         id: bundle
-        run: node -e 'const fs=require("node:fs"); const crypto=require("node:crypto"); fs.appendFileSync(process.env.GITHUB_OUTPUT,"checksum="+crypto.createHash("sha256").update(fs.readFileSync("release/bundle.json")).digest("hex")+"\n")'
+        run: echo "checksum=$(node -p 'require("./release/provenance.json").checksum')" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         id: artifact
         with:

@@ -63,6 +63,8 @@ jobs:
         with:
           artifact-ids: ${{ inputs.artifact }}
           path: incoming
+          # Downloads by ID otherwise extract to incoming/<artifact-name>/.
+          merge-multiple: true
       - name: Validate release identity and upload preview
         if: inputs.mode == 'preview'
         run: node scripts/deploy_cloudflare.mjs

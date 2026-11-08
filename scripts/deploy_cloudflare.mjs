@@ -38,7 +38,7 @@ export function validateBundle(bytes, expected) {
 }
 
 async function github(route, init = {}) {
-  const res = await fetch(`https://api.github.com/repos/yearn/risk-score/${route}`, {
+  const res = await fetch(`https://api.github.com/repos/yearn/risk-score${route && `/${route}`}`, {
     ...init, signal: AbortSignal.timeout(15000), headers: { authorization: `Bearer ${process.env.GITHUB_TOKEN}`, accept: 'application/vnd.github+json', 'x-github-api-version': '2022-11-28', ...init.headers },
   });
   requireValue(res.ok, `GitHub API failed (${res.status})`);
@@ -78,7 +78,7 @@ export async function eligible(expected) {
     ['OWNER', 'MEMBER', 'COLLABORATOR'].includes(r.author_association) && r.user.login !== pr.user.login), 'current head needs maintainer review');
 }
 
-export async function deploy() {
+export async function deploy({ execFile = execFileSync } = {}) {
   requireValue(process.env.CLOUDFLARE_API_TOKEN?.trim(), 'Environment-scoped Cloudflare API token is missing');
   requireValue(process.env.CLOUDFLARE_ACCOUNT_ID?.trim(), 'CLOUDFLARE_ACCOUNT_ID is missing');
   const expected = {
@@ -120,7 +120,7 @@ export async function deploy() {
     args.push('--config', path.join(temp, 'wrangler.json'), '--no-bundle', '--secrets-file', path.join(temp, 'secrets.json'));
     if (expected.pr) args.push('--tag', `pr-${expected.pr}-${expected.sha.slice(0, 12)}`, '--message', `PR #${expected.pr} head ${expected.sha}`);
     // Only the reviewed Wrangler is executed. No bundle config, hooks or imports.
-    execFileSync(process.execPath, [fileURLToPath(new URL('../node_modules/wrangler/bin/wrangler.js', import.meta.url)), ...args], {
+    execFile(process.execPath, [fileURLToPath(new URL('../node_modules/wrangler/bin/wrangler.js', import.meta.url)), ...args], {
       cwd: temp, stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 4 * 1024 * 1024,
       env: { PATH: process.env.PATH, HOME: process.env.HOME, CI: 'true', WRANGLER_SEND_METRICS: 'false',
         CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,

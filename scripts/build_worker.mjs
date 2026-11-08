@@ -42,12 +42,12 @@ const sha256 = body => createHash('sha256').update(body).digest('hex');
 export async function buildWorker() {
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
   if (process.env.SOURCE_REVISION && process.env.SOURCE_REVISION !== sha) throw new Error('checkout does not match SOURCE_REVISION');
-  const tracked = execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0');
-  const vaultFiles = tracked.filter(f => /^vaults\/[^/]+\.(json|md)$/.test(f));
+  const tracked = new Set(execFileSync('git', ['ls-files', '-z'], { encoding: 'utf8' }).split('\0'));
+  const vaultFiles = [...tracked].filter(f => /^vaults\/[^/]+\.(json|md)$/.test(f));
   for (const f of vaultFiles) if (!Object.values(PUBLIC_DATA).includes(f)) throw new Error(`unlisted vault file: ${f}`);
   const dataHashes = {};
   for (const [route, source] of Object.entries(PUBLIC_DATA)) {
-    if (!tracked.includes(source) || !/^[a-zA-Z0-9_./-]+$/.test(route) || route.includes('..')) throw new Error('invalid public-data manifest');
+    if (!tracked.has(source) || !/^[a-zA-Z0-9_./-]+$/.test(route) || route.includes('..')) throw new Error('invalid public-data manifest');
     const body = await readFile(source);
     if (source.endsWith('.json')) validateVaults(body.toString(), source);
     const dest = path.join('dist/_data', route);
@@ -72,7 +72,7 @@ export async function buildWorker() {
         const route = '/' + path.relative('dist', file).split(path.sep).join('/');
         // Astro/Vite emits hashes in this namespace. Public files are copied
         // verbatim, so a hash-looking public filename alone never earns a long TTL.
-        const hashed = !tracked.includes(`public${route}`) && /^\/_astro\/.+\.[A-Za-z0-9_-]{8}\.(?:js|css|woff2?)$/.test(route);
+        const hashed = !tracked.has(`public${route}`) && /^\/_astro\/.+\.[A-Za-z0-9_-]{8}\.(?:js|css|woff2?)$/.test(route);
         const group = route.startsWith('/_astro/') ? route : route.slice(1).includes('/') ? `/${route.split('/')[1]}/*` : route;
         cacheRules.set(group, route.startsWith('/_data/') ? 'no-store' : hashed ? 'public, max-age=31536000, immutable' : REVALIDATE);
         files['assets' + route] = (await readFile(file)).toString('base64');
