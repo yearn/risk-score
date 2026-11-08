@@ -56,6 +56,7 @@ step from the pinned Playwright package, separate from npm lifecycle scripts.
 | `/api/cdn/...` | Alias of the same CDN handlers |
 | Bare `/cdn` or `/api/cdn`, including query-only calls | 400 |
 | Suffixed CDN routes with `schema` + `file` | Validated overrides within the same manifest |
+| Other CDN query parameters, such as cache-busters | Ignored; they cannot select data |
 | CDN and monitoring methods | GET; OPTIONS 204; HEAD and all other methods 405 before reads/cache access |
 | Successful monitoring GETs | Browser 30 seconds; targeted Cache API 60 seconds |
 | Missing pages/APIs, errors | Explicit error status; `no-store` |
@@ -87,8 +88,9 @@ revalidation engine. `X-Monitoring-Cache: HIT|MISS` assists deployed verificatio
 Do not confuse this with Static Assets caching or browser revalidation.
 
 Both Worker configurations explicitly enable persisted observability at full
-sampling for initial validation. Failed operations emit a category and operation
-label without exception messages, request headers, bodies or backend URLs.
+sampling for initial validation, with per-request invocation logs disabled so URLs,
+queries and client metadata are not retained. Failed operations emit a category and
+operation label without exception messages, request headers, bodies or backend URLs.
 Cache failures are logged while the request continues against the upstream.
 Monitor log volume and adjust sampling in version control if usage warrants it.
 

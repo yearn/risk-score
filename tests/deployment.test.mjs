@@ -158,6 +158,16 @@ test('publication rechecks same-repository current-head review and successful ch
   await assert.rejects(eligible(metadata), /pull_request/);
 });
 
+test('Worker logs keep failures but not per-request invocation details', () => {
+  for (const mode of ['preview', 'production']) {
+    const config = JSON.parse(
+      readFileSync(new URL(`../config/wrangler.${mode}.json`, import.meta.url), 'utf8'),
+    );
+    assert.equal(config.observability.enabled, true, mode);
+    assert.equal(config.observability.logs.invocation_logs, false, mode);
+  }
+});
+
 test('publication reads the bundle from where the artifact download puts it', () => {
   const publish = load(
     readFileSync(new URL('../.github/workflows/cloudflare-publish.yml', import.meta.url), 'utf8'),

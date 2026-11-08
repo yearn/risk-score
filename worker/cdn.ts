@@ -38,7 +38,6 @@ export default async function cdn(req: Request, env: Env): Promise<Response> {
   const result = getPath(url);
   if (!result) return response('missing path', 400, cors);
   if (
-    [...url.searchParams.keys()].some((k) => !['schema', 'file'].includes(k)) ||
     ['schema', 'file'].some((k) => url.searchParams.getAll(k).length > 1) ||
     ['schema', 'file'].some((k) => url.searchParams.has(k) && !url.searchParams.get(k)) ||
     url.searchParams.has('schema') !== url.searchParams.has('file') ||

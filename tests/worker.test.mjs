@@ -65,6 +65,7 @@ test('CDN handler enforces bare paths, allowlist, suffixed queries, methods and 
       404,
     );
     assert.equal((await cdn(req(`${prefix}/ignored?schema=vaults`), env)).status, 400);
+    assert.equal((await cdn(req(`${prefix}/vaults/1.json?v=123`), env)).status, 200);
     assert.equal(
       (await cdn(req(`${prefix}/vaults/1.json`, 'GET', { 'if-none-match': '"asset"' }), env))
         .status,
