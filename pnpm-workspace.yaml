@@ -1,9 +1,0 @@
-packages: []
-
-minimumReleaseAge: 7
-
-onlyBuiltDependencies:
-  - "@resvg/resvg-js"
-  - "@astrojs/vercel"
-
-overridePeers: true

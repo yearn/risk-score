@@ -2,54 +2,140 @@ name: Tests
 
 on:
   pull_request:
-    paths:
-      - 'api/**'
-      - 'scripts/**'
-      - 'src/lib/**'
-      - 'tests/**'
-      - '.agents/**'
-      - '.claude/**'
-      - '.pi/**'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
-      - 'reports/README.md'
-      - 'reports/report/**'
-      - 'reports/reassessment.json'
-      - 'reports/TEMPLATE.md'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'pyproject.toml'
-      - 'uv.lock'
-      - '.github/workflows/tests.yml'
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [master]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: tests-${{ github.ref }}
-  cancel-in-progress: true
+  group: curation-${{ github.event_name }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   tests:
+    name: Build, data and Worker checks
     runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+      checksum: ${{ steps.bundle.outputs.checksum }}
+      artifact: ${{ steps.artifact.outputs.artifact-id }}
+    env:
+      # No secrets, protected environment or OIDC in this job, including forks.
+      MONITORING_API_URL: ''
+      MONITORING_API_TOKEN: ''
+      PUBLIC_ANALYTICS_ENABLED: ${{ github.event_name == 'push' && 'true' || 'false' }}
+      PR_NUMBER: ${{ github.event.pull_request.number || '' }}
+      SOURCE_REVISION: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ env.SOURCE_REVISION }}
           persist-credentials: false
-
+      - name: Verify selected source
+        id: source
+        run: |
+          actual=$(git rev-parse HEAD)
+          test "$actual" = "$SOURCE_REVISION"
+          echo "sha=$actual" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Clean pinned Linux install (lifecycle scripts disabled)
+        run: |
+          test "$(npm config get ignore-scripts)" = true
+          npm ci
+          node scripts/check_worker_tools.mjs
+      - run: npm test
+      - run: uv run python -m unittest discover -s tests
+      - run: npm run build
+      - name: Install pinned Chromium for browser verification
+        run: npm exec playwright -- install --with-deps chromium
+      - run: npm run test:worker
+      - name: Record validated bundle checksum
+        id: bundle
+        run: echo "checksum=$(node -p 'require("./release/provenance.json").checksum')" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        id: artifact
+        with:
+          name: curation-${{ steps.source.outputs.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: release/bundle.json
+          if-no-files-found: error
+          retention-days: 14
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-
+  merge:
+    name: Merge result checks
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      MONITORING_API_URL: ''
+      MONITORING_API_TOKEN: ''
+      PUBLIC_ANALYTICS_ENABLED: 'false'
+      SOURCE_REVISION: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - run: test "$(git rev-parse HEAD)" = "$SOURCE_REVISION"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: 24
+          cache: npm
       - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - run: npm exec playwright -- install --with-deps chromium
+      - run: npm run test:worker
 
-      - name: Node tests
-        run: npm test
+  preview:
+    name: Upload reviewed preview version
+    needs: [tests, merge]
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.draft == false &&
+      vars.CLOUDFLARE_PREVIEW_ENABLED == 'true'
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      deployments: write
+    # Protected environment approval reviews workflow changes; tooling comes from master.
+    # Retain GitHub's documented local reusable-workflow syntax.
+    uses: ./.github/workflows/cloudflare-publish.yml # zizmor: ignore[self-repository]
+    with:
+      mode: preview
+      pr: ${{ format('{0}', github.event.pull_request.number) }}
+      sha: ${{ needs.tests.outputs.sha }}
+      checksum: ${{ needs.tests.outputs.checksum }}
+      artifact: ${{ needs.tests.outputs.artifact }}
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PREVIEW_API_TOKEN: ${{ secrets.CLOUDFLARE_PREVIEW_API_TOKEN }}
+      MONITORING_PREVIEW_API_TOKEN: ${{ secrets.MONITORING_PREVIEW_API_TOKEN }}
 
-      - name: Python tests
-        run: uv run python -m unittest discover -s tests
+  production:
+    name: Publish checked master revision
+    needs: tests
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && vars.CLOUDFLARE_PRODUCTION_ENABLED == 'true'
+    permissions:
+      contents: read
+      actions: read
+      pull-requests: read
+      deployments: write
+    # Retain GitHub's documented local reusable-workflow syntax.
+    uses: ./.github/workflows/cloudflare-publish.yml # zizmor: ignore[self-repository]
+    with:
+      mode: production
+      sha: ${{ needs.tests.outputs.sha }}
+      checksum: ${{ needs.tests.outputs.checksum }}
+      artifact: ${{ needs.tests.outputs.artifact }}
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_PRODUCTION_API_TOKEN: ${{ secrets.CLOUDFLARE_PRODUCTION_API_TOKEN }}
+      MONITORING_PRODUCTION_API_TOKEN: ${{ secrets.MONITORING_PRODUCTION_API_TOKEN }}
