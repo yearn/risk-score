@@ -75,6 +75,11 @@ nodes:
     address: "0x60226cbb34445143e5f923abe2d42e5df852d065"
     category: governance
     note: "Sole CANCELLER_ROLE (Safe hasRole false)"
+  - id: gatekeeper-eoa
+    label: Gatekeeper / CCIP Rate-Limit Admin
+    address: "0x5a54bbae78a3f043a1a41d6f9eb39fb2a1f766c7"
+    category: governance
+    note: "No code; GATEKEEPER on Minting; rateLimitAdmin on both CCIP pools; absent from MPC statement"
   - id: blacklist-eoa
     label: Blacklist Manager EOA
     address: "0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169"
@@ -115,7 +120,22 @@ nodes:
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency
-    note: "Hub lock/release; remotes Burn&Mint (Monad/Pharos/Arb/Solana)"
+    note: "Hub lock/release; remotes Burn&Mint (Monad/Pharos/Arb/Solana); Canton lane configured onchain, absent from docs"
+  - id: dep-morpho-market
+    label: Morpho strUSD/USDC (86% LLTV)
+    category: dependency
+    link: "https://app.morpho.org/ethereum/variable/0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1/usdc-strusd"
+    note: "Issue #576 use case; 12.58M USDC supply, 11.33M borrows at snapshot"
+  - id: dep-redstone
+    label: RedStone strUSD_FUNDAMENTAL
+    address: "0x7fdA577c085330E69df3179A2A5867751A9D0cAA"
+    category: dependency
+    note: "Morpho base feed, divided by Chainlink USDC/USD; 0.1% / 6h"
+  - id: dep-accountable
+    label: Accountable
+    category: dependency
+    link: "https://tori.accountable.capital/"
+    note: "Public reserve observations; does not enforce solvency onchain"
   - id: dep-usdc
     label: USDC
     address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
@@ -174,6 +194,22 @@ edges:
     to: trusd-pool
     kind: controls
     label: owner
+  - from: admin-safe
+    to: strusd-lockbox
+    kind: controls
+    label: owner (can authorize callers, no delay)
+  - from: admin-safe
+    to: trusd-lockbox
+    kind: controls
+    label: owner (can authorize callers, no delay)
+  - from: gatekeeper-eoa
+    to: strusd-pool
+    kind: controls
+    label: rateLimitAdmin
+  - from: gatekeeper-eoa
+    to: trusd-pool
+    kind: controls
+    label: rateLimitAdmin
   - from: blacklist-eoa
     to: strusd
     kind: holds-role
@@ -246,6 +282,18 @@ edges:
     kind: routes-through
     label: CCT messages
 
+  - from: strusd
+    to: dep-morpho-market
+    kind: deposits-into
+    label: collateral (86% LLTV)
+  - from: dep-morpho-market
+    to: dep-redstone
+    kind: routes-through
+    label: oracle base feed
+  - from: trusd
+    to: dep-accountable
+    kind: routes-through
+    label: reserve attestation
   - from: custodian
     to: dep-offchain
     kind: allocates-to
