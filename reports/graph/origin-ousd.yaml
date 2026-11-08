@@ -20,7 +20,7 @@ nodes:
     label: OUSD Token (Proxy)
     address: "0x2A8e1E676Ec238d8A992307B495b45B3fEAa5e86"
     category: vault
-    note: EIP-1967 rebasing ERC-20 (1e18 base units, 1:1 USDC). Supply ~6.44M OUSD against ~$6.45M of vault value — a 100.15% backing ratio.
+    note: EIP-1967 rebasing ERC-20 (1e18 base units, 1:1 USDC). Supply ~6.29M OUSD against ~$6.30M of vault value — a 100.14% backing ratio.
   - id: ousd-impl
     label: OUSD Token Implementation
     address: "0xA7B7c59a1705e4a624ea8a4ad8a06f9de22dcc33"
@@ -29,7 +29,7 @@ nodes:
     label: wOUSD (ERC-4626 Wrapper)
     address: "0xD2af830E8CBdFed6CC11Bab697bB25496ed6FA62"
     category: vault
-    note: Appreciating wrapper for DeFi composability; holds ~1.81M OUSD, about 28% of total supply.
+    note: Appreciating wrapper for DeFi composability; holds ~1.81M OUSD, about 29% of total supply.
   - id: vault
     label: OUSD Vault (Proxy)
     address: "0xE75D77B1865Ae93c7eaa3040B038D7aA7BC02F70"
@@ -87,17 +87,17 @@ nodes:
 
   # === Active strategies (4) ===
   - id: morpho-strategy
-    label: Morpho V2 Strategy (70.0%)
+    label: Morpho V2 Strategy (65.9%)
     address: "0x3643cafA6eF3dd7Fcc2ADaD1cabf708075AFFf6e"
     category: strategy
     note: The vault's defaultStrategy — deposits above the 25,000 USDC auto-allocate threshold land here.
   - id: amo-strategy
-    label: Curve USDC AMO Strategy (13.5%)
+    label: Curve USDC AMO Strategy (17.1%)
     address: "0x26a02ec47ACC2A3442b757F45E0A82B8e993Ce11"
     category: strategy
     note: The only mint-whitelisted strategy. AMO operations must keep totalValue/totalSupply at or above 99.8% and must improve the pool's balance; maxSlippage is 0.2%.
   - id: cc-base
-    label: Cross-Chain Master (Base, 16.6%)
+    label: Cross-Chain Master (Base, 17.0%)
     address: "0xB1d624fc40824683e2bFBEfd19eB208DbBE00866"
     category: strategy
     note: Reports a cached remoteStrategyBalance pushed over CCTP messaging rather than a live read. The stored value never expires and is not capped; stale incoming messages are ignored, but transfer confirmations skip that check.
@@ -125,7 +125,7 @@ nodes:
     category: dependency
     morphoVault: v1
     link: "https://app.morpho.org/ethereum/vault/0x5B8b9FA8e4145eE06025F642cAdB1B47e5F39F04/"
-    note: Symbol OUSD-V1. Three-day timelock, Origin Strategist Safe as guardian, 5% performance fee to the Yearn Security multisig. Effectively all of its ~$4.51M sits in the OETH/USDC market, where it is 45% of supply at 90% utilization.
+    note: Symbol OUSD-V1. Three-day timelock, Origin Strategist Safe as guardian, 5% performance fee to the Yearn Security multisig. About 95% of its ~$4.15M sits in the OETH/USDC market, where it is 39% of supply at 88% utilization.
   - id: security
     label: Yearn Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
@@ -158,7 +158,7 @@ nodes:
     category: dependency
     morphoVault: v1
     link: "https://app.morpho.org/base/vault/0x581Cc9a73Ec7431723A4a80699B8f801205841F1/"
-    note: Symbol OUSDb-V1. Three-day timelock, Origin Strategist Safe as guardian, 5% performance fee. About 60% of its assets sit in the superOETHb market, where OUSD is 94% of supply and only about $79K is withdrawable on demand.
+    note: Symbol OUSDb-V1. Three-day timelock, Origin Strategist Safe as guardian, 5% performance fee. About 70% of its assets sit in the superOETHb market, where OUSD is 95% of supply and only about $77K is withdrawable on demand.
   - id: base-owner
     label: Base Vault Owner (4-of-7)
     address: "0xFEaE2F855250c36A77b8C68dB07C4dD9711fE36F"
@@ -217,7 +217,7 @@ nodes:
     label: Curve OUSD/USDC Pool
     address: "0x6d18E1a7faeB1F0467A77C0d293872ab685426dc"
     category: dependency
-    note: StableSwapNG holding roughly 571K OUSD and 304K USDC. The AMO owns 99.9% of the pool's LP supply, so this is OUSD's own capital rather than third-party depth.
+    note: StableSwapNG holding roughly 600K OUSD and 479K USDC. The AMO owns 99.9% of the pool's LP supply, so this is OUSD's own capital rather than third-party depth.
   - id: curve-gauge
     label: Curve Gauge
     address: "0x1eF8B6Ea6434e722C916314caF8Bf16C81cAF2f9"
@@ -241,6 +241,11 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e/"
     note: "Morpho market 0xb8fef900b383db2dbbf4458c7f46acf5b140f26d603a6d1829963f241b82510e"
+  - id: morpho-market-64d65c9a2d91
+    label: "cbBTC/USDC · 86% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64/"
+    note: "Morpho market 0x64d65c9a2d91c36d56fbc42d69e979335320169b3df63bf92789e2c8883fcc64"
   - id: morpho-market-67a66cbacb2f
     label: "superOETHb/USDC · 77% LLTV"
     category: dependency
@@ -251,26 +256,6 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/base/market/0xd4a903dc6d949519060c7707f9604fdc9772c046e05c2e3a8fce0bd7196e4109/"
     note: "Morpho market 0xd4a903dc6d949519060c7707f9604fdc9772c046e05c2e3a8fce0bd7196e4109"
-  - id: morpho-market-9103c3b4e834
-    label: "cbBTC/USDC · 86% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/base/market/0x9103c3b4e834476c9a62ea009ba2c884ee42e94e6e314a26f04d312434191836/"
-    note: "Morpho market 0x9103c3b4e834476c9a62ea009ba2c884ee42e94e6e314a26f04d312434191836"
-  - id: morpho-market-8793cf302b8f
-    label: "WETH/USDC · 86% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/base/market/0x8793cf302b8ffd655ab97bd1c695dbd967807e8367a65cb2f4edaf1380ba1bda/"
-    note: "Morpho market 0x8793cf302b8ffd655ab97bd1c695dbd967807e8367a65cb2f4edaf1380ba1bda"
-  - id: morpho-market-13c42741a359
-    label: "wstETH/USDC · 86% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/base/market/0x13c42741a359ac4a8aa8287d2be109dcf28344484f91185f9a79bd5a805a55ae/"
-    note: "Morpho market 0x13c42741a359ac4a8aa8287d2be109dcf28344484f91185f9a79bd5a805a55ae"
-  - id: morpho-market-0ca10126f6c9
-    label: "cbETH/USDC · 77% LLTV"
-    category: dependency
-    link: "https://app.morpho.org/base/market/0x0ca10126f6c94cbd9cf0a48cc9516ae5e3dec5aa68303e6d988ee37c5149bf0d/"
-    note: "Morpho market 0x0ca10126f6c94cbd9cf0a48cc9516ae5e3dec5aa68303e6d988ee37c5149bf0d"
 # END GENERATED MORPHO MARKET NODES
 
 edges:
@@ -358,15 +343,15 @@ edges:
   - from: vault
     to: morpho-strategy
     kind: allocates-to
-    label: "70.0%"
+    label: "65.9%"
   - from: vault
     to: amo-strategy
     kind: allocates-to
-    label: "13.5%"
+    label: "17.1%"
   - from: vault
     to: cc-base
     kind: allocates-to
-    label: "16.6%"
+    label: "17.0%"
   - from: vault
     to: cc-hyperevm
     kind: allocates-to
@@ -523,29 +508,17 @@ edges:
   - from: ousd-v1
     to: morpho-market-b8fef900b383
     kind: deposits-into
-    label: "100.0%"
+    label: "95.0%"
+  - from: ousd-v1
+    to: morpho-market-64d65c9a2d91
+    kind: deposits-into
+    label: "4.9%"
   - from: ousdb-v1
     to: morpho-market-67a66cbacb2f
     kind: deposits-into
-    label: "59.7%"
+    label: "70.3%"
   - from: ousdb-v1
     to: morpho-market-d4a903dc6d94
     kind: deposits-into
-    label: "38.8%"
-  - from: ousdb-v1
-    to: morpho-market-9103c3b4e834
-    kind: deposits-into
-    label: "0.7%"
-  - from: ousdb-v1
-    to: morpho-market-8793cf302b8f
-    kind: deposits-into
-    label: "0.5%"
-  - from: ousdb-v1
-    to: morpho-market-13c42741a359
-    kind: deposits-into
-    label: "<0.1%"
-  - from: ousdb-v1
-    to: morpho-market-0ca10126f6c9
-    kind: deposits-into
-    label: "<0.1%"
+    label: "29.6%"
 # END GENERATED MORPHO MARKET EDGES
