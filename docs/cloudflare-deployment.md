@@ -155,7 +155,7 @@ Eligibility is checked again before upload; obsolete queued releases are rejecte
 | `CLOUDFLARE_ACCOUNT_ID` variable or secret | Owner-provided account ID | Owner-provided account ID |
 | Deployment token environment secret | `CLOUDFLARE_PREVIEW_API_TOKEN`, scoped to preview Worker only | `CLOUDFLARE_PRODUCTION_API_TOKEN`, scoped to production Worker only |
 | `MONITORING_API_URL` variable | Preview backend/configuration | Production backend/configuration |
-| Monitoring environment secret | `MONITORING_PREVIEW_API_TOKEN`, independently scoped, or empty | `MONITORING_PRODUCTION_API_TOKEN`, production read credential |
+| Monitoring environment secret | `MONITORING_PREVIEW_API_TOKEN`, same read-only credential as production, or empty | `MONITORING_PRODUCTION_API_TOKEN`, shared read-only credential |
 | Publication | `wrangler versions upload` only | `wrangler deploy` after checked master push |
 | Version URLs | Enabled, immutable URL recorded per PR/head | Disabled |
 | Runtime analytics | Always suppressed | Explicitly enabled |
@@ -170,6 +170,8 @@ it is a configuration identifier. Deployment and monitoring token key names are
 distinct per environment, so the generic repository-level `CLOUDFLARE_API_TOKEN`
 and `MONITORING_API_TOKEN` are never selected by the publication workflow. Remove
 obsolete repository-level deployment credentials after replacements are secured.
+Preview and production share one monitoring credential under separate secret
+names, so preview Workers hold it and it must stay read-only.
 Owners must verify the upstream token's actual read-only permissions; the proxy
 allowlist does not establish the backend credential's authority.
 
@@ -223,7 +225,7 @@ and no local copy of the repository token was available to migrate.
 - [ ] On that actual hostname and Access policy, verify asset edge reuse,
   browser ETag/304s and all response headers separately from monitoring
   `X-Monitoring-Cache` and upstream-request evidence. Test monitoring cache expiry,
-  query/revision isolation, error freshness and credential isolation. If Access
+  query/revision isolation and error freshness. If Access
   prevents a usable cache test, obtain an appropriate test hostname before cutover.
 - [ ] Compare deployed CDN bodies against recorded vault checksums; verify both
   Markdown URLs/aliases, address lookup, methods, encoded denial, slash forms,
