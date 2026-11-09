@@ -32,7 +32,11 @@
     "adapter": "0xA07d8cc424421cC2bce0544a65481376f010A438",
     "wstethstrategy": "0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8",
     "usdcstrategy": "0xd023Aac0e2D46c93d4c6e8e2A449bF2d4687804f",
-    "fxsaveadmin": "0xa0fb1b11cca5871fb0225b64308e249b97804e99"
+    "fxsaveadmin": "0xa0fb1b11cca5871fb0225b64308e249b97804e99",
+    "stethshort": "0x25707b9e6690b52c60ae6744d711cf9c1dfc1876",
+    "wbtcshort": "0xa0cc8162c523998856d59065faa254f87d20a5b0",
+    "stethshortoracle": "0x222786833b5fd5eE21532d8b576391bAbeFdAAd1",
+    "wbtcshortoracle": "0x5d2c6215555B36889ef235c6d5cCDE22E9964e6a"
   },
   "roleInventory": {
     "token": {
@@ -299,23 +303,84 @@
           "0x28c921adac4c1072658eb01a28da06b5f651ef62"
         ]
       }
+    },
+    "stethshort": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1": {
+        "role": "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1",
+        "holders": [
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62"
+        ]
+      },
+      "EMERGENCY_ROLE": {
+        "role": "0xbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b26",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      }
+    },
+    "wbtcshort": {
+      "DEFAULT_ADMIN_ROLE": {
+        "role": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "holders": [
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      },
+      "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1": {
+        "role": "0xb5f18962f4b945f1dfca310315a44ecb028f13305dbe26cbb91f87756e6651e1",
+        "holders": [
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62"
+        ]
+      },
+      "EMERGENCY_ROLE": {
+        "role": "0xbf233dd2aafeb4d50879c4aa5c81e96d92f6e6945c906a58f9f2d1c1631b4b26",
+        "holders": [
+          "0x26b2ec4e02ebe2f54583af25b647b1d619e67bbf",
+          "0x28c921adac4c1072658eb01a28da06b5f651ef62",
+          "0x68863fb8855b04509a835082478d6e3d0be4e61a"
+        ]
+      }
     }
   },
   "permissionReadsAndSimulations": {
     "fxsaveadmin getThreshold()(uint256)": 6,
-    "fxsaveadmin getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x8EcAB7B8ed8215cA52500cbf1548B9239173ef82, 0xeF0Ca09fbf9a5f61E657Fb208b46b8685c1d4766, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xcdF067F306E7a511Ef701588AFCdcff292B19282, 0xC8Be49a9b1ca1A1cc654491a7cBbD27aBfA06A81, 0x18411aB626c9b3B3Dd5b7356574D8ff396436744, 0x74390470F4001Ca85D93bD546A4Ab1724359654B]",
     "fxsaveadmin getModulesPaginated(address,uint256)(address[],address)": "[]\n0x0000000000000000000000000000000000000001",
     "op getThreshold()(uint256)": 6,
-    "op getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B, 0xeF0Ca09fbf9a5f61E657Fb208b46b8685c1d4766, 0x8EcAB7B8ed8215cA52500cbf1548B9239173ef82, 0x18411aB626c9b3B3Dd5b7356574D8ff396436744, 0xcdF067F306E7a511Ef701588AFCdcff292B19282, 0xC8Be49a9b1ca1A1cc654491a7cBbD27aBfA06A81]",
     "op getModulesPaginated(address,uint256)(address[],address)": "[]\n0x0000000000000000000000000000000000000001",
     "emergency getThreshold()(uint256)": 3,
-    "emergency getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B]",
     "emergency getModulesPaginated(address,uint256)(address[],address)": "[]\n0x0000000000000000000000000000000000000001",
     "fxsaveadmin grant CLAIM_FOR_ROLE": "0x",
     "stethpool updatePriceOracle from emergency": "0x",
     "stethpool updatePriceOracle from op": "0x",
     "wbtcpool updatePriceOracle from emergency": "0x",
-    "wbtcpool updatePriceOracle from op": "0x"
+    "wbtcpool updatePriceOracle from op": "0x",
+    "fxsaveadmin ownerSet": {
+      "count": 9,
+      "sha256": "5246c3204639dc417e2764c4e3ee501d14d0548e687150ede8c871de3e376983"
+    },
+    "op ownerSet": {
+      "count": 9,
+      "sha256": "5246c3204639dc417e2764c4e3ee501d14d0548e687150ede8c871de3e376983"
+    },
+    "emergency ownerSet": {
+      "count": 4,
+      "sha256": "d31d3e028b4d8811b48a2d8d7722b6782b40df88da73a0a1dbe7134de0bcb933"
+    },
+    "stethshort updatePriceOracle from emergency": "0x",
+    "stethshort updatePriceOracle from op": "0x",
+    "stethshort updatePriceOracle from timelock": "0x",
+    "stethshort updatePriceOracle from unprivileged 0x...dEaD": "reverted: AccessControlUnauthorizedAccount (selector 0xe2517d3f) for EMERGENCY_ROLE",
+    "wbtcshort updatePriceOracle from emergency": "0x",
+    "wbtcshort updatePriceOracle from op": "0x",
+    "wbtcshort updatePriceOracle from timelock": "0x",
+    "wbtcshort updatePriceOracle from unprivileged 0x...dEaD": "reverted: AccessControlUnauthorizedAccount (selector 0xe2517d3f) for EMERGENCY_ROLE"
   },
   "snapshotReads": {
     "stethoracle owner()(address)": "0x68863fb8855b04509a835082478D6E3D0bE4E61a",
@@ -346,10 +411,41 @@
     "token balanceOf(address)(uint256) 0xA07d8cc424421cC2bce0544a65481376f010A438": "81875719051000000000000 [8.187e22]",
     "peg isFundingEnabled()(bool)": false,
     "op getThreshold()(uint256)": 6,
-    "op getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B, 0xeF0Ca09fbf9a5f61E657Fb208b46b8685c1d4766, 0x8EcAB7B8ed8215cA52500cbf1548B9239173ef82, 0x18411aB626c9b3B3Dd5b7356574D8ff396436744, 0xcdF067F306E7a511Ef701588AFCdcff292B19282, 0xC8Be49a9b1ca1A1cc654491a7cBbD27aBfA06A81]",
     "emergency getThreshold()(uint256)": 3,
-    "emergency getOwners()(address[])": "[0x38a93e70b0D8343657f802C1c3Fdb06aC8F8fe99, 0x85DB62FdFA9Ee6050f8b422F74D75D2069dA102B, 0xe3522d85d37F55735e9327CD7a5cDe3abaf28E03, 0x74390470F4001Ca85D93bD546A4Ab1724359654B]",
-    "fxsave admin hasRole DEFAULT_ADMIN_ROLE": true
+    "fxsave admin hasRole DEFAULT_ADMIN_ROLE": true,
+    "op ownerSet": {
+      "count": 9,
+      "sha256": "5246c3204639dc417e2764c4e3ee501d14d0548e687150ede8c871de3e376983"
+    },
+    "emergency ownerSet": {
+      "count": 4,
+      "sha256": "d31d3e028b4d8811b48a2d8d7722b6782b40df88da73a0a1dbe7134de0bcb933"
+    },
+    "stethshort priceOracle()(address)": "0x222786833b5fd5eE21532d8b576391bAbeFdAAd1",
+    "stethshort counterparty()(address)": "0x6Ecfa38FeE8a5277B91eFdA204c235814F0122E8",
+    "shortmanager getPoolInfo(address)(uint256,uint256,uint256,uint256) 0x25707b9e6690b52c60ae6744d711cf9c1dfc1876": "1000000000000000000000000000 [1e27]\n18027191289479104502453 [1.802e22]\n1000000000000000000000000 [1e24]\n4071424673617746456 [4.071e18]",
+    "wbtcshort priceOracle()(address)": "0x5d2c6215555B36889ef235c6d5cCDE22E9964e6a",
+    "wbtcshort counterparty()(address)": "0xAB709e26Fa6B0A30c119D8c55B887DeD24952473",
+    "shortmanager getPoolInfo(address)(uint256,uint256,uint256,uint256) 0xa0cc8162c523998856d59065faa254f87d20a5b0": "1000000000000000000000000000 [1e27]\n68324259515213702645933 [6.832e22]\n1000000000000000000000000 [1e24]\n628644933395797710 [6.286e17]",
+    "stethpool getTotalRawCollaterals()(uint256)": "6444402315879848909240 [6.444e21]",
+    "manager shortBorrowCapacityRatio(address)(uint256) 0x6ecfa38fee8a5277b91efda204c235814f0122e8": "500000000000000000 [5e17]",
+    "stethshort creditNote()(address)": "0x7c5350BaC0eB97F86A366Ee4F9619a560480F05A",
+    "stethshort creditNote totalSupply()(uint256)": "4071424673617746456 [4.071e18]",
+    "stethshortoracle oracle()(address)": "0x0C5C61025f047cB7e3e85852dC8eAFd7b9a4Abfb",
+    "stethshortoracle rateProvider()(address)": "0x81A777c4aB65229d1Bf64DaE4c831bDf628Ccc7f",
+    "wbtcpool getTotalRawCollaterals()(uint256)": "1150214572004248970939 [1.15e21]",
+    "manager shortBorrowCapacityRatio(address)(uint256) 0xab709e26fa6b0a30c119d8c55b887ded24952473": "500000000000000000 [5e17]",
+    "wbtcshort creditNote()(address)": "0xB25a554033C59e33e48c5dc05A7192Fb1bbDdfc6",
+    "wbtcshort creditNote totalSupply()(uint256)": "62864688 [6.286e7]",
+    "wbtcshortoracle oracle()(address)": "0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390",
+    "wbtcshortoracle rateProvider()(address)": "0x0000000000000000000000000000000000000000",
+    "manager tokenRates(address)(uint96,address) wstETH": "1\n0x81A777c4aB65229d1Bf64DaE4c831bDf628Ccc7f",
+    "shortmanager tokenRates(address)(uint96,address) wstETH": "1\n0x0000000000000000000000000000000000000000",
+    "wstETH balanceOf(manager)": "5166697241860714559885",
+    "WBTC balanceOf(manager)": "114968447062",
+    "wstETH stEthPerToken()(uint256)": "1246620093818911326 [1.246e18]",
+    "stethoracle getPrice()(uint256,uint256,uint256)": "2360799541088073954127 [2.36e21]\n2350251417344577564634 [2.35e21]\n2360799541088073954127 [2.36e21]",
+    "wbtcoracle getPrice()(uint256,uint256,uint256)": "80749655884356877435500 [8.074e22]\n80573916394775204366567 [8.057e22]\n80863658720929075032976 [8.086e22]"
   },
   "fxsavePendingRedemptions": {
     "requestEventCount": 2074,
@@ -808,7 +904,6 @@
   },
   "verificationLimits": [
     "Not a complete enumeration of gateway diamond facets, Convex booster/gauge administration, oracle dependencies, or legacy V1 roles.",
-    "Katana supplies were not re-read for this snapshot.",
     "DVN settings retain the original PR verification; this correction did not independently repeat it."
   ],
   "verifiedOn": "2026-11-06",
@@ -857,7 +952,76 @@
       "address": "0x25739865593fa498e92d91e62019dbc051bdc993",
       "contractName": "AaveFundingPool",
       "sourceUrl": "https://etherscan.io/address/0x25739865593fa498e92d91e62019dbc051bdc993#code"
+    },
+    "shortpools": {
+      "address": "0xfa525154c6371e9d46570b44c7328e6cc3e7cc47",
+      "contractName": "ShortPool",
+      "sourceUrl": "https://etherscan.io/address/0xfa525154c6371e9d46570b44c7328e6cc3e7cc47#code"
+    },
+    "stethshortoracle": {
+      "address": "0x222786833b5fd5eE21532d8b576391bAbeFdAAd1",
+      "contractName": "InverseWstETHPriceOracle",
+      "sourceUrl": "https://etherscan.io/address/0x222786833b5fd5eE21532d8b576391bAbeFdAAd1#code"
+    },
+    "wbtcshortoracle": {
+      "address": "0x5d2c6215555B36889ef235c6d5cCDE22E9964e6a",
+      "contractName": "InversePriceOracle",
+      "sourceUrl": "https://etherscan.io/address/0x5d2c6215555B36889ef235c6d5cCDE22E9964e6a#code"
     }
   },
-  "fxsaveAdministratorGrant": "https://etherscan.io/tx/0xc877b438f8406e6af366790fa5fe55c581848bcdd3d899240f4757f6fef5f659"
+  "fxsaveAdministratorGrant": "https://etherscan.io/tx/0xc877b438f8406e6af366790fa5fe55c581848bcdd3d899240f4757f6fef5f659",
+  "ownerSetMethod": "Individual Safe owner addresses are intentionally not listed. sha256 is computed over the getOwners() result at the snapshot block: lowercase 0x-prefixed addresses, sorted ascending, joined with commas. Recompute it at a later block and compare to establish owner-set continuity.",
+  "ownerOverlap": {
+    "operational and fxSAVE-admin (shared / each)": "9 / 9, 9",
+    "emergency owners also on operational": "4 / 4",
+    "emergency owners also on fxSAVE-admin": "4 / 4"
+  },
+  "curveUsdcFxusdSnapshot": {
+    "pool": "0x5018BE882DccE5E3F2f3B0913AE2096B9b3fB61f",
+    "coin0": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+    "coin1": "0x085780639CC2cACd35E474e71f4d000e2405d8f6",
+    "balances(0) USDC micro": "5566056423234",
+    "balances(1) fxUSD wei": "3528022046798427022515260",
+    "price_oracle(0)": "1000417264574042588",
+    "get_dy(1,0,dx) fxUSD to USDC micro": {
+      "500000": "500099038919",
+      "1000000": "1000099050577",
+      "4000000": "3996940446388",
+      "8000000": "5562602515192"
+    }
+  },
+  "defillamaTvl": {
+    "source": "https://api.llama.fi/protocol/fx-protocol",
+    "retrievedOn": "2026-11-09",
+    "note": "Daily series `tvl`; each point is labeled 00:00 UTC. The snapshot (2026-10-18T19:31:59Z) falls between the October 18 and October 19 points. No block-level TVL is available.",
+    "points": {
+      "2026-10-05": 136023535,
+      "2026-10-15": 126427360,
+      "2026-10-16": 127724196,
+      "2026-10-17": 126920663,
+      "2026-10-18": 121371056,
+      "2026-10-19": 115065743,
+      "2026-10-20": 113949433
+    },
+    "minimumSince2026-08-18ThroughSnapshot": 100973369,
+    "pointsAbove100MSince2026-08-18ThroughSnapshot": 62
+  },
+  "katanaSnapshot": {
+    "chainId": 747474,
+    "block": 45609108,
+    "timestamp": "2026-10-18T19:31:59+00:00",
+    "tokens": {
+      "0x4c03ff0f44A55e7098a09016E02a01d3cdC2FDF9": {
+        "poolManager": "0x27b3eE81DF2Dd7356D5ac282e2416991A616f96a",
+        "totalSupply": "12624100652586587694424 [1.262e22]",
+        "pm.fxUSD": "0x4c03ff0f44A55e7098a09016E02a01d3cdC2FDF9"
+      },
+      "0x1364b238C668A2dec1294174e4798E8c09979f86": {
+        "poolManager": "0xFae375C9eA6636c40deB92DD91B7dbbF51BD3C68",
+        "totalSupply": "1000018200000000000000000 [1e24]",
+        "pm.fxUSD": "0x1364b238C668A2dec1294174e4798E8c09979f86"
+      }
+    }
+  },
+  "supplementalReadsOn": "2026-11-09"
 }
