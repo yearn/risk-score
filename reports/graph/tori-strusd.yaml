@@ -34,10 +34,10 @@ nodes:
     category: infra
     note: "REWARDER_ROLE on strUSD; Ownable → Safe; forwards operator calls"
   - id: dist-operator
-    label: Distributor Operator EOA
+    label: Distributor Operator
     address: "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
     category: governance
-    note: "No code; can reportLoss ≤5%/day without Safe/TL (material-EOA gate)"
+    note: "No code; Tori-reported Fordefi MPC (3/4 manual, undisclosed API rules); can reportLoss ≤5%/day without Safe/TL"
 
   - id: minting
     label: Minting
@@ -48,7 +48,7 @@ nodes:
     label: Custodian EOA
     address: "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
     category: governance
-    note: "Registered no-code custodian; unrestricted control over ~$897k USDC+USDT received; offchain account policies TODO"
+    note: "Registered no-code custodian; Tori-reported 2/4 quorum; controls ~$897k USDC+USDT received; bank/asset-manager account policies TODO"
   - id: collateral-manager
     label: Collateral Manager
     address: "0x39c9106e9be3622104a1ab97f3fcc88b65874213"
@@ -59,7 +59,7 @@ nodes:
     label: Admin Safe (3/5)
     address: "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
     category: governance
-    note: "DEFAULT_ADMIN; TL proposer only (not executor/canceller); CCIP pool owner; can redistribute/seize"
+    note: "DEFAULT_ADMIN; TL proposer only (not executor/canceller); CCIP pool owner incl. Monad and Arbitrum; can redistribute/seize"
   - id: timelock
     label: ToriTimelock (24h)
     address: "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4"
@@ -116,7 +116,7 @@ nodes:
     label: Tori-Collateral Morpho Loans
     category: dependency
     link: "https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json"
-    note: "Feed reports $3.438M (4.64% of reserves) in loans against Tori-token collateral; circular backing risk. Holder/market attribution TODO"
+    note: "Feed reports $3.438M (4.64% of reserves) in loans against Tori-token collateral; circular backing risk. Attributed to DeFi Operator: Ethereum markets and Monad strUSD/AUSD + SharpByte vault"
   - id: dep-ccip
     label: Chainlink CCIP
     category: dependency
