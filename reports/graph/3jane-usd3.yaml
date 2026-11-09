@@ -20,19 +20,19 @@ nodes:
     label: USD3 (Senior Tranche)
     address: "0x056B269Eb1f75477a8666ae8C7fE01b64dD55eCc"
     category: vault
-    note: ERC-4626 senior tranche; TransparentUpgradeableProxy; ~$115.0M totalAssets; impl 0xd1f1c3f4 (v1.2, Sep 25 2026)
+    note: ERC-4626 senior tranche; TransparentUpgradeableProxy; ~$115.07M totalAssets; impl 0xd1f1c3f4 (v1.2, Sep 25 2026)
   - id: sUSD3
     label: sUSD3 (Junior / First-Loss)
     address: "0xf689555121e529Ff0463e191F9Bd9d1E496164a7"
     category: vault
-    note: Staked USD3; pool-level first-loss tranche (~$8.37M); 30-day cooldown; 7.5% profit share
+    note: Staked USD3; pool-level first-loss tranche (~$8.52M); 30-day cooldown; 7.5% profit share
 
   # === Protocol infra ===
   - id: morpho-credit
     label: MorphoCredit (Lending Engine)
     address: "0xDe6e08ac208088cc62812Ba30608D852c6B0EcBc"
     category: infra
-    note: Morpho Blue fork; single waEthUSDC market; ~$89.91M borrowed (~78% utilization)
+    note: Morpho Blue fork; single waEthUSDC market; ~$103.93M borrowed (~90% utilization)
   - id: credit-line
     label: CreditLine (Borrower Approval)
     address: "0x26389b03298BA5DA0664FfD6bF78cF3A7820c6A9"
@@ -90,20 +90,20 @@ nodes:
   - id: aave-strategy
     label: Aave V3 Idle Reserves
     category: strategy
-    note: Idle waEthUSDC (~$25.15M, ~21.9% of totalAssets)
+    note: Idle waEthUSDC (~$11.14M, ~9.7% of totalAssets)
   - id: origination-account
     label: Protocol-Owned Origination Account (1-of-1 Safe)
     address: "0x3Ff3ff33D20a086834A095ed6ed562c9e189291b"
     category: strategy
-    note: "~$88.82M borrowed (98.8% of borrows); credit line 94.06M waEthUSDC; premium 0; owner = 3/5 multisig"
+    note: "~$102.85M borrowed (99.0% of borrows); credit line 94.06M waEthUSDC; premium 0; owner = 3/5 multisig"
   - id: unsecured-loans
     label: Legacy Crypto Credit Lines
     category: strategy
-    note: ~$1.09M residual third-party CCL debt; program retired
+    note: ~$1.08M residual third-party CCL debt; program retired
   - id: lcc-facilities
     label: LCC (Levered Callable Capital)
     category: strategy
-    note: "Funding path live (supplyCapExempt + ring-fence conduits); ~$10.92M standby, $0 called through epoch 2"
+    note: "Funding path live (supplyCapExempt + ring-fence conduits); ~$21.19M standby, $0 called through epoch 3"
 
   # === External dependencies ===
   - id: aave-v3-usdc
@@ -117,19 +117,19 @@ nodes:
   - id: erebor
     label: Erebor (USD banking rail)
     category: dependency
-    note: "3Jane USD account; ~$2.68M cash self-reported at snapshot; FCC wires and collections; unverifiable onchain"
+    note: "3Jane USD account; ~$4.36M cash self-reported at snapshot; FCC wires and collections; unverifiable onchain"
   - id: fcc-facilities
     label: FCC Facilities (SPVs)
     category: dependency
-    note: "Self-reported $85.79M deployed principal at snapshot (forward flow $79.23M, warehouse $6.56M); no third-party attestation"
+    note: "Self-reported $96.14M deployed principal at snapshot (forward flow $89.57M, warehouse $6.56M); no third-party attestation"
   - id: fcc-slope
     label: Slope (forward flow)
     category: dependency
-    note: "Trade-credit whole loans, $66.44M (76.6% of deployed FCC, ~58% of totalAssets); no originator first-loss; ~49-day avg remaining term"
+    note: "Trade-credit whole loans, $61.66M (64.1% of deployed FCC, ~54% of totalAssets); no originator first-loss; ~47-day avg remaining term"
   - id: fcc-settle
     label: Settle (forward flow)
     category: dependency
-    note: "Inventory-financing whole loans, $13.71M (15.8%); no originator first-loss; ~86-day avg remaining term"
+    note: "Inventory-financing whole loans, $27.91M (29.0%); no originator first-loss; ~110-day avg remaining term"
   - id: fcc-lendswift
     label: LendSwift (senior warehouse)
     category: dependency
@@ -143,19 +143,19 @@ nodes:
     category: dependency
     note: Verifies zkTLS proofs; early-stage infra
   - id: insurance-fund
-    label: Insurance Fund (~$1.03M USDC)
+    label: Insurance Fund (~$1.04M USDC)
     address: "0x4507B5B23340D248457d955a211C8B0634D29935"
     category: dependency
-    note: CCL-only first-loss backstop (waEthUSDC); with sUSD3, ~10.5% borrow-book coverage
+    note: CCL-only first-loss backstop (waEthUSDC); with sUSD3, ~9.2% borrow-book coverage
   - id: pendle-sy
     label: Pendle SY-USD3
     address: "0xeA3BC608F32847B97965C5e1648BDFCd4C2C40d0"
     category: dependency
-    note: "Holds 50.0% of USD3 supply; source of PT/YT-USD3"
+    note: "Holds 63.0% of USD3 supply; source of PT/YT-USD3"
   - id: morpho-usd3-markets
     label: Morpho USD3 / PT-USD3 Markets
     category: dependency
-    note: "~$51.9M USDC borrowed against USD3 / PT-USD3; USD3 oracle = USD3 PPS; $7.06M debt at HF < 1.01 in the USD3 market"
+    note: "~$53.0M stablecoins borrowed against USD3 / PT-USD3 across 4 markets; USD3 oracle = USD3 PPS; $2.76M debt at HF < 1.01 in the USD3 market"
   - id: margin-oracles
     label: LCC Margin Oracles
     category: dependency
@@ -226,15 +226,15 @@ edges:
   - from: morpho-credit
     to: aave-strategy
     kind: allocates-to
-    label: "idle reserves (~21.9%)"
+    label: "idle reserves (~9.7%)"
   - from: morpho-credit
     to: origination-account
     kind: allocates-to
-    label: "~$88.82M (~77% of totalAssets)"
+    label: "~$102.85M (~89% of totalAssets)"
   - from: morpho-credit
     to: unsecured-loans
     kind: allocates-to
-    label: "~$1.09M residual CCL"
+    label: "~$1.08M residual CCL"
   - from: multisig
     to: origination-account
     kind: controls
@@ -254,11 +254,11 @@ edges:
   - from: fcc-facilities
     to: fcc-slope
     kind: allocates-to
-    label: "$66.44M forward flow"
+    label: "$61.66M forward flow"
   - from: fcc-facilities
     to: fcc-settle
     kind: allocates-to
-    label: "$13.71M forward flow"
+    label: "$27.91M forward flow"
   - from: fcc-facilities
     to: fcc-lendswift
     kind: allocates-to
@@ -302,7 +302,7 @@ edges:
   - from: USD3
     to: insurance-fund
     kind: routes-through
-    label: first-loss buffer ($1.03M)
+    label: first-loss buffer ($1.04M)
   - from: lcc-facilities
     to: USD3
     kind: deposits-into
@@ -314,11 +314,11 @@ edges:
   - from: USD3
     to: pendle-sy
     kind: deposits-into
-    label: "50.0% of supply wrapped (PT/YT)"
+    label: "63.0% of supply wrapped (PT/YT)"
   - from: USD3
     to: morpho-usd3-markets
     kind: deposits-into
-    label: "22.6% of supply + 76.6% of PT as collateral"
+    label: "10.1% of supply + 79.5% of PT as collateral"
   - from: pendle-sy
     to: morpho-usd3-markets
     kind: deposits-into
