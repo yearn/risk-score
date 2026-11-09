@@ -48,9 +48,14 @@ Assessment Date format:
         **Assessment Date:** February 8, 2026 (Updated: March 22, 2026)
     Do NOT stack multiple dates or add prose like "rechecked," "reassessed,"
     or "corrected" — collapse all prior updates into the single latest date.
-  - The reassessment-scan workflow parses every "Month Day, Year" date on this
-    line and uses the latest one to decide whether the report is stale, so the
-    appended date keeps the staleness clock honest.
+  - Scheduled reassessment covers yearn-*.md reports automatically and external
+    dependencies listed in reports/reassessment.json. When authoring or updating
+    an external report, add its slug if Yearn uses it or has approved an unfunded
+    integration; remove it when no qualifying Yearn use remains. Keep the list
+    sorted and unique and document the Yearn use in the report or PR.
+  - For eligible reports, reassessment-scan uses the latest date on this line
+    against its 60-day threshold. Other reports can still have manual time-based
+    or event-based review triggers; these do not imply scheduled GitHub issues.
 -->
 
 
