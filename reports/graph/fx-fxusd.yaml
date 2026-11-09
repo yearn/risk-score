@@ -83,6 +83,16 @@ nodes:
     address: "0xb3c90e64EB6f456A5F5C17Aa99b6aecA6f4a6390"
     category: infra
     note: Owner setters timelocked since Oct 5 2026; 2% max deviation; pool EMERGENCY_ROLE can replace this oracle immediately
+  - id: steth-short-oracle
+    label: InverseWstETHPriceOracle
+    address: "0x222786833b5fd5eE21532d8b576391bAbeFdAAd1"
+    category: infra
+    note: Ownerless wrapper of StETHPriceOracle; pool EMERGENCY_ROLE can replace this oracle immediately
+  - id: wbtc-short-oracle
+    label: InversePriceOracle (WBTC)
+    address: "0x5d2c6215555B36889ef235c6d5cCDE22E9964e6a"
+    category: infra
+    note: Ownerless wrapper of WBTCPriceOracle; pool EMERGENCY_ROLE can replace this oracle immediately
   - id: aave-wsteth-strategy
     label: AaveV3Strategy (wstETH)
     address: "0xFd3A6540e21D0E285f88FBFd904883B23e08F5C8"
@@ -119,7 +129,7 @@ nodes:
     label: Emergency Multisig (3-of-4)
     address: "0x28c921adAC4c1072658eB01a28DA06b5F651eF62"
     category: governance
-    note: Can replace both long-pool oracles, pause managers and fund configured strategies without delay; 4 owners overlap both 6/9 Safes
+    note: Can replace all four long and short pool oracles, pause managers and fund configured strategies without delay; 4 owners overlap both 6/9 Safes
   - id: fxsave-admin
     label: fxSAVE Administrator (6-of-9)
     address: "0xa0fb1b11cca5871fb0225b64308e249b97804e99"
@@ -161,7 +171,7 @@ nodes:
     label: f(x) stETH Short (sPOSITION)
     address: "0x25707b9e6690b52c60ae6744d711cf9c1dfc1876"
     category: strategy
-    note: 18,027 fxUSD collateral, ~3.27 wstETH borrowed from PoolManager
+    note: 18,027 fxUSD collateral, ~4.07 wstETH borrowed from PoolManager
   - id: wbtc-short-pool
     label: f(x) WBTC Short (sPOSITION)
     address: "0xa0cc8162c523998856d59065faa254f87d20a5b0"
@@ -244,6 +254,34 @@ edges:
     to: xwbtc-pool
     kind: holds-role
     label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: operational-multisig
+    to: short-pool-manager
+    kind: holds-role
+    label: EMERGENCY_ROLE — pause (no timelock)
+  - from: emergency-multisig
+    to: steth-short-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: emergency-multisig
+    to: wbtc-short-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: operational-multisig
+    to: steth-short-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: operational-multisig
+    to: wbtc-short-pool
+    kind: holds-role
+    label: EMERGENCY_ROLE — updatePriceOracle (no timelock)
+  - from: timelock
+    to: steth-short-pool
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + EMERGENCY_ROLE
+  - from: timelock
+    to: wbtc-short-pool
+    kind: holds-role
+    label: DEFAULT_ADMIN_ROLE + EMERGENCY_ROLE
   - from: fxsave-admin
     to: fxSAVE
     kind: holds-role
@@ -426,6 +464,22 @@ edges:
     to: xwbtc-pool
     kind: manages
     label: priceOracle() — exchange/liquidate price
+  - from: steth-short-oracle
+    to: steth-short-pool
+    kind: manages
+    label: priceOracle() — exchange/liquidate price
+  - from: wbtc-short-oracle
+    to: wbtc-short-pool
+    kind: manages
+    label: priceOracle() — exchange/liquidate price
+  - from: steth-short-oracle
+    to: steth-oracle
+    kind: routes-through
+    label: inverse of long-pool oracle
+  - from: wbtc-short-oracle
+    to: wbtc-oracle
+    kind: routes-through
+    label: inverse of long-pool oracle
   - from: steth-oracle
     to: dep-chainlink
     kind: routes-through
@@ -445,7 +499,7 @@ edges:
   - from: steth-short-pool
     to: pool-manager
     kind: routes-through
-    label: borrows ~3.27 wstETH
+    label: borrows ~4.07 wstETH
   - from: wbtc-short-pool
     to: pool-manager
     kind: routes-through
