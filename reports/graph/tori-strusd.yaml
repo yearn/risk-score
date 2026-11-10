@@ -37,7 +37,7 @@ nodes:
     label: Distributor Operator
     address: "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
     category: governance
-    note: "No code; Tori-reported Fordefi MPC (3/4 manual, undisclosed API rules); can reportLoss ≤5%/day without Safe/TL"
+    note: "No code; Tori-reported Fordefi MPC (3/4 manual; automated API path undisclosed); can reportLoss ≤5%/day without Safe/TL (critical gate)"
 
   - id: minting
     label: Minting

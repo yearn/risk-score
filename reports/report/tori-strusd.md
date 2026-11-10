@@ -1,11 +1,12 @@
 # Protocol Risk Assessment: Tori Finance
 
-- **Assessment Date:** November 4, 2026 (Updated: November 9, 2026)
+- **Assessment Date:** November 4, 2026 (Updated: November 10, 2026)
 - **Onchain Snapshot:** Ethereum block [26340122](https://etherscan.io/block/26340122), hash `0x9436fc1d4978c0f9d964a2890475c895be97898e6ee43c8295c4300cce7de8f8` (November 4, 2026 08:01:59 UTC); permissions, proxy slots, supply, and Curve quotes revalidated November 6 at this fixed block. DeFiLlama and GeckoTerminal figures retain their November 4 observation dates. Accountable is a separate **November 6, 2026 04:01:02.208 UTC** observation. CCIP, Safe, Fluid, Curve-LP and Morpho reads added November 8 use the same fixed block. Monad supply is pinned at the matching-timestamp block from mint/burn logs and Arbitrum at its archive block. Pharos, Solana and Canton provenance remains TODO; see Cross-Chain Bridge.
 - **Token:** strUSD (Staked trUSD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x280839980a7eD0D7717F64125fE241012E5F5815`](https://etherscan.io/address/0x280839980a7eD0D7717F64125fE241012E5F5815)
-- **Final Score: 3.55/5.0**
+- **Final Score: 5.00/5.0**
+- **Status:** GATED — capped by the Total centralization critical gate: the Distributor `operator` can `reportLoss` with no onchain multiparty approval or timelock, and the reported Fordefi quorum is not shown to govern its automated signing path; the custodian's reported 2/4 quorum is below the three-signer line. Ungated weighted score is **3.60** (Elevated). No realized loss event.
 
 ## Overview + Links
 
@@ -295,9 +296,13 @@ Accountable --> public reserve observations; does not enforce solvency onchain
 - [ ] **No audit** — Sherlock + Nethermind public reports
 - [ ] **Unverified contract source** — core contracts verified
 - [ ] **Unverifiable reserves** — The [captured Accountable response](https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json) has `res=ok`, `data.ts` **2026-11-06 04:01:02.208 UTC**, **$74,070,623.20** reserves / **$73,920,779.79** liabilities and reported CR **100.2027%**, with composition/custody disclosures and dated HT Digital letters. This passes the template's transparent-attestation route. It does not establish independent collateral quality, private-account ownership, or cryptographic-proof validity; the circular reserve claims and assurance limits remain material Funds Management risks.
-- [ ] **Total centralization** — **PASS, not triggered.** Tori is not controlled by a single key: a 3/5 Safe holds admin powers and a 24h timelock covers upgrades. The closest path is the Distributor `operator` [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006), a no-code address that can burn deposited vault trUSD with no onchain multiparty approval or timelock. A [Tori-published Accountable snapshot](https://github.com/yearn/risk-score/blob/2b5c19fb5c9af5cd3cdb89794f3495c2aefade79/reports/data/tori-strusd-2026-11-08.json) states that Fordefi confirmed a 3/4 manual approval policy for this wallet as of 2026-10-26. That is the same class of evidence accepted for Fordefi MPC control in [centrifuge-jaaa](https://github.com/yearn/risk-score/blob/master/reports/report/centrifuge-jaaa.md) and [midas-mglobal](https://github.com/yearn/risk-score/blob/master/reports/report/midas-mglobal.md), and more specific than either, so the operator is treated as attested MPC rather than a single-key EOA. The attestation is static, Tori-published and not enforced onchain, and the [observed automated cadence](https://github.com/yearn/risk-score/blob/368e2decaca9ae123acecbd415bffcabe0c9a8ed/reports/data/tori-strusd-2026-11-09.json) shows that an undisclosed API rule covers routine calls. Those limits are reflected in Governance. The gate should be reopened if the API rule is shown to cover `reportLoss`, or if the policy falls below three approvers. The custodian's reported 2/4 quorum is below that line, but it controls a transit balance of ~1.2% of reported reserves, not vault assets, so it is scored in Governance rather than treated as total control.
+- [x] **Total centralization** — **TRIGGERED** under the [weakest-link / material-EOA rule](https://github.com/yearn/risk-score/blob/13af7f1/reports/TEMPLATE.md), which applies the gate when an EOA or fewer than three signers hold a material loss path. The Distributor `operator` [`0xA2AD…F006`](https://etherscan.io/address/0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006) is a no-code address that can burn deposited vault trUSD via `reportLoss` without onchain multiparty approval or timelock. The 5%/24h cap permits a ~3.24M trUSD loss in one call and further daily losses.
 
-**All gates pass; proceed to category scoring.**
+A [Tori-published Accountable snapshot](https://github.com/yearn/risk-score/blob/2b5c19fb5c9af5cd3cdb89794f3495c2aefade79/reports/data/tori-strusd-2026-11-08.json) states that Fordefi confirmed a 3/4 *manual* approval policy for this wallet as of 2026-10-26. The same snapshot says specified API operations follow separate, undisclosed rules on configured contracts. [All 375 operator transactions](https://github.com/yearn/risk-score/blob/368e2decaca9ae123acecbd415bffcabe0c9a8ed/reports/data/tori-strusd-2026-11-09.json) through the snapshot block are automated `transferInRewards` calls to the Distributor about every 8h02m, so the operator's observed signing path is the API path, not the 3/4 quorum, and that path's scope is unpublished. The registered custodian [`0x6339…1CC7`](https://etherscan.io/address/0x63392EaB47926f6Ee3E6ACA285B367A952001CC7) holds collateral received from mints under a reported **2/4** quorum, below the three-signer line.
+
+This differs from [centrifuge-jaaa](https://github.com/yearn/risk-score/blob/master/reports/report/centrifuge-jaaa.md) and [midas-mglobal](https://github.com/yearn/risk-score/blob/master/reports/report/midas-mglobal.md), which pass on attested MPC control. Here, onchain activity shows that the attested manual threshold does not govern the operator's operating path, and a second fund-moving path is attested below three approvers. The gate can be lifted if Tori shows that the API rule excludes `reportLoss` and that custodian approvals need at least three parties, or moves `reportLoss` behind the Safe or timelock.
+
+**Gate triggered → Final Score capped at 5.00 (Status: GATED).** Category scores below are the ungated rubric result for transparency.
 
 ### Category Scores
 
@@ -309,15 +314,15 @@ Two reputable firm audits with public PDFs, $1M critical bounty (private email c
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-**Governance: 4.5/5** — Upgrades and Minting parameters go through a 3/5 Safe and a 24h timelock, while the Safe can immediately confiscate blacklisted users' shares (`redistributeLockedAmount`) or cooled assets (`seizeCooldown`), drain the CCIP lockboxes and extend the cooldown to 90 days. Timelock executor and canceller are no-code addresses with reported 2/4 policies (Safe is proposer-only). Scored above the rubric's 3/5 row because the weakest material path, operator `reportLoss`, has no timelock and relies on an offchain policy that cannot be verified onchain and whose API coverage of `reportLoss` is undisclosed.
+**Governance: 5.0/5** — The weakest material path, operator `reportLoss`, has no timelock and no onchain approval, and the reported Fordefi quorum is not shown to govern the automated path that signs it (critical gate). The custodian's reported 2/4 quorum also falls below three signers. Separately, the 3/5 Safe can immediately confiscate blacklisted users' shares (`redistributeLockedAmount`) or cooled assets (`seizeCooldown`), drain the CCIP lockboxes and extend the cooldown to 90 days. Timelock executor and canceller are no-code addresses with reported 2/4 policies (Safe is proposer-only). The 24h delay applies only to proxy upgrades and Minting parameter and custody changes.
 
 **Programmability: 4.0/5** — Vault math onchain, but NAV mint/redeem, reward injection, and loss recognition are privileged / offchain-driven; operator-driven `reportLoss` is a material admin loss path.
 
 **Dependencies: 4.0/5** — Many critical deps (offchain book, custodians, CCIP, attestation). Offchain solvency is a practical single point of failure for economic value.
 
-**Centralization = (4.5 + 4.0 + 4.0) / 3 = 4.1667** (retain full precision in the weighted total).
+**Centralization = (5.0 + 4.0 + 4.0) / 3 = 4.333…** (retain full precision in the weighted total).
 
-**Score: 4.17/5**
+**Score: 4.33/5**
 
 #### Category 3: Funds Management (Weight: 30%)
 
@@ -350,11 +355,12 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | Category | Score | Weight | Weighted |
 |----------|-------|--------|----------|
 | Audits & Historical | 3.0 | 20% | 0.60 |
-| Centralization & Control | 4.1667 | 30% | 1.25 |
+| Centralization & Control | 4.333… | 30% | 1.30 |
 | Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 4.0 | 15% | 0.60 |
 | Operational Risk | 2.5 | 5% | 0.125 |
-| **Final Score** | | | **3.55/5.0** |
+| **Ungated weighted (floored)** | | | **3.60/5.0** |
+| **Final Score (gate-capped)** | | | **5.00/5.0** |
 
 ### Risk Tier
 
@@ -366,9 +372,9 @@ Final Score = (Audits × 0.20) + (Centralization × 0.30) + (Funds Mgmt × 0.30)
 | **3.50–4.49** | **Elevated Risk** | Limited approval, strict limits |
 | **4.50–5.00** | **High Risk** | Not recommended |
 
-**Final Risk Tier: Elevated Risk (3.55/5.0)** — limited approval with strict limits.
+**Final Risk Tier: High Risk (5.00/5.0, GATED)** — ungated weighted **3.60** would be Elevated.
 
-The final score reflects an offchain-attested operator loss path with no onchain approval or timelock. Additional risks are immediate Safe confiscation and lockbox control, custodian transfers under a 2/4 quorum, predominantly private-source backing, and circular Morpho reserve claims backed by Tori collateral. Secondary exit capacity is limited relative to pool inventory, and one address supplies effectively all of it. No wsrUSD/Reservoir exposure was identified in the reviewed public evidence; private positions were not exhaustively verified.
+The final score reflects the operator's material loss path, which has no onchain approval or timelock and whose reported quorum is not shown to govern its automated signing. Additional risks are immediate Safe confiscation and lockbox control, custodian transfers under a 2/4 quorum, predominantly private-source backing, and circular Morpho reserve claims backed by Tori collateral. Secondary exit capacity is limited relative to pool inventory, and one address supplies effectively all of it. No wsrUSD/Reservoir exposure was identified in the reviewed public evidence; private positions were not exhaustively verified.
 
 ## Reassessment Triggers
 
@@ -376,12 +382,12 @@ The final score reflects an offchain-attested operator loss path with no onchain
 - TVL: DeFiLlama TVL < $40M or > $150M
 - Accountable coverage ratio published below 100%, or attestation outage > 48h
 - Growth or impairment of Tori-collateral Morpho reserve claims; SharpByte vault exposure changes; independent-reserve stress analysis
-- Distributor `operator` change, `reportLoss` invocation, any change to the Fordefi policy, or disclosure that the API rule covers `reportLoss` (would trigger the Total centralization gate)
+- Distributor `operator` change, `reportLoss` invocation, any change to the Fordefi policy, or disclosure of the API rule scope (evidence that it excludes `reportLoss`, plus a custodian quorum of at least three, would reopen the gate decision)
 - Timelock queue: unexpected upgrade, new custodian, or `setMinter`
 - Pause / gatekeeper `disableMintRedeem`; blacklist → redistribute/seize events
 - CCIP lockbox vs remote supply divergence > immaterial dust; any withdrawal by the dominant exit-liquidity holder
 - Morpho oracle / RedStone feed anomaly vs ERC-4626 rate
-- Material audit / bounty / Safe Harbor change; replacement of operator with a Safe/timelocked path (would lower Governance)
+- Material audit / bounty / Safe Harbor change; replacement of the operator with a Safe/timelocked path (would lift the operator side of the gate)
 
 ## Assessment History
 
@@ -389,4 +395,4 @@ The final score reflects an offchain-attested operator loss path with no onchain
 | --- | --- | --- |
 | [November 4, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.60) | Initial assessment; November 6 validation retains the material-EOA gate, captures dated reserve evidence, identifies Tori-collateral Morpho backing claims, and corrects permission targets, oracle construction and intermediate score rounding. |
 | [November 8, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.60) | Completes Ethereum-side CCIP and Safe inventories (including the undocumented Canton lane), measures the full USDC exit route and Curve LP concentration, adds oracle update rules, and records the Accountable-relayed MPC policy statement. Score unchanged. |
-| [November 9, 2026](https://github.com/yearn/risk-score/pull/577) | 3.55 | Removes the Total centralization gate: Fordefi-attested MPC evidence is now treated consistently with other reports, with Governance lowered from 5.0 to 4.5 to reflect the undisclosed API rule on an automated operator. Pins Monad supply, reads Monad and Arbitrum controls, attributes the Morpho reserve loans, and finds one address supplying effectively all Curve and Fluid liquidity. Withdraws the earlier "match within dust" reconciliation. |
+| [November 10, 2026](https://github.com/yearn/risk-score/pull/577) | 5.00 GATED (ungated 3.60) | Pins Monad supply, reads Monad and Arbitrum controls, attributes the Morpho reserve loans, finds one address supplying effectively all Curve and Fluid liquidity, and withdraws the earlier "match within dust" reconciliation. Keeps the Total centralization gate: the operator's automated signing is not shown to fall under the attested 3/4 quorum, and the custodian is attested at 2/4. The report now states why this differs from MPC passes in other reports. |
