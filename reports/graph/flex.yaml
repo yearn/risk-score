@@ -28,8 +28,9 @@ nodes:
   - id: yvflexweth
     label: yvFlexWETH (Yearn allocator)
     address: "0xfaC55fAFD0b55BFb8dD41F735EfCc195adA9891F"
-    category: vault
+    category: dependency
     note: >-
+      Assessed in its own report (yearn-yvflexweth).
       Yearn V3 allocator vault holding 310.14 WETH, all of it in the Flex yvWETH-2/WETH Lender. Governed by
       Yearn's RoleManager since September 25, 2026. 96.8% of shares are held by the Yearn yETH Recovery
       Vault; a Safe holds the remaining 3.2%.
