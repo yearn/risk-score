@@ -203,7 +203,7 @@ Flex-side parameters that affect this vault but are not under Yearn's control ar
 - **Flex legs exit through `FlexExitRouter.redeem()` — asynchronous.** The router sets the exiting holder as the *proceeds receiver* on the Flex strategies, redeems vault shares, and clears it. Each Flex strategy then redeems Lender shares to that receiver: idle cash arrives atomically, and the remainder triggers Flex redemptions of the lowest-rate Troves whose collateral is sold in a one-day Dutch auction (starting at 100% of oracle value, floored at 99%). Auction proceeds go straight to the exiting holder as they are taken.
   - The vault books the asynchronous portion as a **loss on that withdrawal** (per the strategy's verified source), so the caller must pass a `maxLoss` high enough to cover it. Remaining holders are unaffected: the shortfall and any auction discount fall on the exiting holder alone.
   - The exiting holder bears auction execution: price drift of the collateral during the auction, up to a ~1% discount at the floor, and re-kick delay if no taker appears.
-  - **The yearn.fi interface does not use the router.** Its withdraw paths in [`yearn/yearn.fi`](https://github.com/yearn/yearn.fi) (`main` at [`1e0f1b7`](https://github.com/yearn/yearn.fi/commit/1e0f1b7)) are a direct ERC-4626 `withdraw`/`redeem` on the vault, an Enso zap, and the yBOLD and locked-yvUSD zappers; none references `FlexExitRouter` or `setProceedsReceiver`. A holder withdrawing through yearn.fi can therefore reach only the standard-redeemable ~20.6%; exiting the Flex legs requires calling the router directly.
+  - **Neither interface uses the router.** Its withdraw paths in [`yearn/yearn.fi`](https://github.com/yearn/yearn.fi) (`main` at [`1e0f1b7`](https://github.com/yearn/yearn.fi/commit/1e0f1b7)) are a direct ERC-4626 `withdraw`/`redeem` on the vault, an Enso zap, and the yBOLD and locked-yvUSD zappers; none references `FlexExitRouter` or `setProceedsReceiver`. A holder withdrawing through yearn.fi can therefore reach only the standard-redeemable ~20.6%; exiting the Flex legs requires calling the router directly. Flex's own [lend page](https://flexmeow.com/lend/0x863687e4E9751b57F38b4B0ebA04744C72d0f7B8/withdraw) also calls the vault's `withdraw(amount, user, user, maxLoss = 0)`, capped at `maxWithdraw` (page source read November 10, 2026).
 - **Large holder impact.** The vault is the sole lender in all three Flex USDC markets, so the Yearn Treasury's full exit (~$1.02M, 90.8% of shares) would mean redeeming essentially the entire Flex USDC borrower book — about $889K of Trove debt across three collaterals — through auctions that each clear only in their own collateral. Flex's redemption path has run 60 times across its markets since September 7 without incident, but never at that scale.
 - **Curator unwind.** Brain can also reduce debt on a Flex strategy (`update_debt`) or call `forceFreeFunds`; both use the same redemption-auction path and take at least a day to complete.
 - **Same-value asset:** USDC in, USDC out; the collateral being auctioned is USD-denominated, so short delays carry limited price risk.
@@ -241,7 +241,7 @@ The vault uses the **standard Yearn V3 governance pattern** through the Yearn Ro
 
 - **Vault operator:** Yearn — established since 2020, named Daddy signers, BORG legal wrapper ([YIP-87](https://gov.yearn.fi/t/yip-87-convert-ychad-eth-into-a-borg/14540)).
 - **Underlying operator:** Flex's team is pseudonymous with no legal entity; its risks page denies the admin powers its governance contract holds (see [Flex report](./flex.md#operational-risk)).
-- **Documentation:** Yearn V3 docs are comprehensive. Neither Yearn nor Flex documents this vault's exit path through the `FlexExitRouter` for end users, and the yearn.fi interface does not offer it.
+- **Documentation:** Yearn V3 docs are comprehensive. Neither Yearn nor Flex documents this vault's exit path through the `FlexExitRouter` for end users, and neither yearn.fi nor Flex's interface offers it.
 - **Incident response:** Yearn's demonstrated process and $200K bug bounty cover the vault layer; Flex has no bounty or documented incident process.
 
 ## Monitoring
@@ -252,7 +252,7 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 
 - **Large Flows** (`protocols/yearn/alert_large_flows.py`) and **Small Parent Vault Flows** apply: both discover Yearn V3 vaults from Kong, which indexes this vault. The $500K mainnet large-flow threshold equals ~45% of the vault, so only very large flows alert.
 - **Timelock Events / Timelock Delay** cover strategy additions and the 7-day delay on the Yearn TimelockController; **Safe Multisigs** covers Yearn Safe queues.
-- **No Flex-specific monitor exists** — Trove CRs, bad debt, Lender losses, Flex oracles and Flex governance are unwatched (see the [Flex report's monitoring section](./flex.md#monitoring) for recommended monitors).
+- **No Flex-specific monitor exists in Yearn's repository.** Flex runs its own open-source [`monitoring-bot`](https://github.com/flexmeow/monitoring-bot), which posts Telegram notifications for Trove, auction, registry and allocator-vault events (this vault included). It has no `BadDebt` subscription and no CR, PPS or oracle thresholds. Trove CRs, bad debt, Lender losses, Flex oracles and Flex governance therefore have no alerts (see the [Flex report's monitoring section](./flex.md#monitoring) for recommended monitors).
 
 ### Key Contracts
 
@@ -288,7 +288,7 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 ### Key Risks
 
 - **Concentration in one young protocol:** 81.0% of debt is in Flex, whose markets are isolated but share code, oracle designs and an untimelocked governance Safe that the developer controls with any one other signer.
-- **Exit is mostly asynchronous, and not through the UI:** only ~20.6% exits through a standard redemption, which is all yearn.fi offers. The rest requires calling the `FlexExitRouter` directly, auction execution, and a `maxLoss` that tolerates the asynchronous portion being booked as a loss.
+- **Exit is mostly asynchronous, and not through the UI:** only ~20.6% exits through a standard redemption, which is all that yearn.fi or Flex's interface offers. The rest requires calling the `FlexExitRouter` directly, auction execution, and a `maxLoss` that tolerates the asynchronous portion being booked as a loss.
 - **The vault is the whole lender side:** it owns 99.9% of every Flex USDC Lender, so its largest holder's exit equals unwinding the entire Flex USDC borrower book.
 - **Partly unassessed collateral:** 27.0% of debt sits on collateral chains ending in Liquity V2 BOLD and Curve crvUSD, which this repository has not assessed.
 - **No protocol-level monitoring:** Yearn monitors only the vault's flows and its own governance.
@@ -351,13 +351,13 @@ Verified against [`yearn/monitoring-scripts-py`](https://github.com/yearn/monito
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-About 20.6% of the vault exits atomically through a standard redemption. The rest exits through the `FlexExitRouter`, paid asynchronously from one-day near-par Dutch auctions, with the exiting holder bearing execution and the asynchronous portion booked as a withdrawal loss — a mechanism neither standard ERC-4626 integrations nor the yearn.fi interface use. Same-value assets allow some delay. The deciding factor is large-holder impact: the vault is the sole lender, so its 90.8% holder's exit means unwinding the entire Flex USDC borrower book. The Flex report scores its Lender's liquidity 3; the vault scores half a point worse for that concentration and for the default path's ~20.6% ceiling. → **3.5**
+About 20.6% of the vault exits atomically through a standard redemption. The rest exits through the `FlexExitRouter`, paid asynchronously from one-day near-par Dutch auctions, with the exiting holder bearing execution and the asynchronous portion booked as a withdrawal loss — a mechanism neither standard ERC-4626 integrations nor either front end (yearn.fi, Flex) uses. Same-value assets allow some delay. The deciding factor is large-holder impact: the vault is the sole lender, so its 90.8% holder's exit means unwinding the entire Flex USDC borrower book. The Flex report scores its Lender's liquidity 3; the vault scores half a point worse for that concentration and for the default path's ~20.6% ceiling. → **3.5**
 
 **Score: 3.5/5**
 
 #### Category 5: Operational Risk (Weight: 5%)
 
-Yearn operates the vault (well-known team, BORG entity, comprehensive docs, active vault-level monitoring). The 81.0% underlying is run by a pseudonymous team with no legal entity and no Flex-specific monitoring, and the router exit path is undocumented for users and absent from yearn.fi. → **2**
+Yearn operates the vault (well-known team, BORG entity, comprehensive docs, active vault-level monitoring). The 81.0% underlying is run by a pseudonymous team with no legal entity and no Flex-specific monitoring, and the router exit path is undocumented for users and absent from both interfaces. → **2**
 
 **Score: 2/5**
 
