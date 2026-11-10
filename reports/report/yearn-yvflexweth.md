@@ -349,7 +349,7 @@ The Centralization score is (1 + 1 + 5) / 3 = 2.3333, weighted 0.700. The weight
 
 | Date | Score | Notes |
 |------|------:|-------|
-| [November 10, 2026](https://github.com/yearn/risk-score/pull/TBD) | 2.70 | Initial assessment at block 26382003. 310.31 WETH, 100% in the Flex yvWETH-2/WETH Lender (112.21% backing, 8 Troves); 96.8% held by the yETH Recovery Vault; yvWETH-2 collateral (3,985 WETH) runs Spark lender-borrowers into yvUSD and a 7.94x wstETH looper; no standard exit (`maxWithdraw = 0`) |
+| [November 10, 2026](https://github.com/yearn/risk-score/pull/589) | 2.70 | Initial assessment at block 26382003. 310.31 WETH, 100% in the Flex yvWETH-2/WETH Lender (112.21% backing, 8 Troves); 96.8% held by the yETH Recovery Vault; yvWETH-2 collateral (3,985 WETH) runs Spark lender-borrowers into yvUSD and a 7.94x wstETH looper; no standard exit (`maxWithdraw = 0`) |
 
 ---
 
