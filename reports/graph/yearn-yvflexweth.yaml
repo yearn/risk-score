@@ -1,0 +1,141 @@
+slug: yearn-yvflexweth
+title: Yearn yvFlexWETH — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  - id: yvflexweth
+    label: yvFlexWETH (Flex WETH yVault)
+    address: "0xfaC55fAFD0b55BFb8dD41F735EfCc195adA9891F"
+    category: vault
+    note: >-
+      Yearn V3 vault (v3.1.0) holding 310.31 WETH, 100% in the Flex yvWETH-2/WETH Lender. maxWithdraw is 0;
+      exits go through the FlexExitRouter, which neither yearn.fi nor Flex's interface calls. 96.8% of shares
+      are held by the Yearn yETH Recovery Vault.
+
+  # Depositor
+  - id: yeth-recovery
+    label: Yearn yETH Recovery Vault (96.8%)
+    address: "0xd7a540ba3626c0aa66e7DB4088971d0CD64695B6"
+    category: dependency
+    note: >-
+      Yearn V3 WETH vault (2,433 WETH) owned 34.1% by the yETHRecoveryVault claim wrapper, 33.3% by the Yearn
+      Treasury and 32.5% by yChad. The wrapper is its accountant and takes 100% of profit until yETH claimants
+      reach the target PPS. Also holds 490 WETH of yvWETH-2 directly.
+
+  # Strategy
+  - id: strat-flex
+    label: FlexLenderStrategy — yvWETH-2 (100%)
+    address: "0x7E4a6A89583e117C641aB3ce8897209800A3F2E3"
+    category: strategy
+    note: >-
+      Deposit-gated to this vault; holds 99.98% of the ysWETH Lender. Withdrawable only up to Lender idle cash
+      (0) unless the FlexExitRouter sets a proceeds receiver. Reporting reverts while an auction is unsettled.
+  - id: strat-yvweth1
+    label: yvWETH-1 (1 wei)
+    address: "0xc56413869c6CDf96496f2b1eF801fEDBdFA7dDB0"
+    category: dependency
+    note: Queued strategy holding 1 wei; deposits pass through it before the debt allocator moves them to Flex.
+
+  # Governance
+  - id: role-manager
+    label: Yearn RoleManager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+    note: role_manager since September 25, 2026; also governs yvWETH-2.
+  - id: timelock
+    label: Yearn TimelockController (7 days)
+    address: "0x88ba032be87d5eF1FbE87336B7090767F367BF73"
+    category: governance
+    note: Holds ADD_STRATEGY, REVOKE_STRATEGY, FORCE_REVOKE, ACCOUNTANT and MAX_DEBT.
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+    note: All vault roles except ADD_STRATEGY and ACCOUNTANT; sole timelock proposer.
+  - id: brain
+    label: Brain (3-of-6)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+    note: Operational vault roles; management on the Flex strategy and all yvWETH-2 strategies.
+  - id: flex-daddy-safe
+    label: Flex governance Safe (3-of-5)
+    address: "0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67"
+    category: governance
+    note: >-
+      Owns Flex's Daddy contract (developer holds two of the five keys), which is the Lender's management and
+      performance-fee recipient, with no timelock. Cannot be overridden by any Yearn role.
+
+  # Dependencies
+  - id: lender
+    label: Flex Lender — yvWETH-2/WETH (ysWETH)
+    address: "0x0d57098e501D68905fC4B0A3397f7D4Aa4889E36"
+    category: dependency
+    note: >-
+      Lends to 8 Troves: 310.53 WETH of debt against 318.95 yvWETH-2 (348.43 WETH), backing CR 112.21%.
+      Expanded in the Flex graph.
+  - id: exit-router
+    label: FlexExitRouter
+    address: "0xe8a511403B0C83e7b85513e00Ed39996B48c2aeD"
+    category: dependency
+    note: Async exit through Flex redemption auctions; the undelivered portion is booked as the withdrawer's loss.
+  - id: yvweth2
+    label: yvWETH-2 (collateral, 3,985 WETH)
+    address: "0xAc37729B76db6438CE62042AE1270ee574CA7571"
+    category: dependency
+    note: >-
+      Sole collateral and price input of the market. Yearn V3 vault: 62.8% Spark wstETH→USDS lender-borrower
+      accumulator (withdraw limit 0), 26.1% 7.94x wstETH/WETH Spark looper (outside the default queue), 11.0%
+      Spark WETH→USDS lender-borrower. Not assessed in this repository.
+  - id: lb-wsteth
+    label: Spark wstETH/USDS (yvUSD) Lender Borrower
+    address: "0x41cfE42D221a591C6308Dcea419015Ba8570B380"
+    category: dependency
+    note: 2,006.66 wstETH collateral, 3.137M USDS borrowed into yvUSD; LTV 59.36% vs 84% liquidation threshold.
+  - id: lb-weth
+    label: Spark WETH/USDS (yvUSD) Lender Borrower
+    address: "0x5E8A9Acd00AdCED69b30D36929CbF7D4d4F9AE1F"
+    category: dependency
+    note: 439.97 WETH collateral, 563,896 USDS borrowed into yvUSD; LTV 60.77% vs 86% liquidation threshold.
+  - id: looper
+    label: wstETH/WETH Spark Looper
+    address: "0x68A14629cb07c74259f481382fE8b6cFD8970121"
+    category: dependency
+    note: 7.94x leverage (target 8.0x, max 8.5x); LTV 87.41% vs 93% liquidation threshold.
+  - id: yvusd
+    label: yvUSD
+    address: "0x696d02Db93291651ED510704c9b286841d506987"
+    category: dependency
+    note: Receives ~3.70M USDS lent by yvWETH-2's two lender-borrowers.
+
+edges:
+  - { from: role-manager, to: yvflexweth, kind: controls, label: "role_manager" }
+  - { from: daddy, to: timelock, kind: proposes-on, label: "sole proposer" }
+  - { from: timelock, to: yvflexweth, kind: holds-role, label: "ADD_STRATEGY, REVOKE, FORCE_REVOKE, ACCOUNTANT, MAX_DEBT (7 days)" }
+  - { from: daddy, to: yvflexweth, kind: holds-role, label: "all roles except ADD_STRATEGY / ACCOUNTANT" }
+  - { from: brain, to: yvflexweth, kind: holds-role, label: "revoke, queue, debt, deposit limit, emergency" }
+  - { from: brain, to: strat-flex, kind: holds-role, label: "management" }
+  - { from: role-manager, to: yvweth2, kind: controls, label: "role_manager" }
+  - { from: flex-daddy-safe, to: lender, kind: holds-role, label: "via Daddy: management + performanceFeeRecipient" }
+
+  - { from: yeth-recovery, to: yvflexweth, kind: deposits-into, label: "96.8% of shares" }
+  - { from: yeth-recovery, to: yvweth2, kind: deposits-into, label: "490 WETH direct" }
+  - { from: yvflexweth, to: strat-flex, kind: allocates-to, label: "100%" }
+  - { from: yvflexweth, to: strat-yvweth1, kind: allocates-to, label: "1 wei" }
+  - { from: strat-flex, to: lender, kind: deposits-into, label: "WETH → ysWETH" }
+  - { from: lender, to: yvweth2, kind: routes-through, label: "collateral & oracle, 112.21% CR" }
+  - { from: yvweth2, to: lb-wsteth, kind: allocates-to, label: "62.8% (via wstETH accumulator)" }
+  - { from: yvweth2, to: looper, kind: allocates-to, label: "26.1%" }
+  - { from: yvweth2, to: lb-weth, kind: allocates-to, label: "11.0%" }
+  - { from: lb-wsteth, to: yvusd, kind: deposits-into, label: "3.137M USDS" }
+  - { from: lb-weth, to: yvusd, kind: deposits-into, label: "563,896 USDS" }
+  - { from: exit-router, to: strat-flex, kind: routes-through, label: "setProceedsReceiver — async exit" }
