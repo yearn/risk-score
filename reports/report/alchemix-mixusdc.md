@@ -448,4 +448,4 @@ The score sits in the upper half of Medium Risk. Any Yearn strategy should be **
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| November 16, 2026 | 3.30 | Initial assessment ([issue #596](https://github.com/yearn/risk-score/issues/596)). Snapshot block 26,428,200: MYT 8.14M USDC (siUSD 40.40%, yvUSD 39.93%, Fluid Lite 19.67%); 3-of-7 Safe with zero timelocks; Transmuter 12,458 alUSD capacity free |
+| [November 16, 2026](https://github.com/yearn/risk-score/pull/597) | 3.30 | Initial assessment ([issue #596](https://github.com/yearn/risk-score/issues/596)). Snapshot block 26,428,200: MYT 8.14M USDC (siUSD 40.40%, yvUSD 39.93%, Fluid Lite 19.67%); 3-of-7 Safe with zero timelocks; Transmuter 12,458 alUSD capacity free |
