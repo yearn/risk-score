@@ -117,6 +117,11 @@ nodes:
     address: "0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e"
     category: governance
     note: Fluid Guardian/Team multisig (see Fluid report); fLiteUSD secondary owner and AUTH role (pause withdrawals)
+  - id: fluid-solana
+    label: Fluid Lite Solana strategy
+    address: "0x442287DAFF78D5491a93d537aC96f38732bf7d6F"
+    category: dependency
+    note: SolanaStrategyL1; 25,225,000 sUSDai bridged Ethereum→Arbitrum→Solana (USD.AI OFT) booked as an outstanding claim (~$28.4M); owner and custody multisig = Fluid Avocado 6-of-12
   - id: fusdc
     label: Fluid fUSDC
     address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
@@ -231,6 +236,14 @@ edges:
     to: fluid-handler
     kind: routes-through
     label: pullFunds → leveraged strategies
+  - from: fluid-handler
+    to: fluid-solana
+    kind: routes-through
+    label: largest reported NAV leg (sUSDai on Solana)
+  - from: fluid-avocado
+    to: fluid-solana
+    kind: controls
+    label: owner + TEAM_MULTISIG (sendToTeamMultisig)
   - from: fluid-avocado
     to: fluid-handler
     kind: controls

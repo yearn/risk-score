@@ -4,7 +4,7 @@
 - **Token:** mixUSDC (USDC Mix Yield Token, Alchemix V3 MYT)
 - **Chain:** Ethereum
 - **Token Address:** [`0x9B44efCa3e2a707B63Dc00CE79d646E5E5D24bA5`](https://etherscan.io/address/0x9B44efCa3e2a707B63Dc00CE79d646E5E5D24bA5)
-- **Final Score: 3.30/5.0**
+- **Final Score: 3.33/5.0**
 - **Snapshot:** Ethereum block [26,428,200](https://etherscan.io/block/26428200) (hash `0x511d24f1a5b1482a5728a198de3ae7a52b2b2abedd8d2be7c66d61f19d27194f`), November 16, 2026 14:30:23 UTC. All `cast` reads below are pinned to this block unless stated otherwise; event histories were replayed from the MYT deployment block (24,875,892) to the snapshot.
 
 ## Overview + Links
@@ -108,9 +108,9 @@ The MYT vault itself is Morpho's `VaultV2` (Morpho Association, GPL-2.0). It is 
 - On June 29–30, 2026, Alchemix committed a proof-of-concept test, `src/test/poc/TokeAutoForceDeallocateUpdatedRun.t.sol`. It drives an Aave flash loan through `MYT.deposit` and `forceDeallocate` against a TokeAuto strategy.
 - The same commits made force-deallocation **opt-in with the guard defaulting to false** ([`54106236`](https://github.com/alchemix-finance/v3/commit/54106236cd92e09f96de8770383d1312206c4a9c)) and added an event on changes ([`7b8030fa`](https://github.com/alchemix-finance/v3/commit/7b8030faddb91b9408fe3352b0b3d5b5f2e019b9)).
 - On this MYT, the original TokeAutoUSD adapter ([`0x4610815e65901e66237ef07493a06cbac783c188`](https://etherscan.io/address/0x4610815e65901e66237ef07493a06cbac783c188)) was superseded by a new one ([`0xBE60E0BC077e5221A05D95bA8EF2BF233C799773`](https://etherscan.io/address/0xBE60E0BC077e5221A05D95bA8EF2BF233C799773), added [July 2, 2026](https://etherscan.io/tx/0x848f99ffdf30888acb079ab63ee256d76da122775be7dfd44d960b19b2cc8756), `canForceDeallocate()` = false). The original was removed on [September 23, 2026](https://etherscan.io/tx/0x733f2c75ca3eee4068e67210ad98592228d5fabbdef3389bafe67de9a2f4b9f6) holding 379 wei.
-- MYT's share price shows no decrease at biweekly samples across the period.
+- **No `ForceDeallocate` has ever been executed** on either Ethereum MYT: zero `ForceDeallocate` events on mixUSDC and on the ETH MYT [`0x29bcfeD246ce37319d94eBa107db90C453D4c43D`](https://etherscan.io/address/0x29bcfeD246ce37319d94eBa107db90C453D4c43D) from deployment to the snapshot. Per Alchemix's audit table, TokeAuto runs only on Mainnet, so no TokeAuto strategy anywhere has used the PoC path. MYT's share price shows no decrease at biweekly samples.
 
-Alchemix has not confirmed that this fix is the Immunefi finding, and whether any funds were lost is undisclosed (`TODO`; source: an Alchemix disclosure). The Alchemist implementation was also upgraded on [May 1](https://etherscan.io/tx/0xcf6b368c77290f99a1d8211885c52c231c8f351bb651f74e3d2efc8374d4d7f0) and [July 25, 2026](https://etherscan.io/tx/0xb52be39bebc466d4533defac587fc71d20853e74c9854e5d6449ac7953f26d5e). The deployed adapters run two `MYTStrategy` base versions: the yvUSD adapter predates the opt-in guard and still allows force-deallocation.
+Alchemix has not formally confirmed that this fix is the Immunefi finding (`TODO`: Alchemix disclosure). Because no `ForceDeallocate` was ever executed on the Mainnet MYTs, **no funds were lost through this path onchain**. The Alchemist implementation was also upgraded on [May 1](https://etherscan.io/tx/0xcf6b368c77290f99a1d8211885c52c231c8f351bb651f74e3d2efc8374d4d7f0) and [July 25, 2026](https://etherscan.io/tx/0xb52be39bebc466d4533defac587fc71d20853e74c9854e5d6449ac7953f26d5e). The deployed adapters run two `MYTStrategy` base versions: the yvUSD adapter predates the opt-in guard and still allows force-deallocation.
 
 ### Bug Bounty
 
@@ -151,15 +151,25 @@ Fluid Lite adds a leveraged layer on top of fUSDC. Per [Instadapp's docs](https:
   - It is also the admin (EIP-1967 admin slot) of the **strategy handler** Infinite Proxy ([`0x066e84CA92529B500592867D0Be89E78563fA965`](https://etherscan.io/address/0x066e84CA92529B500592867D0Be89E78563fA965)), where it can `addImplementation` **with no timelock**.
   - The handler is the only caller of the vault's `pullFunds` (withdraws idle fUSDC to the handler) and `updateExchangePrice`, and it runs the leveraged positions.
   - **The weakest Fluid Lite path is therefore the 6-of-12 Avocado multisig upgrading the strategy handler instantly**. That exposes the vault's idle fUSDC and all deployed strategy capital, a stronger threshold than Alchemix's own 3-of-7.
-- Open items:
-  - **Audits:** neither the [Fluid audits page](https://docs.fluid.instadapp.io/audits-and-security.html) nor the [Lite guides](https://lite.guides.instadapp.io/information/risks) list an audit of the Lite vault or strategy handler. Alchemix's [Nethermind (Aug 2026) review](https://docs.alchemix.fi/user/safety/security) covers only the Alchemix-side ERC-4626 adapter.
-  - **Positions:** the strategy handler's `getNetAssets()` reverts at the snapshot (`FluidStrategyHandlerError(30012)`), and the leveraged positions sit on Arbitrum and Plasma. Per-chain sizes and leverage are `TODO` (requires Instadapp reporting or remote-chain reads).
-  - **Rebalancer roles:** the handler (modules `AdminModule`, `AssetModule`, `RebalancerModule`) lists these roles in `getAllRoles()`:
-    - Class 1: EOA [`0x591c35dDA6068872B9D8c836a3B9F376183F9b39`](https://etherscan.io/address/0x591c35dDA6068872B9D8c836a3B9F376183F9b39) and Avocado wallet [`0x43A9b1F93Aa41f60e0D88Cd27775Bb3cbC1C90b7`](https://etherscan.io/address/0x43A9b1F93Aa41f60e0D88Cd27775Bb3cbC1C90b7);
-    - Class 2: Avocado wallets [`0xE87531e34E042262C03bcbbEfCb36ccc45bFE34f`](https://etherscan.io/address/0xE87531e34E042262C03bcbbEfCb36ccc45bFE34f) and [`0x3e6FeBd2b195e1Ef3e8e3F4AABB6772aada32353`](https://etherscan.io/address/0x3e6FeBd2b195e1Ef3e8e3F4AABB6772aada32353);
-    - level 4 (auth): Fluid's 6-of-12 multisig.
+- **Strategies and positions.** `getStrategies()` on the handler lists four registered strategies. The handler's aggregate `getNetAssets()` reverts at the snapshot with `StrategyHandler__NavTimestampsOutOfRange`: it requires cross-chain NAVs to be under 1 hour old, and `getLastReconciliationTimestamp()` = 0. Each strategy's own `getNetAssets()` reads:
 
-    Per the [Lite docs](https://lite.guides.instadapp.io/getting-started/vault-features), Class 2 can move capital between fUSDC and strategy contracts and bridge it, but cannot withdraw from the vault. The code-enforced bounds on Class 2 and those wallets' signer thresholds are `TODO`.
+  | Strategy | Chain | Reported NAV (USD) | Notes |
+  |----------|-------|-------------------:|-------|
+  | [`FluidMainnetStrategy` `0xf3c971C659B8651Fd6721De759b4048aeA3cD6a2`](https://etherscan.io/address/0xf3c971C659B8651Fd6721De759b4048aeA3cD6a2) | Ethereum | 17,072,050 | Five DSA sub-accounts running leveraged positions; owner is the 24 h `FluidTimelockController` |
+  | [`SolanaStrategyL1` `0x442287DAFF78D5491a93d537aC96f38732bf7d6F`](https://etherscan.io/address/0x442287DAFF78D5491a93d537aC96f38732bf7d6F) | Ethereum → **Solana** | 28,408,691 | **25,225,000 sUSDai** booked as an `outstanding` claim (`getOutstanding(sUSDai)`), last updated October 12, 2026. Owner and `TEAM_MULTISIG` are Fluid's 6-of-12 Avocado |
+  | [`FluidLiteL2Strategy` `0x51918Bd79C6E5E460783E229Ec018602dAa5Be16`](https://arbiscan.io/address/0x51918Bd79C6E5E460783E229Ec018602dAa5Be16) | Arbitrum | 7,599,361 | Read on Arbitrum at block 524,773,450 (same timestamp as the Ethereum snapshot) |
+  | `0x4b8E388710BCeAdBa1C97C8954587BDFB17A6B2f` | Plasma (9745) | `TODO` | No Plasma RPC is configured; the stale Ethereum-side mirror reads 3.01 USD from March 2026 |
+
+  - **The Solana leg** is the largest reported position. It was bridged through Fluid's `FluidSolanaBridgeRouter` ([`0x9abF0Bb5D3a0dDcbB5Cf64D12f781B6740F80748`](https://etherscan.io/address/0x9abF0Bb5D3a0dDcbB5Cf64D12f781B6740F80748)) "Solana hop", which sends sUSDai Ethereum → Arbitrum → Solana over USD.AI's LayerZero OFT. That ran in 14 `LogBridgeToSolana` transfers between September 22 and October 12, 2026. USDC sent earlier over CCIP (1.0M in total) shows 0 outstanding after a 5.1M USDC `returnFunds` on September 25, 2026.
+  - **Custody and valuation:** `getNetAssets()` values strategy-held tokens plus `outstanding` claims at the Fluid price oracle. The Solana position therefore cannot be verified from EVM state. The same strategy also has a `sendToTeamMultisig` custody leg that moves tokens to the 6-of-12 multisig and books them as an outstanding claim.
+  - **NAV versus liabilities:** reported strategy NAVs plus the 7.93M idle fUSDC total **≥ $61.0M** (excluding Plasma), against fLiteUSD `totalAssets()` of **$37.30M**. The source of the ≥ $23.7M difference is undisclosed: possibly Fluid-supplied capital or reserves (`getReserves()` = 0), or NAV double counting. It is `TODO`, requiring an Instadapp explanation.
+- **Rebalancer roles** (`getAllRoles()` on the handler):
+  - Class 1: EOA [`0x591c35dDA6068872B9D8c836a3B9F376183F9b39`](https://etherscan.io/address/0x591c35dDA6068872B9D8c836a3B9F376183F9b39) and a **1-of-1** Avocado wallet [`0x43A9b1F93Aa41f60e0D88Cd27775Bb3cbC1C90b7`](https://etherscan.io/address/0x43A9b1F93Aa41f60e0D88Cd27775Bb3cbC1C90b7);
+  - Class 2: **2-of-2** Avocado wallets [`0xE87531e34E042262C03bcbbEfCb36ccc45bFE34f`](https://etherscan.io/address/0xE87531e34E042262C03bcbbEfCb36ccc45bFE34f) and [`0x3e6FeBd2b195e1Ef3e8e3F4AABB6772aada32353`](https://etherscan.io/address/0x3e6FeBd2b195e1Ef3e8e3F4AABB6772aada32353);
+  - level 4 (auth): Fluid's 6-of-12 multisig.
+
+  In the verified `RebalancerModule`, Class 2 (`pullFromVault`, `depositToStrategy`, `withdrawFromStrategy`, `rebalanceBetweenStrategies`) can only move supported tokens between the vault, the handler, and **registered** strategies. `addStrategy`/`removeStrategy` are `onlyOwner`, i.e. the 24 h timelock. Class 1 can only push to the vault and deploy idle USDC. Bridge destinations are owner-set, so rebalancers cannot redirect funds to themselves. The instant handler-upgrade path above bypasses all of these bounds.
+- **Audits:** neither the [Fluid audits page](https://docs.fluid.instadapp.io/audits-and-security.html) nor the [Lite guides](https://lite.guides.instadapp.io/information/risks) list an audit of the Lite vault, handler, or strategies. Alchemix's [Nethermind (Aug 2026) review](https://docs.alchemix.fi/user/safety/security) covers only the Alchemix-side ERC-4626 adapter.
 
 ### Circular exposure with yvUSD
 
@@ -193,9 +203,16 @@ MYT is a **24.3% holder of yvUSD**, and yvUSD is MYT's liquidity adapter. If the
 | V1 `Alchemist` [`0xc21D353FF4ee73C572425697f4F5aaD2109fe35b`](https://etherscan.io/address/0xc21D353FF4ee73C572425697f4F5aaD2109fe35b) | ✓ | 70,000,000 / 6,181,071 | `paused` = true; collateral-backed. A `SENTINEL` (incl. the EOA below) can unpause it |
 | `MigrationTool` [`0x303241e2b3b4aed0bb0f8623e7442368fed8faf3`](https://etherscan.io/address/0x303241e2b3b4aed0bb0f8623e7442368fed8faf3), [`0xe1f27add45652812bad02e26eec588f0ef97e1d3`](https://etherscan.io/address/0xe1f27add45652812bad02e26eec588f0ef97e1d3), [`0x0d4289008e9e566836effea7664eeb60f2ee6fa9`](https://etherscan.io/address/0x0d4289008e9e566836effea7664eeb60f2ee6fa9) | ✓ | unlimited (max uint) | V2 migration helpers. `migrateVaults` flash-mints alUSD, burns it against the caller's V2 debt, re-mints via `AlchemistV2.mintFrom`, and burns the balance in the same transaction, so the mint is atomic and self-netting. The V2 Alchemist is no longer whitelisted, so any migration with debt now reverts |
 | `MigrationTool` [`0x88970ee3eb5844ba29f684e85f7f33d58b7b5c47`](https://etherscan.io/address/0x88970ee3eb5844ba29f684e85f7f33d58b7b5c47) | ✓ | 0 | Cannot mint (ceiling 0) |
+| `MigrationTool` [`0x0a86adbf58424ee2e304b395af0697e850730ecd`](https://etherscan.io/address/0x0a86adbf58424ee2e304b395af0697e850730ecd) | ✓ | unlimited / 0 | Same flash-mint pattern, targets the V2 Alchemist; never minted |
+| **Unverified** `MigrationTool` clone [`0xaeff0d3f487f0431318d923f691ff9c484c7564e`](https://etherscan.io/address/0xaeff0d3f487f0431318d923f691ff9c484c7564e) | ✓ | **unlimited** / 0 | Whitelisted by the DAO multisig on February 14, 2025 ([tx](https://etherscan.io/tx/0xec10d9f3acca84f3e6dcdcc8865351d42f0ea5fe7e45d028946808ada48317bc)). Source not verified on Etherscan; its bytecode exposes exactly the `MigrationTool` selectors (`migrateVaults`, `previewMigration`, `multicall`), `version()` = "1.0.1", and `alchemist()` = the V2 Alchemist. Never minted. Behaviour is inferred, not source-verified |
 | V2 `AlchemistV2` proxy [`0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd`](https://etherscan.io/address/0x5C6374a2ac4EBC38DeA0Fc1F8716e5Ea1AdD94dd) | — | 1e12 alUSD / 21,941,473 | **Not whitelisted**: cannot mint |
 
-None of the other 141 addresses has a whitelist entry or ceiling, and no bridge contract appears among historical Ethereum minters. This method cannot detect an address that is whitelisted but has never minted, which remains `TODO` and would require a full `setWhitelist` call trace; the Dune trace query exceeded the available quota.
+None of the other 141 addresses has a whitelist entry or ceiling. To catch addresses that are whitelisted but have never minted, every account that has ever held alUSD `ADMIN` was traced. The only holders were the deployer EOA [`0x51e029a5ef288fb87c5e8dd46895c353ad9aaaec`](https://etherscan.io/address/0x51e029a5ef288fb87c5e8dd46895c353ad9aaaec) (blocks 11,937,214–11,938,011), the legacy multisig (since 11,938,003), and the DAO multisig (since 21,843,844), per `RoleGranted`/`RoleRevoked`. For each, all `setWhitelist`/`setCeiling` calls were decoded:
+- the deployer's direct transactions;
+- all 2,036 stored legacy-multisig transactions (`transactions(i)`);
+- all 701 DAO-multisig `execTransaction` calls since the grant, including `multiSend` batches.
+
+This added the two never-used tools above, plus the V2 de-whitelisting and V3 whitelisting at the V3 launch ([tx](https://etherscan.io/tx/0xa5d5d5e90b10587dcefce02753a3fac1a0832b184cec45b76d52fab95151dc09), April 15, 2026). Calls nested inside other helper contracts are not decoded. With the V2 Alchemist de-whitelisted, every tool's debt-migration path reverts, and the **V3 Alchemist is the only working mint path**. The unverified, uncapped `0xaeff…564e` remains a residual trust item on alUSD supply.
 
 | Role on alUSD | Holders (enumerated via `getRoleMemberCount`/`getRoleMember`) | Power |
 |---------------|------------------------------------------------------------|-------|
@@ -223,7 +240,7 @@ Unbacked alUSD would not change V3 `totalSyntheticsIssued`, so it cannot dilute 
 **MYT redemption.** There is no secondary market for mixUSDC; exit is redemption only.
 
 1. **Instant via the liquidity adapter:** up to the yvUSD position, **3.25M USDC (39.9% of MYT)**, subject to yvUSD's own withdrawal queue (fully withdrawable at the snapshot).
-2. **`forceDeallocate` (permissionless, 2% penalty):** `forceDeallocatePenalty` = 0.02e18 on every adapter. The **siUSD adapter** allows it (direct unstake + InfiniFi redeem, which depends on InfiniFi's 11.93M LIQUID bucket), as does the yvUSD adapter (older base, no opt-out). **Fluid Lite and TokeAuto have `canForceDeallocate()` = false**, so the 19.67% in Fluid Lite can only be withdrawn when the allocator (the v3 admin Safe) acts or the DAO sentinel calls `deallocate`. `ForceDeallocate` has been used 6 times since launch.
+2. **`forceDeallocate` (permissionless, 2% penalty):** `forceDeallocatePenalty` = 0.02e18 on every adapter. The **siUSD adapter** allows it (direct unstake + InfiniFi redeem, which depends on InfiniFi's 11.93M LIQUID bucket), as does the yvUSD adapter (older base, no opt-out). **Fluid Lite and TokeAuto have `canForceDeallocate()` = false**, so the 19.67% in Fluid Lite can only be withdrawn when the allocator (the v3 admin Safe) acts or the DAO sentinel calls `deallocate`. No `ForceDeallocate` has ever been executed on this MYT (zero events through the snapshot).
 3. **Allocator deallocation:** unbounded, discretionary, no SLA.
 
 **Transmuter path (proposed Yearn strategy):**
@@ -329,6 +346,7 @@ Three newer or high-complexity yield sources with no fallback make up 100% of th
 | Medium (daily) | `depositCap − totalActiveLocked` | Transmuter | Capacity for strategy deposits |
 | Medium (daily) | yvUSD `maxWithdraw(0xdFDC…e220)` vs MYT outstanding claims | yvUSD | < 25% of MYT TVL |
 | Medium (daily) | Fluid Lite `getIdleBalance()`, `isWithdrawalsPaused()`, `getExchangePrice()` updates | fLiteUSD | Idle < 2× MYT position or withdrawals paused |
+| Medium (daily) | Fluid Lite `SolanaStrategyL1.getOutstanding(sUSDai)`, `LogSendToTeamMultisig`, handler `addImplementation` / `LogSetImplementation` | Fluid Lite strategy [`0x442287DAFF78D5491a93d537aC96f38732bf7d6F`](https://etherscan.io/address/0x442287DAFF78D5491a93d537aC96f38732bf7d6F), handler | Any custody-leg send, a handler module change, or the outstanding claim growing above 25.2M |
 | Medium (daily) | InfiniFi `Accounting.totalAssetsValueOf(1)` | InfiniFi | LIQUID bucket < 2× MYT siUSD position |
 | Medium (daily) | alUSD/USDC and alUSD/frxUSD `get_dy` | Curve | Discount > 5% (stress) or < 1% (strategy unprofitable) |
 | Low (weekly) | Safe `getThreshold()`/`getOwners()` for v3 admin and DAO Safes; alUSD `ADMIN` role members | Safes, alUSD | Any change |
@@ -385,7 +403,7 @@ Three newer or high-complexity yield sources with no fallback make up 100% of th
 ### Key Risks
 
 - **Single 3-of-7 Safe with zero timelocks** controls the MYT adapter set, caps, allocations, adapter swap parameters, the Alchemist implementation, and Transmuter fees. The DAO sentinel shares 6 of 7 signers and has no revoke window.
-- **Underlying quality is mixed and concentrated:** 40% InfiniFi (offchain-RWA-heavy), 40% yvUSD (cross-chain and levered legs; circular if the Yearn strategy sits in yvUSD), and 20% Fluid Lite, whose share price **cannot decrease** and so masks losses until withdrawals fail.
+- **Underlying quality is mixed and concentrated:** 40% InfiniFi (offchain-RWA-heavy), 40% yvUSD (cross-chain and levered legs; circular if the Yearn strategy sits in yvUSD), and 20% Fluid Lite, whose share price **cannot decrease** and so masks losses until withdrawals fail. Fluid Lite's largest reported position is 25.2M sUSDai bridged to Solana and booked as an unverifiable claim.
 - **Transmuter capacity is effectively full** (12,458 alUSD free of 2.5M), and alUSD entry and exit liquidity is shallow and imbalanced. **83–89% of the two largest alUSD pools is Alchemix protocol-owned liquidity** that the same signer group already pulled once (2.6M LP on July 7, 2026). The strategy's deployable size and early-exit value are tightly constrained.
 - **Thin borrower buffers:** the largest positions sit at CR ≈ 1.114 against liquidation at 1.053. A ~10% MYT drawdown would create bad debt and pro-rata Transmuter haircuts.
 - **Recent and evolving code:** about 7 months in production, a June 2026 critical in a strategy, two Alchemist upgrades, and two adapter base versions in use.
@@ -427,11 +445,11 @@ Three newer or high-complexity yield sources with no fallback make up 100% of th
 #### Category 3: Funds Management (Weight: 30%)
 
 - **Collateralization: 3.5**: MYT is 100% backed by onchain positions, but the underlying quality is mixed: offchain RWA (InfiniFi) and a leveraged cross-chain vault whose price cannot reflect losses (Fluid Lite). Curation is discretionary with instantly raisable caps. The Alchemist is overcollateralized at the system level (CR 1.90), with thin buffers on the largest borrowers.
-- **Provability: 3.0**: MYT and Alchemix V3 accounting is fully onchain and reconciles. Underlying values rely on InfiniFi NAV/attestations and Instadapp's reported exchange price.
+- **Provability: 3.25**: MYT and Alchemix V3 accounting is fully onchain and reconciles. Underlying values rely on InfiniFi NAV/attestations and on Fluid Lite's non-decreasing exchange price. Fluid Lite's largest reported leg (25.2M sUSDai on Solana) is an outstanding claim that cannot be verified from EVM state, and its reported NAV does not reconcile to its liabilities.
 
-**Funds Management Score = (3.5 + 3.0) / 2 = 3.25**
+**Funds Management Score = (3.5 + 3.25) / 2 = 3.375**
 
-**Score: 3.25/5**
+**Score: 3.38/5**
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -447,10 +465,10 @@ Three newer or high-complexity yield sources with no fallback make up 100% of th
 |----------|-------|--------|----------|
 | Audits & Historical | 3.00 | 20% | 0.600 |
 | Centralization & Control | 3.67 | 30% | 1.100 |
-| Funds Management | 3.25 | 30% | 0.975 |
+| Funds Management | 3.375 | 30% | 1.0125 |
 | Liquidity Risk | 3.50 | 15% | 0.525 |
 | Operational Risk | 2.00 | 5% | 0.100 |
-| **Final Score** | | | **3.30/5.0** |
+| **Final Score** | | | **3.33/5.0** |
 
 **Optional Modifiers:** none apply (V3 has been live < 2 years; TVL < $500M).
 
@@ -487,4 +505,4 @@ The score sits in the upper half of Medium Risk. Any Yearn strategy should be **
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| [November 16, 2026](https://github.com/yearn/risk-score/pull/597) | 3.30 | Initial assessment ([issue #596](https://github.com/yearn/risk-score/issues/596)). Snapshot block 26,428,200: MYT 8.14M USDC (siUSD 40.40%, yvUSD 39.93%, Fluid Lite 19.67%); 3-of-7 Safe with zero timelocks; Transmuter 12,458 alUSD capacity free |
+| [November 16, 2026](https://github.com/yearn/risk-score/pull/597) | 3.33 | Initial assessment ([issue #596](https://github.com/yearn/risk-score/issues/596)). Snapshot block 26,428,200: MYT 8.14M USDC (siUSD 40.40%, yvUSD 39.93%, Fluid Lite 19.67%); 3-of-7 Safe with zero timelocks; Transmuter 12,458 alUSD capacity free |
