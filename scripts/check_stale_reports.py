@@ -1,4 +1,9 @@
-"""Scan reports/report/*.md and open reassessment issues for stale reports.
+"""Open reassessment issues for stale Yearn reports and listed dependencies.
+
+Yearn assets (yearn-*.md) are discovered automatically. reports/reassessment.json
+lists external protocols/assets used by Yearn, including approved but unfunded
+integrations. Other reports are not scanned. Missing reports are logged and
+counted as failures after the remaining reports have been scanned.
 
 A report is considered stale if its assessment date is more than STALE_DAYS old.
 The assessment date is parsed from the `**Assessment Date:**` line in the report
@@ -7,7 +12,8 @@ latest date wins. If no date can be parsed, falls back to the file's last git
 commit date.
 
 Existing open issues with the `reassessment` label and matching title are not
-re-created, so the workflow is safe to run repeatedly.
+re-created. Out-of-scope issues are flagged for manual review. DRY_RUN previews
+eligible stale reports locally without querying GitHub or checking open issues.
 """
 
 import json
@@ -21,6 +27,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 REPORTS_DIR = Path("reports/report")
+REASSESSMENT_LIST = Path("reports/reassessment.json")
 STALE_DAYS = 60
 LABEL = "reassessment"
 TITLE_PREFIX = "Reassessment: "
@@ -46,6 +53,55 @@ TERMINAL_STATUSES = {
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 log = logging.getLogger("stale-reports")
+
+
+def load_reassessment_reports() -> list[Path]:
+    """Validate external dependency slugs and discover Yearn asset reports.
+
+    Returns:
+        Sorted paths to reports eligible for reassessment.
+
+    Raises:
+        ValueError: If the list is unreadable, malformed, unsorted, or contains Yearn slugs.
+    """
+    try:
+        slugs = json.loads(REASSESSMENT_LIST.read_text())
+    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+        raise ValueError(
+            f"cannot read {REASSESSMENT_LIST}: {exc}; fix the report list"
+        ) from exc
+
+    if not isinstance(slugs, list):
+        raise ValueError(
+            f"{REASSESSMENT_LIST} must contain a JSON array of report slugs"
+        )
+    invalid = [
+        slug
+        for slug in slugs
+        if not isinstance(slug, str)
+        or not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", slug)
+    ]
+    if invalid:
+        raise ValueError(
+            f"{REASSESSMENT_LIST} contains invalid report slugs: {invalid!r}"
+        )
+    if len(slugs) != len(set(slugs)):
+        raise ValueError(
+            f"{REASSESSMENT_LIST} contains duplicate report slugs; remove duplicates"
+        )
+    if slugs != sorted(slugs):
+        raise ValueError(
+            f"{REASSESSMENT_LIST} must be sorted alphabetically by report slug"
+        )
+    if any(slug.startswith("yearn-") for slug in slugs):
+        raise ValueError(
+            f"{REASSESSMENT_LIST} must contain only external dependencies; "
+            "yearn-* reports are discovered automatically"
+        )
+
+    paths = [REPORTS_DIR / f"{slug}.md" for slug in slugs]
+    paths.extend(REPORTS_DIR.glob("yearn-*.md"))
+    return sorted(paths)
 
 
 def parse_dates_from_line(line: str) -> list[datetime]:
@@ -150,6 +206,22 @@ def open_reassessment_titles() -> set[str]:
     return {issue["title"] for issue in json.loads(out)}
 
 
+def flag_out_of_scope_issues(paths: list[Path], existing_titles: set[str]) -> None:
+    """Log open reassessment issues whose slugs are no longer eligible.
+
+    Args:
+        paths: All selected paths, including missing files that need repair.
+        existing_titles: Titles of open issues carrying the reassessment label.
+    """
+    eligible_titles = {f"{TITLE_PREFIX}{path.stem}" for path in paths}
+    for title in sorted(existing_titles - eligible_titles):
+        if title.startswith(TITLE_PREFIX):
+            log.warning(
+                "OUT-OF-SCOPE %s — open issue is no longer scheduled; review and close manually",
+                title,
+            )
+
+
 def extract_repo_slug(remote_url: str) -> str | None:
     """Return owner/repo from common GitHub remote URL forms."""
     patterns = (
@@ -239,25 +311,31 @@ def create_issue(title: str, body: str, dry_run: bool) -> bool:
     return False
 
 
-def main() -> int:
-    dry_run = os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+def scan_reports(paths: list[Path], existing_titles: set[str], dry_run: bool) -> int:
+    """Apply the existing stale-report rules to the selected report paths.
+
+    Args:
+        paths: Reports included in the reassessment list.
+        existing_titles: Titles of open reassessment issues to avoid duplicating.
+        dry_run: Whether to preview issue creation without writing to GitHub.
+
+    Returns:
+        One if any report read or issue creation failed, otherwise zero.
+    """
     now = datetime.now(timezone.utc)
     cutoff = now - timedelta(days=STALE_DAYS)
-
-    if not REPORTS_DIR.is_dir():
-        log.error("reports directory not found: %s", REPORTS_DIR)
-        return 1
-
-    if dry_run:
-        log.info("DRY-RUN enabled — no issues will be created")
-    existing_titles = open_reassessment_titles()
-    log.info("found %d existing open reassessment issues", len(existing_titles))
-
     stale_count = 0
     skipped_count = 0
     failed_count = 0
-    for path in sorted(REPORTS_DIR.glob("*.md")):
-        report = parse_report(path)
+    for path in paths:
+        try:
+            report = parse_report(path)
+        except (OSError, UnicodeError) as exc:
+            log.error(
+                "cannot read %s: %s; continuing with remaining reports", path, exc
+            )
+            failed_count += 1
+            continue
         if report["terminal_status"]:
             log.info(
                 "SKIP %s — terminal status: %s",
@@ -294,12 +372,40 @@ def main() -> int:
             failed_count += 1
 
     log.info(
-        "done: %d new issue(s), %d skipped (already open), %d failed",
+        "done: %d new issue(s), %d skipped (already open or terminal), %d failed",
         stale_count,
         skipped_count,
         failed_count,
     )
     return 1 if failed_count else 0
+
+
+def main() -> int:
+    dry_run = os.environ.get("DRY_RUN", "").lower() in ("1", "true", "yes")
+    if not REPORTS_DIR.is_dir():
+        log.error("reports directory not found: %s", REPORTS_DIR)
+        return 1
+
+    try:
+        paths = load_reassessment_reports()
+    except ValueError as exc:
+        log.error("%s", exc)
+        return 1
+
+    if dry_run:
+        log.info(
+            "DRY-RUN offline preview — no GitHub calls; open issues are not checked"
+        )
+    log.info(
+        "scanning %d Yearn reports and dependencies from %s",
+        len(paths),
+        REASSESSMENT_LIST,
+    )
+    existing_titles = set() if dry_run else open_reassessment_titles()
+    flag_out_of_scope_issues(paths, existing_titles)
+    if not dry_run:
+        log.info("found %d existing open reassessment issues", len(existing_titles))
+    return scan_reports(paths, existing_titles, dry_run)
 
 
 if __name__ == "__main__":

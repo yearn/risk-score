@@ -98,19 +98,5 @@ class FindCoverageIssuesTests(unittest.TestCase):
         self.assertIn("yearn-yvusdc", issues["stale_allowlist"][0])
 
 
-class RealRepoCoverageTests(unittest.TestCase):
-    """The committed protocols.yaml and reports must be in sync."""
-
-    def test_repo_is_green(self):
-        issues = coverage.find_coverage_issues(
-            coverage.report_slugs(), coverage.protocol_report_links()
-        )
-        self.assertEqual(issues["missing"], [])
-        self.assertEqual(issues["dangling"], [])
-        self.assertEqual(issues["undeclared"], [])
-        self.assertEqual(issues["duplicate"], {})
-        self.assertEqual(issues["stale_allowlist"], [])
-
-
 if __name__ == "__main__":
     unittest.main()

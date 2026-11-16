@@ -24,27 +24,32 @@ nodes:
     label: HYPE++ Trader OMS
     address: "0x8CaBD8b787e8c69C5f24091cFDA197fF570345B3"
     category: strategy
-    note: Non-proxy selector router (~4.2KB code); delegatecalls modules; funds custodied here during epochs
+    note: Non-proxy selector router (~4.2KB code); delegatecalls modules; custodied 8.66M USDC for epoch 23 (Oct 2, 2026 – Jan 15, 2027)
   - id: dgnhype-vault
     label: dgnHYPE Vault
     address: "0x64167cd42859F64cfF2Aa4B63c3175cceF9659dd"
     category: strategy
-    note: Nested D2 strategy held by HYPE++ trader; ~64.2% of HYPE++ assets
+    note: Nested D2 VaultV0 held 100% by HYPE++ trader; 6.00M USDC = 69.27% of HYPE++ assets (Oct 12, 2026)
   - id: dgnhype-trader
     label: dgnHYPE Custody Safe
     address: "0x155d0B27B754ebC664aeD565945C1AaEa91966fb"
     category: strategy
-    note: Nested 3-of-5 unrestricted custody Safe; routes capital through operational EOAs
+    note: Nested 3-of-5 unrestricted custody Safe; 3.41M USDC held directly vs 6.00M custodied; routes capital through operational EOAs
   - id: hyperliquid-operator-1
     label: Hyperliquid Operator EOA 1
     address: "0x0C684f333A7e120bce61383DA670bbB0157e82d0"
     category: strategy
-    note: Received 5.0M USDC from dgnHYPE Safe in July 2026 before Bridge2 deposits
+    note: Received 5.0M USDC (Jul 2026, via Bridge2) and 2.60M USDC (Oct 12, 2026, via Circle CCTP) from dgnHYPE Safe; returned ~3.10M via CCTP Sep 19, 2026
   - id: hyperliquid-operator-2
     label: Hyperliquid Operator EOA 2
     address: "0x11A691612BD108e57cC04ea42B006C9CB1ff006A"
     category: strategy
     note: Received 400k USDC from dgnHYPE Safe in August 2026; uses Bridge2 and Circle CCTP
+  - id: hyperliquid-operator-3
+    label: Hyperliquid Operator EOA 3
+    address: "0x4c3d48cbe2186beeafecc6723630ab8eda4117fc"
+    category: strategy
+    note: Returned ~2.55M USDC from Hyperliquid to dgnHYPE Safe via CCTP V2 mints on Sep 19, 2026; holds leveraged HyperCore perps
   - id: hyperliquid-bridge
     label: Hyperliquid Bridge2
     address: "0x2Df1c51E09aECF9cacB7bc98cB1742757f163dF7"
@@ -55,6 +60,16 @@ nodes:
     address: "0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE"
     category: dependency
     note: Circle-documented Arbitrum extension for USDC transfers to HyperCore
+  - id: cctp-v2
+    label: Circle CCTP V2 MessageTransmitter
+    address: "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64"
+    category: dependency
+    note: Mints USDC on Arbitrum for withdrawals from Hyperliquid (source domain 19, HyperEVM)
+  - id: aave-v3
+    label: Aave V3 aArbUSDCn
+    address: "0x724dc807b04555b71ed48a6896b6f41593b8c637"
+    category: dependency
+    note: Aave V3 Arbitrum native-USDC aToken; 1.66M USDC = 19.18% of HYPE++ assets (Oct 12, 2026)
   - id: hypercore
     label: HyperCore Trading
     category: dependency
@@ -134,11 +149,15 @@ edges:
   - from: hypeplus-trader
     to: usdc
     kind: deposits-into
-    label: direct USDC
+    label: direct USDC (11.56%)
+  - from: hypeplus-trader
+    to: aave-v3
+    kind: deposits-into
+    label: "aave_supply (19.18%)"
   - from: hypeplus-trader
     to: dgnhype-vault
     kind: deposits-into
-    label: dgnHYPE shares
+    label: dgnHYPE shares (69.27%)
   - from: dgnhype-vault
     to: dgnhype-trader
     kind: allocates-to
@@ -150,7 +169,7 @@ edges:
   - from: dgnhype-trader
     to: hyperliquid-operator-1
     kind: deposits-into
-    label: 5.0M USDC (Jul 2026)
+    label: 5.0M USDC (Jul 2026); 2.60M USDC (Oct 12 2026)
   - from: dgnhype-trader
     to: hyperliquid-operator-2
     kind: deposits-into
@@ -163,6 +182,26 @@ edges:
     to: hyperliquid-bridge
     kind: deposits-into
     label: USDC bridge deposits
+  - from: hyperliquid-operator-1
+    to: hypercore-cctp
+    kind: deposits-into
+    label: 2,599,000 USDC via CCTP (Oct 12 2026)
+  - from: hypercore
+    to: cctp-v2
+    kind: routes-through
+    label: withdrawals via CCTP V2
+  - from: cctp-v2
+    to: hyperliquid-operator-1
+    kind: routes-through
+    label: ~3.10M USDC (Sep 19 2026)
+  - from: cctp-v2
+    to: hyperliquid-operator-3
+    kind: routes-through
+    label: ~2.55M USDC (Sep 19 2026)
+  - from: hyperliquid-operator-3
+    to: dgnhype-trader
+    kind: routes-through
+    label: returned to Safe
   - from: hyperliquid-operator-2
     to: hypercore-cctp
     kind: deposits-into

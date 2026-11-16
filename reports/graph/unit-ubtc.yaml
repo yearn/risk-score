@@ -54,7 +54,7 @@ nodes:
   - id: btc-treasury
     label: Bitcoin Treasury
     category: strategy
-    note: "bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9 — 4,765.12 BTC vs 3,272.76 UBTC"
+    note: "bc1pdwu79dady576y3fupmm82m3g7p2p9f6hgyeqy0tdg7ztxg7xrayqlkl8j9 — ~6,604.76 BTC vs 574.21 UBTC (CoinGecko circulation)"
 
   # === External dependencies ===
   - id: dep-bitcoin
@@ -126,7 +126,7 @@ edges:
   - from: UBTC
     to: btc-treasury
     kind: allocates-to
-    label: 1:1 BTC backing (over-backed ~45.6%)
+    label: 1:1 BTC backing (significantly over-backed)
   - from: btc-treasury
     to: dep-bitcoin
     kind: deposits-into
