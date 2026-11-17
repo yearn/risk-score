@@ -105,7 +105,7 @@ nodes:
     label: Cross-Chain Master (HyperEVM, ~$28)
     address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
     category: strategy
-    note: Same cached-balance design as the Base leg. Wound down to about $28 between September 28 and October 1, 2026, but still approved. Its remote side can be upgraded after a 60-second delay, and an upgraded remote could report an uncapped forged balance into vault accounting.
+    note: Same cached-balance design as the Base leg. Wound down to about $28 between September 28 and October 1, 2026, but still approved. Its remote side can be upgraded after a 48h delay, and an upgraded remote could report an uncapped forged balance into vault accounting.
 
   # === Ethereum Morpho stack ===
   - id: morphousd-vault
@@ -172,7 +172,7 @@ nodes:
     address: "0xE0228DB13F8C4Eb00fD1e08e076b09eF5cD0EA1e"
     chain: hyperevm
     category: strategy
-    note: Same address as the mainnet master. Holds about $28. Its governor is the HyperEVM Timelock, which has a 60-second delay.
+    note: Same address as the mainnet master. Holds about $28. Its governor is the HyperEVM Timelock, which has a 48h delay.
   - id: ousdh-v2
     label: OUSDh Vault V2 (Morpho V2)
     address: "0xE90959cbE7E56b5eBFF9AD12de611A4976F2d2B1"
@@ -200,11 +200,11 @@ nodes:
     category: governance
     note: governor() of the Base remote strategy; can upgrade it after a 48h delay. TIMELOCK_ADMIN_ROLE is held only by itself.
   - id: hyper-timelock
-    label: HyperEVM Timelock (60s)
+    label: HyperEVM Timelock (48h)
     address: "0x77121911A387c9e4Eae46345E0f831A6da8a1364"
     chain: hyperevm
     category: governance
-    note: governor() of the HyperEVM remote strategy with getMinDelay() of 60 seconds. The deployer EOA retains CANCELLER only.
+    note: governor() of the HyperEVM remote strategy with getMinDelay() of 48 hours (raised from 60 seconds on November 17, 2026). The deployer EOA retains CANCELLER only.
   - id: origin-remote-safe
     label: Origin Remote-Chain Safe (5/8)
     address: "0x92A19381444A001d62cE67BaFF066fA1111d7202"
@@ -467,7 +467,7 @@ edges:
   - from: hyper-timelock
     to: cc-hyper-remote
     kind: controls
-    label: "governor (upgrade, 60s)"
+    label: "governor (upgrade, 48h)"
   - from: strategist
     to: ousd-v1
     kind: holds-role
