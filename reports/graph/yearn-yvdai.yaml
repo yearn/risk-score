@@ -197,6 +197,10 @@ edges:
     to: dai-to-usdc-depositor
     kind: holds-role
     label: "emergencyAdmin"
+  - from: brain
+    to: pawn-broker
+    kind: manages
+    label: "management + sole liquidator"
   - from: security
     to: yvDAI
     kind: holds-role
