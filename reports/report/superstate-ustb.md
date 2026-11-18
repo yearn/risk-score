@@ -18,7 +18,7 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 
 - **Current NAV/Share:** $11.177748 (official daily NAV, [Superstate API](https://api.superstate.com/v1/funds/1/nav-daily), August 17, 2026). Onchain at **block 25,773,912** (2026-08-17T09:29:47Z): Chainlink feed $11.177748 — an exact match to the official NAV — and SuperstateOracle $11.181564, round 420. The SuperstateOracle figure is *not* reproducible without pinning the block: it extrapolates linearly and continuously, so it advances every second between checkpoints.
 - **Onchain Supply (Ethereum):** 69,310,953.05 USTB (~$775M) — `totalSupply()` verified onchain
-- **DeFiLlama TVL (USTB, all chains):** ~$781.7M (August 17, 2026) — [defillama.com/protocol/invesco-ustb](https://defillama.com/protocol/invesco-ustb). Peak was ~$923.8M on April 28, 2026. DeFiLlama lists this protocol as **"Invesco USTB"** following the rebrand (slug `invesco-ustb`).
+- **DeFiLlama TVL (USTB, all chains):** ~$781.7M (August 17, 2026) — [defillama.com/rwa/asset/USTB](https://defillama.com/rwa/asset/USTB). Peak was ~$923.8M on April 28, 2026.
 - **Total AUM (all networks + book-entry):** $953,805,376 with 85,330,728 shares outstanding (per [Superstate NAV API](https://api.superstate.com/v1/funds/1/nav-daily), August 17, 2026). Ethereum holds ~81% of shares; book-entry ~18.5%; Solana and Plume ~0.5% combined.
 - **Onchain Holders (Ethereum):** 78 ([Ethplorer](https://ethplorer.io/address/0x43415eB6ff9DB7E26A15b704e7A3eDCe97d31C4e), `getTokenInfo` API, August 17, 2026)
 - **Current APY:** 3.50% (30-day yield), 3.50% (7-day yield), 3.52% (1-day yield) — [Superstate yield API](https://api.superstate.com/v1/funds/1/yield), as of August 13, 2026
@@ -34,7 +34,7 @@ The fund is structured as a series of **Superstate Asset Trust**, a **Delaware S
 - [GitHub (legacy USTB contracts, last updated April 2025)](https://github.com/superstateinc/ustb/tree/main)
 - [LlamaRisk Assessment](https://www.llamarisk.com/research/2024-10-07t21-32-09-000z) — **October 2024, ~22 months old.** Predates the Invesco partnership, the BNY Mellon custodian change, the auditor change to PwC, and the entire `FundToken` migration. Treat its architecture and service-provider descriptions as historical.
 - [Aave Forum — USTB/BUIDL GSM](https://governance.aave.com/t/arfc-ustb-buidl-gsm/19299/3)
-- [DeFiLlama — Invesco USTB](https://defillama.com/protocol/invesco-ustb)
+- [DeFiLlama — USTB](https://defillama.com/rwa/asset/USTB)
 - [CoinGecko](https://www.coingecko.com/en/coins/superstate-short-duration-us-government-securities-fund-ustb)
 - [Chainlink USTB NAV/Share Feed](https://data.chain.link/feeds/ethereum/mainnet/ustb-nav-per-share)
 - [RWA.xyz](https://app.rwa.xyz/assets/USTB)
