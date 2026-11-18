@@ -251,17 +251,17 @@ Scores use the November 18 snapshot and the published Yearn rubric. The category
 
 **Subcategory B: Programmability — 3.5/5.** Minting, claim checks and sUSDM conversion are calculated onchain. Trading, replenishment and yield settlement depend on active operator decisions and Core execution. [Vault source](https://hyperevmscan.io/address/0x08f69c88c47ef1c5274fc11bfe350561252c77f2#code), [sUSDM source](https://hyperevmscan.io/address/0x8a83295c57d854751ff89c8871d7daddb05029d1#code).
 
-**Subcategory C: External Dependencies — 5.0/5.** HyperCore outage or impairment can disrupt order execution, backing reads and the return of USDC from the same portfolio. Circle's USDC and settlement infrastructure add a second critical dependency. [HyperCore execution documentation](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/interacting-with-hypercore), [Circle contracts](https://github.com/circlefin/hyperevm-circle-contracts).
+**Subcategory C: External Dependencies — 4.5/5.** HyperCore outage or impairment can disrupt order execution, backing reads and the return of USDC from the same portfolio. Circle's USDC and settlement infrastructure add a second critical dependency. The score stops short of 5.0 because HyperCore is an established venue and funded EVM balances can still pay some redemptions during a Core disruption. This is consistent with the Hyperliquid dependency scoring in the [d2-hypeplus](https://github.com/yearn/risk-score/blob/master/reports/report/d2-hypeplus.md) and [unit-ubtc](https://github.com/yearn/risk-score/blob/master/reports/report/unit-ubtc.md) reports. [HyperCore execution documentation](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/interacting-with-hypercore), [Circle contracts](https://github.com/circlefin/hyperevm-circle-contracts).
 
-**Score: 4.50/5** — (5.0 + 3.5 + 5.0) / 3.
+**Score: 4.33/5** — (5.0 + 3.5 + 4.5) / 3.
 
 #### Category 3: Funds Management (Weight: 30%)
 
-**Subcategory A: Collateralization — 3.5/5.** Marked backing covered 100.49% of outstanding USDM. The narrow buffer and concentration in actively managed, leveraged HYPE basis positions make realized coverage sensitive to unwinds and margin. [Accountant state](https://hyperevmscan.io/address/0x8950A5136f3994f82b998e37e1183b8A37c12705#readProxyContract), [Core custody](https://app.hyperliquid.xyz/explorer/address/0x6E25e5D971BDa9799F7A5242f4720b5B3f939200).
+**Subcategory A: Collateralization — 4.0/5.** Marked backing covered 100.49% of outstanding USDM. About 97% of it sits in a native 2-of-3 HyperCore multisig account rather than in contract-held collateral, which places it in the rubric's custodial band. The narrow buffer and concentration in actively managed, leveraged HYPE basis positions make realized coverage sensitive to unwinds and margin. [Accountant state](https://hyperevmscan.io/address/0x8950A5136f3994f82b998e37e1183b8A37c12705#readProxyContract), [Core custody](https://app.hyperliquid.xyz/explorer/address/0x6E25e5D971BDa9799F7A5242f4720b5B3f939200).
 
 **Subcategory B: Provability — 2.5/5.** Backing inputs and the Accountant mark are public. Reconciliation depends on registered assets and Core marks. The independent TVL publisher uses the same Accountant, and a separate reserve attestation remains unverified. [Accountant source](https://hyperevmscan.io/address/0x5ce5e40522e8cb42d7a1ae2dadab808d31f1a8e2#code), [DefiLlama methodology](https://defillama.com/protocol/monetrix-usdm).
 
-**Score: 3.00/5** — (3.5 + 2.5) / 2.
+**Score: 3.25/5** — (4.0 + 2.5) / 2.
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
@@ -276,11 +276,11 @@ Scores use the November 18 snapshot and the published Yearn rubric. The category
 | Category | Score | Weight | Weighted |
 |---|---:|---:|---:|
 | Audits & Historical | 3.75 | 20% | 0.750 |
-| Centralization & Control | 4.50 | 30% | 1.350 |
-| Funds Management | 3.00 | 30% | 0.900 |
+| Centralization & Control | 4.33 | 30% | 1.300 |
+| Funds Management | 3.25 | 30% | 0.975 |
 | Liquidity Risk | 4.50 | 15% | 0.675 |
 | Operational Risk | 3.50 | 5% | 0.175 |
-| **Category-weighted score** | | | **3.85/5.0** |
+| **Category-weighted score** | | | **3.87/5.0** |
 | **Final Score** | | | **5.00/5.0** |
 
 The optional age and sustained-TVL modifiers do not apply. The governance gate sets the final score to 5.00.
