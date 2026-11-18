@@ -44,6 +44,16 @@ nodes:
     category: infra
     address: '0xaa556b9755C249F9B6b98F89dd20C5D4997B8F32'
     note: Separate USDC buffer for atomic exits, with a 30 bp fee at the snapshot.
+  - id: instant-unstake
+    label: InstantUnstake
+    category: infra
+    address: '0xaaCE6A69C27dF3F92763F688606335cBf3CE329d'
+    note: Separate buffer for atomic sUSDM exits.
+  - id: susdm-escrow
+    label: sUSDMEscrow
+    category: infra
+    address: '0xD81600838Ab778D49038Df9c3B78CDcA244E3707'
+    note: Holds USDM during the sUSDM unstake cooldown.
   - id: yield
     label: YieldEscrow
     category: infra
@@ -65,7 +75,7 @@ nodes:
     label: Foundation Safe (2-of-3)
     category: governance
     address: '0x73a964d19E409E390628AFb1b5B42dde130F45EE'
-    note: Holds direct governance, guardian and role-admin permissions.
+    note: Holds direct GOVERNOR, GUARDIAN and DEFAULT_ADMIN_ROLE. As admin of UPGRADER it can grant itself upgrade rights and bypass the 48h timelock.
   - id: timelock24
     label: Governor Timelock (24h)
     category: governance
@@ -75,9 +85,17 @@ nodes:
     category: governance
     address: '0xDe54E1F99752062ef448Dcc6C7636f90214C789e'
   - id: operators
-    label: Vault Operators
+    label: Vault Operators (4 EOAs)
     category: governance
-    note: Four wallets can operate individually within the deployed Vault's operator functions.
+    note: Each EOA can act individually. Hedge calls take caller-set limit prices with no oracle bound or cumulative loss cap.
+  - id: core-signers
+    label: Core Custody Multisig (2-of-3)
+    category: governance
+    note: Native HyperCore multisig signers for the custody account; one signer overlaps with the Foundation Safe.
+  - id: core-agent
+    label: Core Trading Agent
+    category: governance
+    note: API wallet delegated by the custody account. Permitted actions and limits are unverified.
   - id: deposit-wallet
     label: Circle CoreDepositWallet
     category: dependency
@@ -100,6 +118,8 @@ nodes:
 edges:
   - { from: vault, to: usdm, kind: mints, label: onlyVault }
   - { from: susdm, to: usdm, kind: deposits-into, label: USDM staking asset }
+  - { from: susdm, to: susdm-escrow, kind: routes-through, label: Unstake cooldown }
+  - { from: instant-unstake, to: susdm, kind: routes-through, label: Atomic sUSDM exit }
   - { from: usdm, to: vault, kind: routes-through, label: Issuance and redemption }
   - { from: usdc, to: vault, kind: routes-through, label: Mint deposits }
   - { from: vault, to: core, kind: allocates-to, label: '97.46% net backing' }
@@ -110,13 +130,18 @@ edges:
   - { from: vault, to: yield, kind: routes-through, label: Realized USDC }
   - { from: vault, to: susdm, kind: routes-through, label: Staker share of realized yield }
   - { from: vault, to: insurance, kind: routes-fees-to, label: Insurance share of yield }
-  - { from: safe, to: acl, kind: holds-role, label: 'DEFAULT_ADMIN_ROLE, GOVERNOR, GUARDIAN' }
+  - { from: safe, to: acl, kind: holds-role, label: 'DEFAULT_ADMIN_ROLE (admin of UPGRADER), GOVERNOR, GUARDIAN' }
+  - { from: safe, to: vault, kind: controls, label: 'Direct GOVERNOR: emergencyRawAction, routing and escrow setters' }
   - { from: safe, to: timelock24, kind: proposes-on, label: PROPOSER_ROLE }
   - { from: safe, to: timelock48, kind: proposes-on, label: PROPOSER_ROLE }
   - { from: timelock24, to: acl, kind: holds-role, label: GOVERNOR }
   - { from: timelock48, to: acl, kind: holds-role, label: UPGRADER }
   - { from: operators, to: vault, kind: holds-role, label: OPERATOR }
   - { from: acl, to: vault, kind: controls, label: Protocol roles }
-  - { from: acl, to: usdm, kind: controls, label: Governor and pause authority }
+  - { from: acl, to: usdm, kind: controls, label: Upgrade (UPGRADER) and pause (GUARDIAN) }
+  - { from: acl, to: instant, kind: controls, label: Buffer, fee and recovery settings }
+  - { from: acl, to: insurance, kind: controls, label: GOVERNOR withdrawals }
+  - { from: core-signers, to: core, kind: controls, label: 2-of-3 custody and withdrawals }
+  - { from: core-agent, to: core, kind: manages, label: Delegated trading }
   - { from: acl, to: config, kind: controls, label: Configuration authority }
   - { from: acl, to: accountant, kind: controls, label: Accounting roles }
