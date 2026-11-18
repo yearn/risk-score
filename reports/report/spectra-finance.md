@@ -477,7 +477,7 @@ Governance uses **Zodiac contracts** attached to a **Gnosis SAFE multisig** with
 
 ### Curator Whitelisted Operations
 
-Curators execute via `execTransactionWithRole` through the Zodiac Roles module ([source](https://web.archive.org/web/20260618042610/https://curator.docs.spectra.finance/technical/whitelisted-actions)):
+Curators execute via `execTransactionWithRole` through the Zodiac Roles module ([source](https://dev.spectra.finance/docs/metavaults/access-control-and-roles)):
 
 **Immediate actions:**
 - Token approvals (only to approved contracts)
