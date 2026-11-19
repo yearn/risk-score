@@ -122,7 +122,7 @@ Brain and Security share two signers ([`0x5250…0bDB`](https://etherscan.io/add
 The contest reported **2 High and 1 Medium**. All three are marked *"acknowledged by the team but won't be fixed"*:
 
 - **H-1 ([#154](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/154)):** first-depositor share inflation on a newly deployed strategy. It doesn't apply to the live strategies, which each hold 1.8M or more shares owned by the yBOLD vault.
-- **H-2 ([#155](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/155)):** someone deposits after a keeper reports a post-liquidation loss and before the collateral is auctioned, steals from existing depositors. This is the same class of bug as ChainSecurity's earlier sBOLD audit finding and the first press accounts of the November 2026 sBOLD exploit. K3's post-mortem later traced the exploit itself to a leftover router approval. Both are analyzed in [the sBOLD case study](#case-study-k3-capital-sbold-exploit-and-why-ysybold-is-not-exposed). The current onchain settings block it, but they can be changed without a timelock.
+- **H-2 ([#155](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/155)):** someone deposits after a keeper reports a post-liquidation loss and before the collateral is auctioned, steals from existing depositors. This is the same class of bug as ChainSecurity's earlier sBOLD audit finding. K3's post-mortem traces the November 2026 sBOLD exploit to a different combination: live share pricing that donations could inflate, plus a leftover router approval. Both are analyzed in [the sBOLD case study](#case-study-k3-capital-sbold-exploit-and-why-ysybold-is-not-exposed). The current onchain settings block it, but they can be changed without a timelock.
 - **M-1:** `dustThreshold` has no maximum, so management can make `tend()` skip claiming collateral (a liveness issue).
 
 ### Yearn V3 core audits
@@ -162,45 +162,68 @@ Moderate:
 
 ### What happened to sBOLD
 
-On **November 18, 2026**, K3 Capital's **sBOLD** vault lost about **3.43M BOLD** in under 10 minutes. Like yBOLD, sBOLD is an ERC-4626 vault that spreads BOLD across Liquity V2 Stability Pools.
+Source: K3 Capital, [*sBOLD Vault Exploit: Postmortem and Recovery Plan*](https://x.com/k3_capital/status/2123395654214967426), November 19, 2026. The technical analysis was done by ChainSecurity for K3. Quotes below are from the post-mortem.
 
-**Root cause per K3's post-mortem: a token approval left in place by the public swap.** K3 published a [post-mortem on X](https://x.com/k3_capital/status/2123395654214967426) on November 19. This report could not retrieve its text (x.com refuses automated fetches), so what follows comes from coverage that summarizes it ([The Defiant](https://thedefiant.io/news/security/k3-capital-says-sbold-vault-flaw-drained-3-43m-bold), [Crypto Times](https://www.cryptotimes.io/2026/11/19/k3-capital-offers-15-bounty-to-recover-3-43m-lost-in-sbold-exploit/)):
+On **November 18, 2026, 12:25–12:33 UTC**, attackers drained **~3.43M BOLD**, nearly all of sBOLD's assets, in **99 transactions** by **ten operators**, starting at block [26,441,929](https://etherscan.io/block/26441929). The vault was paused at 13:05 UTC. Like yBOLD, sBOLD is an ERC-4626 vault spreading BOLD across the three Liquity V2 Stability Pools. The post-mortem says Liquity V2 and 1inch were not exploited, and **no Liquity liquidations were involved**. That corrects the early reports.
 
-- **Cause:** The Defiant traces the loss to *"unused token-spending permissions in K3's vault"*. Crypto Times reports that the vault's public swap function, which lets anyone convert vault collateral into BOLD through the 1inch router, did not revoke the router approval when a swap didn't use all of it. Attackers then used that leftover approval to take collateral.
-- **Liquity:** Liquity said its protocol was not affected.
-- **Response:** K3 paused its contracts and offered a bounty to recover the funds (15% per Crypto Times).
+The root cause combines **two flaws**:
 
-The public sBOLD code has exactly this pattern. `sBold.swap()` can be called by anyone and takes caller-supplied `SwapData`. [`SwapLogic._execute`](https://github.com/K3Capital/sBOLD/blob/master/contracts/libraries/logic/SwapLogic.sol):
+1. **The share price counted any collateral the vault held, live.** *"Total assets are the BOLD in the three stability pools, the BOLD in the vault, the value of unclaimed collateral in the pools, and the value of collateral held directly by the vault. Any collateral sent to the vault therefore raises the share price."* The price was recomputed on every deposit and redeem.
+2. **Anyone could call `swap()` with their own 1inch calldata, and it left the approval behind.** [`SwapLogic._execute`](https://github.com/K3Capital/sBOLD/blob/master/contracts/libraries/logic/SwapLogic.sol) approves `_inAmount` of collateral to the 1inch Aggregation Router v6, calls it with the caller's data, and checks only that enough BOLD arrived. *"It does not verify that the adapter actually took the collateral. It does not reset the allowance to zero after the call."* The router's `swap(executor, desc, data)` lets the caller choose the token sold and the executor contract.
 
-1. calls `IERC20(_src).approve(_adapter, _inAmount)`;
-2. runs the caller's calldata on the adapter (`_adapter.call(_swapData)`);
-3. checks only that enough BOLD came back.
+**One round of the attack** (each transaction ran 8 rounds):
 
-It never resets the approval. So any amount the caller's route didn't spend stays approved to the router. How exactly the attacker spent the leftover approval through the router has not been confirmed from the post-mortem text.
+1. **Setup:** flash-borrow wstETH (Morpho) and WETH (Balancer), open a Liquity V2 trove, and borrow BOLD worth several times the vault's assets (the first attack used 9.01M BOLD).
+2. **Deposit** the BOLD into sBOLD, taking most of the shares (72.4% in the first round).
+3. **Donate** 4 WETH to the vault with a plain transfer. The share price rises.
+4. **Fake swap:** call `swap()` for the 4 WETH with a crafted order that sells an attacker-owned dummy token and delivers the BOLD the vault expects. No WETH leaves, so the received BOLD acts as a second donation, and the WETH approval to the router stays unused.
+5. **Redeem** all shares at the inflated price.
+6. **Take the WETH back:** call `swap()` again for a dust amount of wstETH, with an order that sells WETH. The router spends the leftover approval and sends the 4 WETH to the attacker.
 
-**Earlier explanations, now superseded.** The first alerts and articles ([CoinDesk](https://www.coindesk.com/tech/2026/11/19/ethereum-block-builders-received-the-most-in-a-usd3-4-million-vault-hack-data-shows), [Cryptonews / Blockaid](https://cryptonews.net/news/security/33775498/), [Altcoinbuzz / Bitquery / DefiLlama](https://www.altcoinbuzz.io/3-42-million-drained-from-k3-capital-s-sbold-vault-in-eight-minutes)) described a share-pricing attack: flash loans, collateral left out of the share price, cheap mints, then redemption after a swap. K3's account replaces that. The share-pricing class is still relevant to yBOLD, though:
+Why this works: per the post-mortem, the profit per round is about *(2 × attacker's share − 1) × donated WETH value*, positive once the attacker owns more than 50% of the shares. **Neither flaw pays off alone:** *"Without the leftover approval, an attacker cannot recover its donation and loses money."*
 
-- the [May 2025 ChainSecurity audit of sBOLD](https://www.chainsecurity.com/security-audit/k3-sbold) reported it (shares underpriced after liquidations);
-- yBOLD's own audit found the same class ([H-2](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/155)).
+Each round extracted only ~3,200–7,460 BOLD, because sBOLD refuses redemptions while it holds more than 7,500 BOLD of collateral. Gas limits held each transaction to 8 rounds, so the drain needed ~100 transactions. Once the first one landed, others copied it: attackers paid **~986 ETH (~1.77M BOLD) to block builders**, which went to 21 validator fee recipients.
 
-This report therefore covers **both** sBOLD-family attacks: (A) the confirmed approval / arbitrary-calldata attack and (B) the share-pricing attack.
+Other details from the post-mortem:
 
-### Attack A (confirmed sBOLD cause): leftover approvals and caller-supplied swap calldata
+- Pendle's SY-sBOLD (12.79% of sBOLD shares) was also affected.
+- K3 identified counterparties holding 894.50 ETH and **131,316 yBOLD** that came from the exploit, and lists **Yearn** among the parties committed to the recovery. yBOLD has no freeze or seizure function, so returning that yBOLD is up to its holders. This does not affect other yBOLD holders.
+- Recovery address: [`0x2f02BCd2163176B29C7B070B43A1660A5341C795`](https://etherscan.io/address/0x2f02BCd2163176B29C7B070B43A1660A5341C795), with a 15% bounty.
 
-yBOLD never swaps collateral through an aggregator, and it never runs calldata supplied by an outside caller:
+> Early reports ([CoinDesk](https://www.coindesk.com/tech/2026/11/19/ethereum-block-builders-received-the-most-in-a-usd3-4-million-vault-hack-data-shows), [Cryptonews / Blockaid](https://cryptonews.net/news/security/33775498/), [Altcoinbuzz / Bitquery / DefiLlama](https://www.altcoinbuzz.io/3-42-million-drained-from-k3-capital-s-sbold-vault-in-eight-minutes)) said self-liquidations or collateral "excluded below a threshold" were involved. The post-mortem rules out liquidations. The 7,500-BOLD collateral cap that limited each round is probably the "threshold" those reports meant.
 
-| sBOLD condition | yBOLD / ysyBOLD at the snapshot | Evidence |
-|-----------------|----------------------------------|----------|
-| Anyone can call `swap()` with their own router calldata | No yBOLD contract runs caller-supplied swap calldata. Collateral is moved with `COLL.safeTransfer(AUCTION, amount)` inside the keeper-only `tend()` and sold in a Dutch auction | [`Strategy._tend`](https://github.com/yearn/yBOLD/blob/master/src/Strategy.sol) |
-| Approval to a third-party router (`approve(adapter, _inAmount)`) never reset | **None of the strategies, the staker, the vault or the Accountant holds any standing allowance.** The vault's BOLD approvals to strategies are set per debt update and are 0 at the snapshot. Strategies deposit into the Stability Pools through Liquity's `sendToPool`, which needs no approval | `Approval` logs scanned on BOLD, WETH, wstETH, rETH and yBOLD for every yBOLD contract (Etherscan), checked with `allowance()` at the snapshot |
-| Buyers pay through a router path the vault doesn't control | Auction buyers call `take()`. The auction sends the collateral, optionally calls back the **buyer's own** contract, then pulls BOLD from the buyer with `transferFrom`. It reverts unless the price, which falls over time and has a floor, is fully paid | [Auction v1.0.4 `_take`](https://etherscan.io/address/0xecdfb5bebb9e72ca7c8b6aeeb0ca07375c1c0b2e#code) |
-| — | **The only standing approvals:** each auction approves its collateral (WETH, wstETH, rETH) at `type(uint256).max` to CoW Protocol's [`GPv2VaultRelayer`](https://etherscan.io/address/0xC92E8bdf79f0507f65a392b0ab4667716BFE0110), set by `enable()`. The relayer only acts for CoW's settlement contract, and the auction approves a CoW order only through `isValidSignature`. That requires: the order hash matches, the buy token is BOLD, the receiver is the strategy, the buy amount is at least the current auction price, no fee, the order is partially fillable, the sell amount is at most the kicked lot, and it expires within the auction window | Auction v1.0.4 `enable()` / `isValidSignature()`; `allowance(auction, GPv2VaultRelayer)` = max for each auction |
+### Why the sBOLD attack does not work against yBOLD / ysyBOLD
 
-What's left is the CoW approval. It is capped by the auction price and covers only collateral sitting in an auction, which was 0 at the snapshot. It depends on CoW Protocol's settlement and relayer contracts.
+Both flaws are needed, and **neither exists in yBOLD**:
 
-### Attack B (share-pricing class): yBOLD's Sherlock H-2
+| sBOLD ingredient | yBOLD / ysyBOLD at the snapshot | Evidence |
+|------------------|----------------------------------|----------|
+| **Donations raise the share price instantly**, because collateral and BOLD balances count live on every deposit and redeem | All share contracts run **v3.0.4 report-boundary accounting**. Deposits and redeems use the stored `totalAssets`; tokens sent to the vault, a strategy or ysyBOLD don't count until a keeper reports. **Collateral never counts**: strategies value themselves in BOLD only (`asset.balanceOf + getCompoundedBoldDeposit`). Donated BOLD reaches holders only after three keeper steps (strategy report → vault `process_report`, where the 100% fee keeps yBOLD at 1.0 → ysyBOLD report), then a **3-day** release. Someone who deposits and redeems in one transaction gets no part of a donation | `apiVersion() = "3.0.4"`; [`estimatedTotalAssets`](https://github.com/yearn/yBOLD/blob/master/src/Strategy.sol); ysyBOLD `profitMaxUnlockTime() = 259200`; yBOLD `pricePerShare() = 1e18` |
+| **Outsiders deposit into the contract that holds collateral** and own most of its shares | Strategies are **closed** (`openDeposits = false`; only yBOLD is `allowed`; yBOLD holds 100% of strategy shares). Outsiders can only buy yBOLD (pinned at 1.0) or ysyBOLD, which hold no collateral | `openDeposits()`, `allowed(yBOLD)`, `balanceOf(yBOLD) == totalSupply()` |
+| **Anyone can call `swap()` with their own router calldata** (a caller-chosen token and executor) | No yBOLD contract runs calldata from an outside caller. Collateral moves only through `COLL.safeTransfer(AUCTION, amount)` inside the keeper-only `tend()`. Only the strategy can kick the auction (`governanceOnlyKick = true`) | [`Strategy._tend`](https://github.com/yearn/yBOLD/blob/master/src/Strategy.sol), `Auction.governanceOnlyKick()`, `Auction.governance()` |
+| **A leftover router approval** lets the attacker take the donation back | The strategies, ysyBOLD, yBOLD and the Accountant hold **no standing allowances**. The vault's BOLD approvals to strategies are set per debt update and are 0 at the snapshot. Stability Pool deposits use Liquity's `sendToPool`, which needs no approval | `Approval` logs scanned on BOLD, WETH, wstETH, rETH and yBOLD for every yBOLD contract (Etherscan), checked with `allowance()` at the snapshot |
+| **The vault checks only BOLD received**, not collateral sent | Auction buyers call `take()`: the auction sends a fixed collateral amount, optionally calls the **buyer's own** contract, then pulls the full BOLD price from the buyer with `transferFrom`, or reverts. The price falls over time and has a floor at 95% of the Liquity oracle | [Auction v1.0.4 `_take`](https://etherscan.io/address/0xecdfb5bebb9e72ca7c8b6aeeb0ca07375c1c0b2e#code) |
 
-yBOLD's strategies value themselves **only** in BOLD: `asset.balanceOf(strategy) + SP.getCompoundedBoldDeposit(strategy)` ([`estimatedTotalAssets`](https://github.com/yearn/yBOLD/blob/master/src/Strategy.sol)). Liquidation collateral is ignored until it is sold. On paper, that is a stronger version of sBOLD's first step. The yBOLD audit found the matching attack ([H-2](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/155)):
+**The only standing approvals** are each auction's `type(uint256).max` approval of its collateral (WETH, wstETH, rETH) to CoW Protocol's [`GPv2VaultRelayer`](https://etherscan.io/address/0xC92E8bdf79f0507f65a392b0ab4667716BFE0110), set by `enable()`. Unlike the 1inch router used by sBOLD:
+
+- the relayer only acts for CoW's settlement contract;
+- the auction accepts a CoW order only through `isValidSignature`, which requires the buy token to be BOLD, the receiver to be the strategy, a buy amount at or above the current auction price, no fee, a sell amount at most the kicked lot, and expiry within the auction window.
+
+A caller can't pick the token or the receiver, so this approval can't be used to take collateral without paying the auction price. It covers only collateral sitting in an auction, which was 0 at the snapshot.
+
+**Running sBOLD's attack against yBOLD:**
+
+- A donation to a yBOLD strategy or to ysyBOLD doesn't move any price within the transaction.
+- It reaches ysyBOLD holders only after keeper reports and a 3-day release.
+- The donor can't take it back, because no contract leaves an approval behind.
+
+Per the post-mortem's own reasoning, the donation is then a pure loss for the attacker.
+
+### Related class: share price lowered after liquidations (yBOLD Sherlock H-2)
+
+The [May 2025 ChainSecurity audit of sBOLD](https://www.chainsecurity.com/security-audit/k3-sbold) reported a different share-pricing issue (shares underpriced after liquidations), and yBOLD's own audit found the matching attack ([H-2](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/155)). It was not part of the November exploit, but it is the yBOLD issue most like it, so it is analyzed here.
+
+yBOLD's strategies value themselves **only** in BOLD: `asset.balanceOf(strategy) + SP.getCompoundedBoldDeposit(strategy)` ([`estimatedTotalAssets`](https://github.com/yearn/yBOLD/blob/master/src/Strategy.sol)). Liquidation collateral is ignored until it is sold. That is the opposite of sBOLD, which counted collateral live: it makes yBOLD immune to collateral donations, but if a loss were reported after a liquidation, the strategy's share price would be too low until the collateral sells. The yBOLD audit found the attack that follows ([H-2](https://github.com/sherlock-audit/2025-05-yearn-ybold-judging/issues/155)):
 
 1. A liquidation burns some of a strategy's BOLD and gives it collateral instead.
 2. A keeper reports, so the strategy records a **loss** and its price per share drops.
@@ -208,12 +231,12 @@ yBOLD's strategies value themselves **only** in BOLD: `asset.balanceOf(strategy)
 4. The collateral is auctioned into BOLD, and the next report restores the price **instantly**, because the strategy's `profitMaxUnlockTime = 0`.
 5. The attacker redeems at the restored price, taking value from the yBOLD vault.
 
-#### Why attack B does not work against yBOLD / ysyBOLD today
+#### Why H-2 does not work against yBOLD / ysyBOLD today
 
-| Share-pricing condition (early sBOLD reports, ChainSecurity finding) | yBOLD / ysyBOLD at the snapshot | Evidence |
+| H-2 / share-pricing condition | yBOLD / ysyBOLD at the snapshot | Evidence |
 |-----------------|----------------------------------|----------|
 | Share price updates live on every deposit and redeem, so it can be moved inside one transaction | All four share contracts run **v3.0.4 report-boundary accounting**: `totalAssets` changes only when a keeper calls `report()` / `process_report()`. Nothing an outsider does moves the price in between | `apiVersion() = "3.0.4"` on yBOLD, ysyBOLD and all strategies |
-| Anyone could call `swap()` to make excluded collateral count | Only the strategy can kick its auction: `governanceOnlyKick = true` with `governance` = the strategy. Kicking happens only inside the keeper-gated `tend()`. Anyone can **buy** from an auction (that is how it works), but the BOLD proceeds count only at the next keeper report | `Auction.governanceOnlyKick()`, `Auction.governance()` |
+| Anyone can trigger the step that makes collateral count | Only the strategy can kick its auction: `governanceOnlyKick = true` with `governance` = the strategy. Kicking happens only inside the keeper-gated `tend()`. Anyone can **buy** from an auction (that is how it works), but the BOLD proceeds count only at the next keeper report | `Auction.governanceOnlyKick()`, `Auction.governance()` |
 | Outsiders can mint vault shares while the price is depressed | **Strategies are closed to outsiders**: `openDeposits = false`, and only the yBOLD vault is on `allowed`. The vault holds 100% of each strategy's shares | `openDeposits()`, `allowed(yBOLD)`, `balanceOf(yBOLD) == totalSupply()` |
 | A report after a liquidation records a loss | Every strategy has `doHealthCheck = true` and `lossLimitRatio = 0`, so **any report showing a loss fails**. The keeper has to auction the collateral first; step 2 of H-2 cannot happen | `doHealthCheck()`, `lossLimitRatio()` |
 | A loss at the vault level would let users mint cheap yBOLD | If yBOLD ever reports a loss (price below 1.0), `OnLossDepositLimit` returns 0 and **vault deposits stop** until the price recovers | [`OnLossDepositLimit`](https://etherscan.io/address/0x746C238E34a6dBFE1d35d50471467Bd7Bf898f62), `deposit_limit_module()` |
@@ -226,7 +249,7 @@ Onchain history supports this:
 - ysyBOLD emitted **329 `Reported` events with zero losses** (Etherscan logs, from deployment to the snapshot block).
 - yBOLD's price per share was exactly 1.000000 at every sampled block (snapshot, and 30, 90, 180 and 365 days earlier).
 
-#### What could bring attack B back
+#### What could bring H-2 back
 
 Five settings protect against this. **Brain (3-of-6, no timelock)** can change most of them; the fifth needs the ySafe:
 
@@ -236,7 +259,7 @@ Five settings protect against this. **Brain (3-of-6, no timelock)** can change m
 | `setLossLimitRatio(>0)` / `setDoHealthCheck(false)` on a strategy | Brain (`management`) | A report that records a post-liquidation loss (step 2 of H-2) |
 | yBOLD `set_deposit_limit_module` | Brain or ySafe (DEPOSIT_LIMIT_MANAGER) | Removes the stop on deposits while yBOLD is below 1.0 |
 | ysyBOLD `setProfitMaxUnlockTime(0)` | Brain (`management`) | Instant ysyBOLD price jumps at report, so someone could deposit just before a report and take the yield |
-| A strategy on TokenizedStrategy ≥ v3.1 that overrides `_strategyTotalAssets()` with live accounting | Needs ADD_STRATEGY (7-day timelock) | Live pricing between reports, which is the main precondition of share-pricing attack B |
+| A strategy on TokenizedStrategy ≥ v3.1 that overrides `_strategyTotalAssets()` with live accounting | Needs ADD_STRATEGY (7-day timelock) | Live pricing between reports, which is the precondition both of H-2 and of sBOLD's donation inflation |
 
 Even with these settings flipped, H-2-style extraction is **limited to unsold liquidation collateral**: the value an attacker can capture is the collateral recovery that would otherwise go to existing depositors. At the snapshot, every strategy and auction held **0 collateral**: `getDepositorCollGain = 0`, `stashedColl = 0`, and collateral balances of 0 on the strategies and auctions. The [Monitoring](#monitoring) section has alerts for all five settings.
 
@@ -396,7 +419,7 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 | ysyBOLD | [`0x23346B04a7f55b8760E5860AA5A77383D63491cD`](https://etherscan.io/address/0x23346B04a7f55b8760E5860AA5A77383D63491cD) | `pricePerShare()` (must not fall), `totalAssets()`, `profitMaxUnlockTime()` (alert if < 1 day), `performanceFee()`, `management()`, `Reported` events with a loss |
 | yBOLD | [`0x9F4330700a36B29952869fac9b33f45EEdd8A3d8`](https://etherscan.io/address/0x9F4330700a36B29952869fac9b33f45EEdd8A3d8) | `pricePerShare()` (alert if ≠ 1e18), `deposit_limit_module()` (alert on change), `accountant()`, `StrategyChanged`, `DebtUpdated`, `StrategyReported` with loss > 0 |
 | Strategies (×3) | [`0xc5e7…5b75`](https://etherscan.io/address/0xc5e7D3F76a03006540f17668A0267C668FFb5b75), [`0x3589…49a5`](https://etherscan.io/address/0x3589b93CaDb464b6E1974Cc9fc0c9be698Ee49a5), [`0x6ED5…9005`](https://etherscan.io/address/0x6ED566B76838A08d04cBd6323231B08a2eC69005) | **sBOLD/H-2 guards:** `openDeposits()` must stay false; alert on any `setAllowed`. Alert if `lossLimitRatio()` ≠ 0 or `doHealthCheck()` is false. Alert if `minAuctionPriceBps()` < 9500 or `bufferPercentage()` changes. Also watch `profitMaxUnlockTime()`, `management()`, `keeper()`, and unsold collateral (`SP.getDepositorCollGain + stashedColl + COLL.balanceOf(strategy) + COLL.balanceOf(AUCTION)`) |
-| Auctions (×3) | [`0x61C9…9381`](https://etherscan.io/address/0x61C9e1113661C991fb6377B3610804476Dcd9381), [`0x64e8…5CcA`](https://etherscan.io/address/0x64e8050D33BB296d48FE8eb08d09F00633e45CcA), [`0x3793…8091`](https://etherscan.io/address/0x3793405FBcE404f351e76fa115209488aC0e8091) | `governanceOnlyKick()` must stay true; `Approval` events from the auctions to any spender other than CoW's `GPv2VaultRelayer` (attack A guard); `minimumPrice()` vs Liquity `lastGoodPrice()`; `AuctionKicked`, sales events; auctions that end without selling |
+| Auctions (×3) | [`0x61C9…9381`](https://etherscan.io/address/0x61C9e1113661C991fb6377B3610804476Dcd9381), [`0x64e8…5CcA`](https://etherscan.io/address/0x64e8050D33BB296d48FE8eb08d09F00633e45CcA), [`0x3793…8091`](https://etherscan.io/address/0x3793405FBcE404f351e76fa115209488aC0e8091) | `governanceOnlyKick()` must stay true; `Approval` events from the auctions to any spender other than CoW's `GPv2VaultRelayer` (sBOLD-style leftover-approval guard); `minimumPrice()` vs Liquity `lastGoodPrice()`; `AuctionKicked`, sales events; auctions that end without selling |
 | Accountant | [`0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa`](https://etherscan.io/address/0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa) | `feeRecipient()` must equal ysyBOLD; `feeManager()`; `defaultConfig()` |
 | OnLossDepositLimit | [`0x746C238E34a6dBFE1d35d50471467Bd7Bf898f62`](https://etherscan.io/address/0x746C238E34a6dBFE1d35d50471467Bd7Bf898f62) | Must remain yBOLD's `deposit_limit_module` |
 | Liquity V2 Stability Pools / Trove Managers | [`0x5721…F9bF`](https://etherscan.io/address/0x5721cbbd64fc7Ae3Ef44A0A3F9a790A9264Cf9BF), [`0x9502…e56B`](https://etherscan.io/address/0x9502b7c397E9aa22FE9dB7EF7DAF21cD2AEBe56B), [`0xd442…8695`](https://etherscan.io/address/0xd442E41019B7F5C4dD78F50dc03726C446148695); TMs [`0x7bcb…Cf5A`](https://etherscan.io/address/0x7bcb64B2c9206a5B699eD43363f6F98D4776Cf5A), [`0xA289…8B22`](https://etherscan.io/address/0xA2895d6A3bf110561Dfe4b71cA539d84e1928B22), [`0xb2B2…e19e`](https://etherscan.io/address/0xb2B2ABEb5C357a234363FF5D180912D319e3e19e) | `getTotalBoldDeposits()`, yBOLD share of each pool, `shutdownTime()` (alert if non-zero), large liquidations |
@@ -456,8 +479,8 @@ Governance: ySafe 6/9 ──propose/execute──▶ Timelock (7d) ──ADD_STR
 
 ### Key Strengths
 
-- **Not exposed to the confirmed sBOLD exploit.** K3's post-mortem blames a leftover router approval from a swap anyone could call. yBOLD runs no caller-supplied swap calldata, its strategies, staker, vault and Accountant hold no standing allowances, and collateral is sold in Dutch auctions. The only approvals are the auctions' to CoW's relayer, guarded by `isValidSignature` price checks.
-- **Share-pricing variants are also blocked today.** Share prices change only at keeper reports. Outsiders can't deposit into the strategies. Loss reports are blocked by the health check, the vault stops deposits when PPS < 1, and gains reach ysyBOLD only after three keeper steps plus a 3-day release.
+- **Not exposed to the sBOLD exploit.** K3's post-mortem says the attack needed two things: a share price that donations raise instantly, and a leftover router approval to take the donation back. yBOLD has neither. Share prices move only at keeper reports and collateral is never counted. ysyBOLD releases gains over 3 days. No yBOLD contract runs caller-supplied swap calldata, and none holds a standing allowance except the auctions' approval to CoW's relayer, which is guarded by `isValidSignature` price checks.
+- **The post-liquidation share-pricing attack (Sherlock H-2) is also blocked today.** Share prices change only at keeper reports. Outsiders can't deposit into the strategies. Loss reports are blocked by the health check, the vault stops deposits when PPS < 1, and gains reach ysyBOLD only after three keeper steps plus a 3-day release.
 - **Clean record:** ~18 months live, 1,258 vault reports and 329 staker reports, zero losses. ysyBOLD PPS rose 10.4% since launch.
 - **Immutable, fully onchain stack:** no proxies or oracles in share accounting. Unsold collateral is counted as zero, so the reported value can only be lower than the true value.
 - **Strategy changes go through the 7-day timelock** with ySafe 6/9 as the only proposer.
@@ -556,10 +579,10 @@ No optional modifiers apply: under 2 years live and under $500M TVL.
 - **Time-based:** every 6 months (May 2027).
 - **Configuration-based (sBOLD/H-2 guards):** any change to strategy `openDeposits` / `allowed`, `lossLimitRatio`, `doHealthCheck`, `minAuctionPriceBps`, `bufferPercentage`; yBOLD `deposit_limit_module` or `accountant`; ysyBOLD `profitMaxUnlockTime`; any new strategy on TokenizedStrategy ≥ v3.1 with live accounting.
 - **TVL-based:** yBOLD TVL changes by more than ±50% (from ~7.6M BOLD), or yBOLD's share of any Stability Pool exceeds 75%.
-- **Incident-based:** any reported loss on yBOLD or ysyBOLD, a Liquity V2 branch shutdown, a BOLD depeg above 2%, or new details from K3's sBOLD post-mortem that also apply to yBOLD (for example, a way to exploit CoW relayer approvals).
+- **Incident-based:** any reported loss on yBOLD or ysyBOLD, a Liquity V2 branch shutdown, a BOLD depeg above 2%, any update to K3's sBOLD analysis that also applies to yBOLD, or any finding against CoW relayer approvals or the Auction's `isValidSignature`.
 
 ## Assessment History
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| November 19, 2026 | 2.10 | Initial assessment at block 26,450,218. Compared with the K3 sBOLD exploit (leftover router approval): yBOLD holds no such approvals. Protection against the share-pricing variant (Sherlock H-2) relies on settings Brain 3-of-6 can change without a timelock. |
+| November 19, 2026 | 2.10 | Initial assessment at block 26,450,218. Compared with K3's sBOLD post-mortem (donation-inflated live share price + leftover 1inch approval): yBOLD has neither. Protection against the share-pricing variant (Sherlock H-2) relies on settings Brain 3-of-6 can change without a timelock. |
