@@ -5,7 +5,7 @@
 - **Chain:** HyperEVM
 - **Token Address:** [`0xE2d2959f89B6389DeB624bF076Fe7D9E5401f377`](https://hyperevmscan.io/address/0xE2d2959f89B6389DeB624bF076Fe7D9E5401f377)
 - **Final Score: 5.00/5.0**
-- **Status:** GATED
+- **Status:** GATED — score capped by the "total centralization" critical gate (2-of-3 Foundation Safe can self-grant UPGRADER and upgrade USDM without delay); ungated weighted score is 3.87 (Elevated). No realized loss event.
 
 ## Overview + Links
 
@@ -230,10 +230,12 @@ Scores use the November 18 snapshot and the published Yearn rubric. The category
 
 ### Critical Risk Gates
 
-- [ ] **Unverified contract source.** The USDM proxy and its active implementation have verified source. [USDM proxy](https://hyperevmscan.io/address/0xE2d2959f89B6389DeB624bF076Fe7D9E5401f377#code), [active implementation](https://hyperevmscan.io/address/0x05faf9cfa7143804e7fb0db423fde8330cd586df#code).
-- [ ] **No audit.** Code4rena reviewed the core system. Coverage of later components and changes is evaluated under Category 1. [Code4rena report](https://code4rena.com/reports/2026-04-monetrix).
-- [ ] **Unverifiable reserves.** The Vault and RedeemEscrow balances and Core position inputs are observable onchain. [Accountant](https://hyperevmscan.io/address/0x8950A5136f3994f82b998e37e1183b8A37c12705#readProxyContract), [HyperCore reads](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/interacting-with-hypercore).
-- [x] **Total centralization.** The Governance rubric triggers the gate for a material control path requiring fewer than three signers. The direct 2-of-3 Foundation path and native 2-of-3 Core custody each meet that condition. The four operator EOAs independently meet the EOA condition because they set loss-causing trade limit prices without an oracle bound. [Foundation Safe](https://hyperevmscan.io/address/0x73a964d19E409E390628AFb1b5B42dde130F45EE#readProxyContract), [access controller](https://hyperevmscan.io/address/0x301024E319191495146AB3627fe3Fc1FfE586595#events), [Core custody](https://app.hyperliquid.xyz/explorer/address/0x6E25e5D971BDa9799F7A5242f4720b5B3f939200).
+- [x] **Unverified contract source** -> **PASS** — The USDM proxy and its active implementation have verified source. [USDM proxy](https://hyperevmscan.io/address/0xE2d2959f89B6389DeB624bF076Fe7D9E5401f377#code), [active implementation](https://hyperevmscan.io/address/0x05faf9cfa7143804e7fb0db423fde8330cd586df#code).
+- [x] **No audit** -> **PASS** — Code4rena reviewed the core system. Coverage of later components and changes is evaluated under Category 1. [Code4rena report](https://code4rena.com/reports/2026-04-monetrix).
+- [x] **Unverifiable reserves** -> **PASS** — The Vault and RedeemEscrow balances and Core position inputs are observable onchain. [Accountant](https://hyperevmscan.io/address/0x8950A5136f3994f82b998e37e1183b8A37c12705#readProxyContract), [HyperCore reads](https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/hyperevm/interacting-with-hypercore).
+- [ ] **Total centralization** -> **TRIGGERED** — Applied under the Governance rubric's "EOA or <3 signers" row. The 2-of-3 Foundation Safe holds a no-delay path to unbacked minting, and the native 2-of-3 Core multisig holds most backing. The four operator EOAs independently meet the EOA condition because they set loss-causing trade limit prices without an oracle bound. [Foundation Safe](https://hyperevmscan.io/address/0x73a964d19E409E390628AFb1b5B42dde130F45EE#readProxyContract), [access controller](https://hyperevmscan.io/address/0x301024E319191495146AB3627fe3Fc1FfE586595#events), [Core custody](https://app.hyperliquid.xyz/explorer/address/0x6E25e5D971BDa9799F7A5242f4720b5B3f939200).
+
+**Critical gate "Total centralization" is triggered.** Per the scoring framework the final score is capped at 5.00; the category-weighted score of 3.87 is recorded for comparability.
 
 ### Category Scores
 
