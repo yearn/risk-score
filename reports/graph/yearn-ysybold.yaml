@@ -20,22 +20,22 @@ nodes:
     label: ysyBOLD (Staked yBOLD)
     address: "0x23346B04a7f55b8760E5860AA5A77383D63491cD"
     category: vault
-    note: TokenizedStrategy v3.0.4 holding yBOLD. Receives all yBOLD yield from the yBOLD Accountant; 3-day profit unlock; 10% performance fee.
+    note: TokenizedStrategy v3.0.4 holding yBOLD. Configured recipient of yBOLD fees at the snapshot, with a 3-day profit unlock and 10% performance fee.
   - id: ybold
     label: yBOLD (Yearn BOLD vault)
     address: "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8"
     category: vault
-    note: Yearn V3 vault v3.0.4. PPS pinned at 1.0 by a 100% performance fee routed to ysyBOLD. Deposits blocked while PPS < 1 (OnLossDepositLimit).
+    note: Yearn V3 vault v3.0.4. Stored PPS was 1.0 BOLD at the snapshot. OnLossDepositLimit blocks new deposits when stored PPS falls below 1.0.
   - id: ybold-accountant
     label: yBOLD Accountant (100% perf fee)
     address: "0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa"
     category: infra
-    note: feeRecipient = ysyBOLD; feeManager = Brain. Fee waived while yBOLD PPS < 1.
+    note: Brain can redirect accrued fees and future yield without a delay. Recipient was ysyBOLD at the snapshot. Gains first cover any shortfall to 1 BOLD per share.
   - id: on-loss-limit
     label: OnLossDepositLimit
     address: "0x746C238E34a6dBFE1d35d50471467Bd7Bf898f62"
     category: infra
-    note: yBOLD deposit_limit_module. Returns 0 when yBOLD pricePerShare < 1e18, blocking cheap mints after a reported loss (sBOLD / Sherlock H-2 guard).
+    note: yBOLD deposit limit module. Returns 0 when stored yBOLD PPS is below 1e18. Applies to vault deposits.
   - id: yearn-accountant
     label: Yearn Accountant (ysyBOLD fees)
     address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
@@ -46,17 +46,17 @@ nodes:
     label: Liquity V2 wstETH SP (45.5%)
     address: "0x3589b93CaDb464b6E1974Cc9fc0c9be698Ee49a5"
     category: strategy
-    note: openDeposits false (only yBOLD allowed); lossLimitRatio 0; profitMaxUnlockTime 0. Collateral sold via its own Dutch auction 0x64e8050D33BB296d48FE8eb08d09F00633e45CcA.
+    note: Deposits are allowlisted and yBOLD owns all shares at the snapshot. Loss limit and profit unlock are both zero. Collateral is sold through a dedicated Dutch auction.
   - id: strat-weth
     label: Liquity V2 WETH SP (30.3%)
     address: "0xc5e7D3F76a03006540f17668A0267C668FFb5b75"
     category: strategy
-    note: openDeposits false (only yBOLD allowed); lossLimitRatio 0; profitMaxUnlockTime 0. Collateral sold via its own Dutch auction 0x61C9e1113661C991fb6377B3610804476Dcd9381.
+    note: Deposits are allowlisted and yBOLD owns all shares at the snapshot. Loss limit and profit unlock are both zero. Collateral is sold through a dedicated Dutch auction.
   - id: strat-reth
     label: Liquity V2 rETH SP (24.2%)
     address: "0x6ED566B76838A08d04cBd6323231B08a2eC69005"
     category: strategy
-    note: openDeposits false (only yBOLD allowed); lossLimitRatio 0; profitMaxUnlockTime 0. Collateral sold via its own Dutch auction 0x3793405FBcE404f351e76fa115209488aC0e8091.
+    note: Deposits are allowlisted and yBOLD owns all shares at the snapshot. Loss limit and profit unlock are both zero. Collateral is sold through a dedicated Dutch auction.
 
   # Auctions
   - id: auction-wsteth
@@ -107,11 +107,12 @@ nodes:
     label: Daddy / ySafe (6-of-9)
     address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
     category: governance
+    note: Directly holds FORCE_REVOKE_MANAGER and WITHDRAW_LIMIT_MANAGER. Can accept yBOLD role administration after a handoff initiated by Brain.
   - id: brain
     label: Brain (3-of-6)
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
-    note: management of ysyBOLD and all three strategies; Accountant feeManager. Untimelocked; can change the sBOLD/H-2 guard settings.
+    note: Manages ysyBOLD and all three strategies. Can redirect Accountant fees and initiate a role-manager handoff to ySafe. These powers have no delay.
   - id: security
     label: Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
@@ -124,6 +125,12 @@ nodes:
     label: Yearn V3 Role Manager
     address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
     category: governance
+    note: Governed by the Timelock. Brain can initiate transfer of the vault's role administration to the fixed chad address, ySafe, without a delay.
+  - id: borg-guard
+    label: ySafe BORG Guard
+    address: "0xe1c90a1f8a9553b31110dd6feead76e79a6ed419"
+    category: governance
+    note: Blacklist mode at the snapshot, with no policy entry for yBOLD or its Role Manager.
 
   # Bots
   - id: keeper
@@ -156,7 +163,7 @@ edges:
   - from: strat-wsteth
     to: sp-wsteth
     kind: deposits-into
-    label: "3.47M BOLD"
+    label: "3.46M BOLD"
   - from: strat-weth
     to: sp-weth
     kind: deposits-into
@@ -203,11 +210,11 @@ edges:
   - from: ybold
     to: ybold-accountant
     kind: routes-fees-to
-    label: "100% of gains"
+    label: "100% of gains above shortfall to par"
   - from: ybold-accountant
     to: ysybold
     kind: routes-fees-to
-    label: "feeRecipient (yBOLD fee shares)"
+    label: "feeRecipient at snapshot"
   - from: ysybold
     to: yearn-accountant
     kind: routes-fees-to
@@ -235,18 +242,31 @@ edges:
   - from: role-manager
     to: ybold
     kind: manages
-  - from: daddy
+    label: "vault role administration"
+  - from: timelock
     to: role-manager
     kind: controls
-    label: "chad"
+    label: "governance"
+  - from: brain
+    to: role-manager
+    kind: holds-role
+    label: "initiates role handoff to ySafe without delay"
+  - from: daddy
+    to: role-manager
+    kind: holds-role
+    label: "chad, can accept vault role administration"
+  - from: borg-guard
+    to: daddy
+    kind: controls
+    label: "Safe transaction guard"
   - from: daddy
     to: ybold
     kind: holds-role
-    label: "0x3FF6 (all but ADD_STRATEGY / ACCOUNTANT)"
+    label: "0x3FF6 includes FORCE_REVOKE / WITHDRAW_LIMIT"
   - from: brain
     to: ybold
     kind: holds-role
-    label: "0x3972 (DEBT / DEPOSIT_LIMIT / EMERGENCY …)"
+    label: "0x3972 includes DEBT / DEPOSIT_LIMIT / EMERGENCY"
   - from: security
     to: ybold
     kind: holds-role
