@@ -1,25 +1,20 @@
-name: Deploy to Vercel
+name: Deploy to Cloudflare
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
   push:
     branches: [master]
 
-concurrency:
-  group: vercel-deploy-${{ github.ref }}
-  cancel-in-progress: true
-
 permissions:
   contents: read
-  deployments: write
   id-token: write
   pull-requests: write
 
-cache-mode: none
-
 jobs:
-  risk-score:
-    uses: yearn/yearn-gha/.github/workflows/vercel-deploy.yml@d7047bb766f85ae4dfe0c4ab080bee3ebb1a7d31
+  deploy:
+    uses: yearn/yearn-gha/.github/workflows/cloudflare-deploy.yml@98064cbbea45a15fd4746c43d4476d47bda3c2f8
     with:
       project: risk-score
+      sync-secrets: true
       identity-id: ${{ github.event_name == 'pull_request' && vars.DOPPLER_PREVIEW_IDENTITY_ID || vars.DOPPLER_PRODUCTION_IDENTITY_ID }}

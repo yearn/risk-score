@@ -9,11 +9,11 @@
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
     "update-stats": "node scripts/update_stats.mjs",
     "check-bridges": "node scripts/check_bridges.mjs --strict",
-    "check-graphs": "node scripts/check_graphs.mjs --strict"
+    "check-graphs": "node scripts/check_graphs.mjs --strict",
+    "build:cloudflare": "bun run build && git rev-parse HEAD > commit-sha.txt"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
-    "@astrojs/vercel": "11.0.14",
     "@plausible-analytics/tracker": "0.4.6",
     "@resvg/resvg-js": "2.6.2",
     "astro": "7.4.2",
@@ -23,5 +23,8 @@
     "js-yaml": "4.3.0",
     "marked": "18.1.2",
     "satori": "0.63.2"
+  },
+  "devDependencies": {
+    "wrangler": "4.165.0"
   }
 }

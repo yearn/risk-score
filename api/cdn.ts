@@ -2,7 +2,7 @@ export const config = { runtime: 'edge' }
 
 const REPO_OWNER = 'yearn'
 const REPO_NAME = 'risk-score'
-const HEAD = process.env.VERCEL_GIT_COMMIT_SHA || 'master'
+const HEAD = process.env.GIT_COMMIT_SHA || 'master'
 
 type PathResult =
   | { type: 'direct'; path: string }

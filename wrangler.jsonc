@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "risk-score",
+  "main": "worker.ts",
+  "compatibility_date": "2026-11-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "dist", "binding": "ASSETS", "not_found_handling": "404-page" },
+  "workers_dev": true,
+  "routes": [{ "pattern": "curation.yearn.fi/*", "zone_name": "yearn.fi" }],
+  "env": { "preview": { "workers_dev": true, "routes": [] } }
+}
