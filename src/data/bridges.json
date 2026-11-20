@@ -34,6 +34,14 @@
           "detail": "Katana yvUSDC Compounder wraps USDC into vbUSDC [`0x53E8…a765e`](https://etherscan.io/address/0x53E82ABbb12638F09d9e624578ccB666217a765e) and bridges to Katana"
         },
         {
+          "slug": "avant-saveth",
+          "name": "Avant savETH",
+          "kind": "direct",
+          "model": "transport",
+          "integration": "AggLayer unified bridge (backing assets to Katana)",
+          "detail": "Avant's ETH-book strategy wallet [`0x6CC6…C4bD`](https://etherscan.io/address/0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD) has sent 5,577.1 weETH through `PolygonZkEVMBridgeV2` [`0x2a3D…2EDe`](https://etherscan.io/address/0x2a3DD3EB832aF982ec71669E178424b10Dca2EDe) to Katana over its history. At the October 28–29, 2026 reconciliation the wallet held only 0.016 ETH on Katana, so current remote custody is negligible; exposure arises only while backing assets are in transit or deployed on Katana. savETH itself does not bridge over AggLayer."
+        },
+        {
           "slug": "flex",
           "name": "Flex",
           "kind": "indirect",
@@ -136,6 +144,15 @@
           "integration": "Chainlink CCIP (LockReleaseTokenPool)",
           "detail": "LockReleaseTokenPool holds ~13% of supply on mainnet, backing bridged syrupUSDC on Base/Arbitrum/Solana",
           "owner": "Pool owner: Maple governance contract [`0x4483…9449`](https://etherscan.io/address/0x44835bBBA9D40DEDa9b64858095EcFB2693c9449)."
+        },
+        {
+          "slug": "avant-saveth",
+          "name": "Avant savETH",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "Chainlink CCIP (LockReleaseTokenPool 1.5.1)",
+          "detail": "Ethereum savETH is canonical; pool [`0x43f4…fa54`](https://etherscan.io/address/0x43f47a434dadd5a122c42e49378365cca949fa54) escrows 1,702.10 savETH (16.8% of supply) backing `FactoryBurnMintERC20` copies on Arbitrum ([`0x23E3…72De`](https://arbiscan.io/address/0x23E3df1196b3249c9b0A9476f990F105591872De), 1,702.10 savETH, ~all in a Dolomite isolation vault), Linea (0.0008) and Avalanche (0.000474, from lane-specific CCIP 1.5 ramp `Locked`/`Released` accounting on Ethereum). Each inbound lane bucket holds 2,518.51 savETH refilling ~2,518/day, so one lane can release the full escrow. A CCIP or pool-owner compromise harms bridged holders, not Ethereum savETH backing. Separately, the avETH book holds ~$32.7M of CCIP-bridged savUSD on other chains (see report). Verified onchain October 28–29, 2026.",
+          "owner": "Pool owner + CCIP token administrator: [`0xd4d2…57cb`](https://etherscan.io/address/0xd4d23209aaE8630bf386b7393763a5b7865e57cb) — no code (Avant states Fordefi MPC), no timelock; same key owns avETH/savETH and the Arbitrum token. Rebalancer and rate-limit admin unset."
         },
         {
           "slug": "saturn-usdat",
@@ -267,7 +284,8 @@
         "resolv-rlp",
         "resolv-wstusr",
         "superstate-ustb",
-        "saturn-usdat"
+        "saturn-usdat",
+        "avant-saveth"
       ],
       "dependencies": [
         {
