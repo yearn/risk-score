@@ -1,0 +1,308 @@
+slug: tori-strusd
+title: Tori Finance (strUSD) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: infra
+    label: Minting / Custody / Bridges
+  - id: governance
+    label: Governance
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  - id: strusd
+    label: strUSD (StakedTrUSD)
+    address: "0x280839980a7eD0D7717F64125fE241012E5F5815"
+    category: vault
+    note: "ERC-4626 UUPS; ~62.54M supply; PPS ~1.0363; 7d cooldown"
+  - id: trusd
+    label: trUSD
+    address: "0xd0580192E98eA6CEB9c7b6191Ed2E27560911697"
+    category: vault
+    note: "Synthetic dollar; ~72.80M supply; sole minter = Minting"
+  - id: silo
+    label: trUSD Silo
+    address: "0xF7c0d8853E69DCD37ee7599c6280d2632F3360B4"
+    category: infra
+    note: "Cooldown escrow; ~618.3k trUSD at snapshot"
+  - id: distributor
+    label: Staking Rewards Distributor
+    address: "0xa0C49fFa4B7941830235cde974d9B2a8420CD375"
+    category: infra
+    note: "REWARDER_ROLE on strUSD; Ownable → Safe; forwards operator calls"
+  - id: dist-operator
+    label: Distributor Operator
+    address: "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006"
+    category: governance
+    note: "No code; Tori-reported Fordefi MPC (3/4 manual; automated API path undisclosed); can reportLoss ≤5%/day without Safe/TL (critical gate)"
+
+  - id: minting
+    label: Minting
+    address: "0xe16b821B9F6B0a6f06a2C4a61D5d1f71cFa53F1E"
+    category: infra
+    note: "Directly deployed (not UUPS); whitelist EIP-712 mint/redeem; USDC/USDT"
+  - id: custodian
+    label: Custodian EOA
+    address: "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7"
+    category: governance
+    note: "Registered no-code custodian; Tori-reported 2/4 quorum; controls ~$897k USDC+USDT received; bank/asset-manager account policies TODO"
+  - id: collateral-manager
+    label: Collateral Manager
+    address: "0x39c9106e9be3622104a1ab97f3fcc88b65874213"
+    category: governance
+    note: "transferToCustody: registered destinations only, no amount cap; Safe can grant role"
+
+  - id: admin-safe
+    label: Admin Safe (3/5)
+    address: "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316"
+    category: governance
+    note: "DEFAULT_ADMIN; TL proposer only (not executor/canceller); CCIP pool owner incl. Monad and Arbitrum; can redistribute/seize"
+  - id: timelock
+    label: ToriTimelock (24h)
+    address: "0xA952453E39F77108Ee37C1b92de593F1C59A6ef4"
+    category: governance
+    note: "TIMELOCK_ADMIN; strUSD/trUSD upgrades; Minting params/custody (Minting not upgradeable)"
+  - id: tl-executor-eoa
+    label: Timelock Executor EOA
+    address: "0x039e71e865a34bcaaebfc641291bec6517ea0ce7"
+    category: governance
+    note: "Sole EXECUTOR_ROLE (Safe hasRole false)"
+  - id: tl-canceller-eoa
+    label: Timelock Canceller EOA
+    address: "0x60226cbb34445143e5f923abe2d42e5df852d065"
+    category: governance
+    note: "Sole CANCELLER_ROLE (Safe hasRole false)"
+  - id: gatekeeper-eoa
+    label: Gatekeeper / CCIP Rate-Limit Admin
+    address: "0x5a54bbae78a3f043a1a41d6f9eb39fb2a1f766c7"
+    category: governance
+    note: "No code; GATEKEEPER on Minting; rateLimitAdmin on both CCIP pools; absent from MPC statement"
+  - id: blacklist-eoa
+    label: Blacklist Manager EOA
+    address: "0xb1e50b7a19b8f650a6ee77dc0ac52b88059fa169"
+    category: governance
+    note: "BLACKLIST_MANAGER alongside Safe; prerequisite for redistribute/seize"
+
+  - id: strusd-pool
+    label: strUSD CCIP LockRelease Pool
+    address: "0x63AAEFD6e9F8a306ad6AD60f18f882Ee7Da866b9"
+    category: infra
+    note: "LockReleaseTokenPool 2.0.0"
+  - id: trusd-pool
+    label: trUSD CCIP LockRelease Pool
+    address: "0x6823666FD0869050a0530eB15BA568936234d463"
+    category: infra
+    note: "LockReleaseTokenPool 2.0.0"
+  - id: strusd-lockbox
+    label: strUSD LockBox
+    address: "0xc1A9e4BBb58573B8971C9b3C24e17f9851268F86"
+    category: infra
+    note: "~13.23M strUSD escrowed"
+  - id: trusd-lockbox
+    label: trUSD LockBox
+    address: "0x8D21EB2945c6084797De85D7AE0c163e1971a37f"
+    category: infra
+    note: "~0.68M trUSD escrowed"
+
+  - id: dep-offchain
+    label: Reserve Portfolio
+    category: dependency
+    link: "https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json"
+    note: "Predominantly offchain reserves; also onchain lending and liquidity. Accountable observation: 2026-11-06"
+  - id: dep-reserve-morpho
+    label: Tori-Collateral Morpho Loans
+    category: dependency
+    link: "https://github.com/yearn/risk-score/blob/93c1c7cccae645fb419d7f32f66a12fad724ed22/reports/data/tori-strusd-2026-11-06.json"
+    note: "Feed reports $3.438M (4.64% of reserves) in loans against Tori-token collateral; circular backing risk. Attributed to DeFi Operator: Ethereum markets and Monad strUSD/AUSD + SharpByte vault"
+  - id: dep-ccip
+    label: Chainlink CCIP
+    category: dependency
+    note: "Hub lock/release; remotes Burn&Mint (Monad/Pharos/Arb/Solana); Canton lane configured onchain, absent from docs"
+  - id: dep-morpho-market
+    label: Morpho strUSD/USDC (86% LLTV)
+    category: dependency
+    link: "https://app.morpho.org/ethereum/variable/0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1/usdc-strusd"
+    note: "Issue #576 use case; 12.58M USDC supply, 11.33M borrows at snapshot"
+  - id: dep-redstone
+    label: RedStone strUSD_FUNDAMENTAL
+    address: "0x7fdA577c085330E69df3179A2A5867751A9D0cAA"
+    category: dependency
+    note: "Morpho base feed, divided by Chainlink USDC/USD; 0.1% / 6h"
+  - id: dep-accountable
+    label: Accountable
+    category: dependency
+    link: "https://tori.accountable.capital/"
+    note: "Public reserve observations; does not enforce solvency onchain"
+  - id: dep-usdc
+    label: USDC
+    address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+    category: dependency
+  - id: dep-usdt
+    label: USDT
+    address: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+    category: dependency
+
+edges:
+  - from: admin-safe
+    to: timelock
+    kind: proposes-on
+    label: PROPOSER
+  - from: tl-canceller-eoa
+    to: timelock
+    kind: cancels-on
+    label: CANCELLER (Safe hasRole false)
+  - from: tl-executor-eoa
+    to: timelock
+    kind: holds-role
+    label: EXECUTOR (Safe hasRole false)
+  - from: timelock
+    to: strusd
+    kind: holds-role
+    label: TIMELOCK_ADMIN (24h upgrades)
+  - from: timelock
+    to: trusd
+    kind: holds-role
+    label: TIMELOCK_ADMIN (24h upgrades)
+  - from: timelock
+    to: minting
+    kind: holds-role
+    label: TIMELOCK_ADMIN (24h params; not upgradeable)
+  - from: admin-safe
+    to: strusd
+    kind: holds-role
+    label: DEFAULT_ADMIN (redistribute/seize, no delay)
+  - from: admin-safe
+    to: trusd
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: admin-safe
+    to: minting
+    kind: holds-role
+    label: DEFAULT_ADMIN
+  - from: admin-safe
+    to: distributor
+    kind: controls
+    label: owner (can replace operator)
+  - from: admin-safe
+    to: strusd-pool
+    kind: controls
+    label: owner
+  - from: admin-safe
+    to: trusd-pool
+    kind: controls
+    label: owner
+  - from: admin-safe
+    to: strusd-lockbox
+    kind: controls
+    label: owner (can authorize callers, no delay)
+  - from: admin-safe
+    to: trusd-lockbox
+    kind: controls
+    label: owner (can authorize callers, no delay)
+  - from: gatekeeper-eoa
+    to: strusd-pool
+    kind: controls
+    label: rateLimitAdmin
+  - from: gatekeeper-eoa
+    to: trusd-pool
+    kind: controls
+    label: rateLimitAdmin
+  - from: blacklist-eoa
+    to: strusd
+    kind: holds-role
+    label: BLACKLIST_MANAGER
+
+  - from: minting
+    to: trusd
+    kind: mints
+    label: sole minter()
+  - from: collateral-manager
+    to: minting
+    kind: holds-role
+    label: COLLATERAL_MANAGER (registered destinations)
+  - from: minting
+    to: custodian
+    kind: routes-through
+    label: transferToCustody
+  - from: dep-usdc
+    to: minting
+    kind: deposits-into
+    label: whitelist collateral
+  - from: dep-usdt
+    to: minting
+    kind: deposits-into
+    label: whitelist collateral
+
+  - from: strusd
+    to: trusd
+    kind: deposits-into
+    label: "ERC-4626 totalAssets (~64.81M)"
+  - from: distributor
+    to: strusd
+    kind: holds-role
+    label: REWARDER (rewards / reportLoss)
+  - from: dist-operator
+    to: distributor
+    kind: controls
+    label: operator (reportLoss ≤5%/day)
+  - from: admin-safe
+    to: strusd
+    kind: holds-role
+    label: REWARDER
+  - from: strusd
+    to: silo
+    kind: routes-through
+    label: 7d cooldown claim path
+
+  - from: strusd
+    to: strusd-pool
+    kind: routes-through
+    label: CCIP lock (holder-level)
+  - from: trusd
+    to: trusd-pool
+    kind: routes-through
+    label: CCIP lock (holder-level)
+  - from: strusd-pool
+    to: strusd-lockbox
+    kind: routes-through
+    label: escrow
+  - from: trusd-pool
+    to: trusd-lockbox
+    kind: routes-through
+    label: escrow
+  - from: strusd-pool
+    to: dep-ccip
+    kind: routes-through
+    label: CCT messages
+  - from: trusd-pool
+    to: dep-ccip
+    kind: routes-through
+    label: CCT messages
+
+  - from: strusd
+    to: dep-morpho-market
+    kind: deposits-into
+    label: collateral (86% LLTV)
+  - from: dep-morpho-market
+    to: dep-redstone
+    kind: routes-through
+    label: oracle base feed
+  - from: trusd
+    to: dep-accountable
+    kind: routes-through
+    label: reserve attestation
+  - from: custodian
+    to: dep-offchain
+    kind: allocates-to
+    label: offchain hedges
+  - from: dep-offchain
+    to: dep-reserve-morpho
+    kind: deposits-into
+    label: "4.64% of reported reserves (2026-11-06)"
+  - from: trusd
+    to: dep-offchain
+    kind: deposits-into
+    label: economic backing (offchain)

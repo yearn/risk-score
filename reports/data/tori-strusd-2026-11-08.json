@@ -1,0 +1,444 @@
+{
+  "snapshot": {
+    "chain_id": 1,
+    "number": 26340122,
+    "hash": "0x9436fc1d4978c0f9d964a2890475c895be97898e6ee43c8295c4300cce7de8f8",
+    "timestamp": "2026-11-04T08:01:59Z"
+  },
+  "verification_date": "2026-11-08",
+  "method": {
+    "rpc": "Configured Ethereum and Arbitrum RPCs via scripts/env.py; endpoints omitted",
+    "reads": "cast call/storage at the listed block; no transactions broadcast",
+    "fluid": "FluidDexT1.swapIn estimate mode: eth_call from 0x000000000000000000000000000000000000dEaD returns FluidDexSwapResult(amountOut)"
+  },
+  "safe": {
+    "address": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+    "version": "1.4.1",
+    "threshold": 3,
+    "modules": [],
+    "guard_slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "module_guard_slot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "ccip": {
+    "strUSD": {
+      "pool": "0x63AAEFD6e9F8a306ad6AD60f18f882Ee7Da866b9",
+      "type_and_version": "LockReleaseTokenPool 2.0.0",
+      "owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+      "router": "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
+      "rate_limit_admin": "0x5A54bbAe78a3F043a1A41D6f9EB39FB2a1f766c7",
+      "fee_admin": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+      "lockbox": "0xc1A9e4BBb58573B8971C9b3C24e17f9851268F86",
+      "lockbox_type": "ERC20LockBox 2.0.0",
+      "lockbox_owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+      "lockbox_authorized_callers": [
+        "0x63AAEFD6e9F8a306ad6AD60f18f882Ee7Da866b9"
+      ],
+      "token_admin_registry": {
+        "address": "0xb22764f98dD05c789929716D677382Df22C05Cb6",
+        "administrator": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "pending_administrator": "0x0000000000000000000000000000000000000000",
+        "pool": "0x63AAEFD6e9F8a306ad6AD60f18f882Ee7Da866b9"
+      },
+      "lanes": {
+        "monad-mainnet": {
+          "selector": "8481857512324358265",
+          "remote_pool": "0x00000000000000000000000052e34c46ce7ce0cbdb8864d7a02fb0a9ae9b3012",
+          "remote_token": "0x000000000000000000000000683fb58ee77172626d5b49087ddac71ef7825d20",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "pharos-mainnet": {
+          "selector": "7801139999541420232",
+          "remote_pool": "0x0000000000000000000000007305a63323d3171c6311d8f3218c3a7d164f3f0f",
+          "remote_token": "0x00000000000000000000000025419e949b485d481bed4ea0c5a0496f6c7f7c63",
+          "outbound": {
+            "tokens": 1371808392405598064458867,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "arbitrum-mainnet": {
+          "selector": "4949039107694359620",
+          "remote_pool": "0x000000000000000000000000d87d9d4fb4ae0dd438404561f58e99c16dc437f1",
+          "remote_token": "0x0000000000000000000000002f0ef93ce562bd192f13db1acb32d3a8aa324974",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "solana-mainnet": {
+          "selector": "124615329519749607",
+          "remote_pool": "0x7158ebe151833c27e19c97ebefa84287dce63ab7a61586953732f80d099b1dc0",
+          "remote_token": "0xe2eb6f77d53c6cc161e75b41f0ca5194df9aacd411a28797e6dd12cc50198c91",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "canton-mainnet": {
+          "selector": "2308837218439511688",
+          "remote_pool": "0xe0f16b284c8e4f264dbbedb84d4f28eba53c65c0be559d164705311503d36ba1",
+          "remote_token": "0x837cdfe55a32d53a3506adf5e8c5879dbdf91e560c8d67474e704a394bb6e16c",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        }
+      }
+    },
+    "trUSD": {
+      "pool": "0x6823666FD0869050a0530eB15BA568936234d463",
+      "type_and_version": "LockReleaseTokenPool 2.0.0",
+      "owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+      "router": "0x80226fc0Ee2b096224EeAc085Bb9a8cba1146f7D",
+      "rate_limit_admin": "0x5A54bbAe78a3F043a1A41D6f9EB39FB2a1f766c7",
+      "fee_admin": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+      "lockbox": "0x8D21EB2945c6084797De85D7AE0c163e1971a37f",
+      "lockbox_type": "ERC20LockBox 2.0.0",
+      "lockbox_owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+      "lockbox_authorized_callers": [
+        "0x6823666FD0869050a0530eB15BA568936234d463"
+      ],
+      "token_admin_registry": {
+        "address": "0xb22764f98dD05c789929716D677382Df22C05Cb6",
+        "administrator": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "pending_administrator": "0x0000000000000000000000000000000000000000",
+        "pool": "0x6823666FD0869050a0530eB15BA568936234d463"
+      },
+      "lanes": {
+        "monad-mainnet": {
+          "selector": "8481857512324358265",
+          "remote_pool": "0x0000000000000000000000006f6818c72a7ffc72b2ed90fd7e8df1d17c18b195",
+          "remote_token": "0x000000000000000000000000770a579ea200784723b31b8668b0773ba80393c9",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "pharos-mainnet": {
+          "selector": "7801139999541420232",
+          "remote_pool": "0x000000000000000000000000ab7d93271b693ec5196ccd16639b4c8087d0d2f7",
+          "remote_token": "0x0000000000000000000000003816102cdaff06e2a5a362ca7f767ccfd2337003",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "arbitrum-mainnet": {
+          "selector": "4949039107694359620",
+          "remote_pool": "0x0000000000000000000000007408e795335952b59086e90f673c28d841989b5c",
+          "remote_token": "0x000000000000000000000000dbec7b2f9435d4fcbdf9cfcab626a6eb88b5d0d1",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "solana-mainnet": {
+          "selector": "124615329519749607",
+          "remote_pool": "0x0b0841111aaeb3213feb3a74c143d4c1fa7f14cdf753418a92dbd41801bfd252",
+          "remote_token": "0x77cdb6135e4443e181b3bd741d61c71823996fc764b282f7b5d79bec2ec0b9ad",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        },
+        "canton-mainnet": {
+          "selector": "2308837218439511688",
+          "remote_pool": "0xa8f015e735624818e4875c4e4f4235ed17eaac7e3f7205ea327cd3fcc673c68a",
+          "remote_token": "0xca24a3fd48b6f4efc474dd5e0508f81520a24518228e3898a4b85add75719e45",
+          "outbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          },
+          "inbound": {
+            "tokens": 1500000000000000000000000,
+            "last_updated": 1793779319,
+            "is_enabled": true,
+            "capacity": 1500000000000000000000000,
+            "rate_per_second": 69444444444444444444
+          }
+        }
+      }
+    }
+  },
+  "rate_limit_admin_code_size": 0,
+  "fluid_exit": {
+    "pool": "0x97f32e5091d0e6aee24beb398e6592ae111dee9c",
+    "token0": "USDC",
+    "token1": "trUSD",
+    "direction": "swap0to1=false (trUSD to USDC)",
+    "direct_quotes": [
+      {
+        "trusd_in": 100000,
+        "usdc_out_raw": "99987062579"
+      },
+      {
+        "trusd_in": 250000,
+        "usdc_out_raw": "249940652910"
+      },
+      {
+        "trusd_in": 500000,
+        "usdc_out_raw": "499791319951"
+      },
+      {
+        "trusd_in": 1000000,
+        "usdc_out_raw": "999222890740"
+      }
+    ],
+    "reverts_from_trusd": 1100000,
+    "route_curve_then_fluid": [
+      {
+        "strusd_in": "100000",
+        "curve_trusd_out": "103517219693448557733467",
+        "fluid_usdc_out_raw": "103503565026",
+        "usdc_out": 103503.565026,
+        "impact_vs_pps_pct": -0.13
+      },
+      {
+        "strusd_in": "250000",
+        "curve_trusd_out": "258559923174473018205630",
+        "fluid_usdc_out_raw": "258496950489",
+        "usdc_out": 258496.950489,
+        "impact_vs_pps_pct": -0.23
+      },
+      {
+        "strusd_in": "500000",
+        "curve_trusd_out": "515897830331727662781587",
+        "fluid_usdc_out_raw": "515676612028",
+        "usdc_out": 515676.612028,
+        "impact_vs_pps_pct": -0.48
+      },
+      {
+        "strusd_in": "1000000",
+        "curve_trusd_out": "951825673376287350872562",
+        "fluid_usdc_out_raw": "951118981662",
+        "usdc_out": 951118.981662,
+        "impact_vs_pps_pct": -8.22
+      }
+    ]
+  },
+  "curve_lp": {
+    "strusd_trusd": {
+      "pool": "0x25a637c80ad90177d0b3ff28aa2d3f74f7165ccb",
+      "gauge": "0xd5367fe432b1e6aae2eaf16aee5fddddabb83e99",
+      "gauge_share_of_lp_pct": 99.99,
+      "largest_gauge_holder": "0xa8a697f7fec0e99c1e6d82add6c80aafb07da60e",
+      "largest_holder_gauge_share_pct": 100.0
+    },
+    "frxusd_trusd": {
+      "pool": "0xd1d954bc94c843815ec7b8119f2de00af27fa6ff",
+      "gauge": "0xa49eb49f7e4c86d93f6ea8b81e4863ac4c3b4891",
+      "gauge_share_of_lp_pct": 99.4,
+      "largest_gauge_holder": "0xa8a697f7fec0e99c1e6d82add6c80aafb07da60e",
+      "largest_holder_gauge_share_pct": 99.07
+    },
+    "method": "Etherscan v2 getLogs Transfer reconciliation through block 26340122",
+    "holder_identity": "TODO: no-code address; identity not established"
+  },
+  "morpho": {
+    "market": "0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1",
+    "total_supply_assets_usdc": 12581777.724396,
+    "total_borrow_assets_usdc": 11332617.651292,
+    "utilization": 0.900717,
+    "defi_operator": "0xD07d31698E9689Af5954698b08e0c963ad9c00eb",
+    "defi_operator_source": "Accountable policy_attestation v2 name: DeFi Operator",
+    "defi_operator_supply_usdc_at_snapshot": 90692.88,
+    "accountable_block": 26353280,
+    "defi_operator_supply_usdc_at_accountable_block": 90728.78,
+    "accountable_reported_ethereum_usd": 126199.48,
+    "accountable_timestamp": "2026-11-06T04:01:02.208Z"
+  },
+  "oracle_update_rules": {
+    "redstone": {
+      "feed": "0x7fdA577c085330E69df3179A2A5867751A9D0cAA",
+      "deviation_pct": 0.1,
+      "heartbeat_seconds": 21600,
+      "source": "redstone-finance/redstone-oracles-monorepo relayer-manifests-multi-feed/ethereumMultiFeed.json, priceFeeds.strUSD_FUNDAMENTAL.updateTriggersOverrides"
+    },
+    "chainlink": {
+      "feed": "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6",
+      "deviation_pct": 0.25,
+      "heartbeat_seconds": 82800,
+      "source": "https://reference-data-directory.vercel.app/feeds-mainnet.json"
+    }
+  },
+  "arbitrum_remote": {
+    "block": 521117081,
+    "hash": "0x8a5163cd1a130e74bfc070d7b42397032b5cae8647df89559470233b121bbff9",
+    "timestamp": 1793779319,
+    "strUSD_total_supply": "96165253625160913",
+    "trUSD_total_supply": "221146525140322349"
+  },
+  "accountable_policy_attestation": {
+    "source": "https://tori.accountable.capital:8443/dashboard",
+    "request_headers": {
+      "Accept": "application/json"
+    },
+    "response_sha256": "94319e49361e396cb375c1e48e98204d4c716aa851832946d864f77511d4dd50",
+    "response_ts": 1794177061950,
+    "response_ts_utc": "2026-11-08T22:31:01.950000+00:00",
+    "selection": "data.v2.policy_attestation; includes role names, quorum summaries and provider statement as published by Tori via Accountable. Not independently verified.",
+    "policy_attestation": {
+      "type": "static_snapshot",
+      "controller": "Tori Finance",
+      "addresses": [
+        {
+          "name": "Owner / Admin",
+          "wallet": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+          "enforcement": "onchain",
+          "quorum": "3/5 Safe quorum",
+          "quorum_source": "read from the Safe contract"
+        },
+        {
+          "name": "Gatekeeper",
+          "wallet": "0xb0444060ADcC379e57b72C5EB7E09530351B183D",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "Whitelister",
+          "wallet": "0x541d53Bc10213FF7835b3393f6e74bAaEfca3cF6",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "Collateral Manager",
+          "wallet": "0x39C9106E9bE3622104A1aB97F3fCC88B65874213",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "Reward Operator",
+          "wallet": "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006",
+          "enforcement": "provider",
+          "quorum": "3/4 approval quorum"
+        },
+        {
+          "name": "Proposal Canceller",
+          "wallet": "0x60226Cbb34445143E5F923ABe2D42e5DF852d065",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "Proposal Executor",
+          "wallet": "0x039e71e865A34bcaAebFC641291bEc6517ea0ce7",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "Custodian (MPC custody)",
+          "wallet": "0x63392EaB47926f6Ee3E6ACA285B367A952001CC7",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "CCIP Admin",
+          "wallet": "0x07aDFa5E8C7E8E80d1449DAC46C3d6e739850E64",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        },
+        {
+          "name": "DeFi Operator",
+          "wallet": "0xD07d31698E9689Af5954698b08e0c963ad9c00eb",
+          "enforcement": "provider",
+          "quorum": "2/4 approval quorum"
+        }
+      ],
+      "statement": "Protocol roles and an operational custody address. Owner / Admin uses a Gnosis Safe with an on-chain quorum. Fordefi confirmed the transaction approval policy for nine vaults as of 2026-10-26 at 17:04 UTC. Vault signing keys use 2-of-2 MPC; approval thresholds are separate. Displayed quorums summarize manual transaction approval policies. Reward Operator's message signing and covered token allowances require 2-of-4 approval. Specified Tori API operations follow separate rules restricted to configured markets, contracts and initiators. Rules are evaluated in order; the first match applies and unmatched transactions are blocked. Custodian is an MPC custody address, not a timelock role. This snapshot does not cover later policy changes."
+    }
+  }
+}
