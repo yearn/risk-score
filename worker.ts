@@ -1,4 +1,3 @@
-import './commit'
 import cdn from './api/cdn'
 import monitoring from './api/monitoring'
 
@@ -15,7 +14,7 @@ export default {
   async fetch(req: Request, env: { ASSETS: Fetcher }, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(req.url)
     const path = url.pathname
-    if (path.startsWith('/cdn/') || path.startsWith('/api/cdn')) return cached(req, ctx, cdn)
+    if (path.startsWith('/cdn/') || path.startsWith('/api/cdn')) return cdn(req, env.ASSETS)
     if (path.startsWith('/api/monitoring/')) return cached(req, ctx, monitoring)
     if (path.startsWith('/proxy/plausible/')) {
       const fwd = new Request(`https://plausible.io/${path.slice(17)}${url.search}`, req)

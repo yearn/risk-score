@@ -57,4 +57,3 @@ reports/data/**/lib/
 
 # Cloudflare
 .wrangler/
-commit-sha.txt

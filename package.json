@@ -10,7 +10,7 @@
     "update-stats": "node scripts/update_stats.mjs",
     "check-bridges": "node scripts/check_bridges.mjs --strict",
     "check-graphs": "node scripts/check_graphs.mjs --strict",
-    "build:cloudflare": "bun run build && git rev-parse HEAD > commit-sha.txt"
+    "build:cloudflare": "bun run build && mkdir -p dist/cdn && cp -R vaults dist/cdn/"
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.4",
