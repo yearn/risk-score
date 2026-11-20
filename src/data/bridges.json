@@ -415,7 +415,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero V2 OFT Adapter (Solana + Avalanche only)",
-          "detail": "Minor route: LayerZero handles only Solana + Avalanche (~48.7M locked, <0.7% of mainnet USDS supply) and does not hold `wards` on USDS. The bulk of USDS/sUSDS bridges via native rollup bridges — see the Native Rollup Bridges row",
+          "detail": "Minor route: LayerZero handles only Solana + Avalanche (~4.58M locked, ~0.09% of mainnet USDS supply) and does not hold `wards` on USDS. The bulk of USDS/sUSDS bridges via native rollup bridges — see the Native Rollup Bridges row",
           "security": {
             "label": "2-of-2",
             "confirmations": 12,
@@ -425,7 +425,7 @@
             ],
             "route": "Avalanche→Ethereum (inbound; Solana route also 2-of-2)",
             "weak": false,
-            "verifiedAt": "2026-07-16",
+            "verifiedAt": "2026-11-16",
             "link": "https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8"
           },
           "owner": "Adapter owner: Sky PauseProxy [`0xBE8E…98FB`](https://etherscan.io/address/0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB) (Chief + 48h GSM)."
@@ -642,7 +642,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "OP Stack + Arbitrum Nitro canonical bridges (SkyLink)",
-          "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (<0.7% of mainnet USDS supply)"
+          "detail": "Primary USDS/sUSDS cross-chain route: ~4.4M USDS + ~443M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro), with ~96.5% of the sUSDS in the Arbitrum escrow after the July and October 2026 Spark Liquidity Layer repatriations. No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (~0.09% of mainnet USDS supply)"
         }
       ]
     },
