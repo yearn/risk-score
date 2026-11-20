@@ -23,7 +23,7 @@ nodes:
     label: Staked USDM
     category: vault
     address: '0x5f1ab62C3159eBE04aFF14Beef84b0b60de63DDF'
-    note: Holds USDM and receives the staker share of realized yield.
+    note: Held 2.568M USDM at the snapshot and receives the staker share of realized yield.
   - id: vault
     label: MonetrixVault
     category: infra
@@ -33,7 +33,7 @@ nodes:
     label: MonetrixAccountant
     category: infra
     address: '0x8950A5136f3994f82b998e37e1183b8A37c12705'
-    note: Values EVM and HyperCore backing through registered positions and precompiles.
+    note: Values EVM and HyperCore backing through registered positions and precompiles. An operator can remove a registered entry and omit a liability from marked backing.
   - id: redeem
     label: RedeemEscrow
     category: infra
@@ -87,7 +87,7 @@ nodes:
   - id: operators
     label: Vault Operators (4 EOAs)
     category: governance
-    note: Each EOA can act individually. Hedge calls take caller-set limit prices with no oracle bound or cumulative loss cap.
+    note: Each EOA can act individually. Hedge calls take caller-set limit prices with no oracle bound or cumulative loss cap. Operators also edit the Accountant's supplied-asset registries.
   - id: core-signers
     label: Core Custody Multisig (2-of-3)
     category: governance
@@ -104,11 +104,16 @@ nodes:
     label: Circle USDC
     category: dependency
     address: '0xb88339CB7199b77E23DB6E890353E22632Ba630f'
-  - id: core
-    label: HyperCore Portfolio
+  - id: custody-core
+    label: Core Custody Account
     category: strategy
     link: 'https://app.hyperliquid.xyz/explorer/address/0x6E25e5D971BDa9799F7A5242f4720b5B3f939200'
-    note: Encompasses the native 2-of-3 custody account and the Vault's own Core account. Predominantly HYPE basis exposure with a small BTC basis leg and USDC borrow/lend.
+    note: Native 2-of-3 custody account with primarily HYPE basis exposure, a smaller BTC leg and USDC borrowing. Account-level net backing at the snapshot remains unverified.
+  - id: vault-core
+    label: Vault Core Account
+    category: strategy
+    link: 'https://app.hyperliquid.xyz/explorer/address/0x5586c2c8223C73Ec0B41D6352748e6c173372E11'
+    note: The Vault contract's own Core account supplies USDC and is subject to its governor and operators. Account-level net backing at the snapshot remains unverified.
   - id: hypercore
     label: HyperCore Markets and Margin
     category: dependency
@@ -122,9 +127,13 @@ edges:
   - { from: instant-unstake, to: susdm, kind: routes-through, label: Atomic sUSDM exit }
   - { from: usdm, to: vault, kind: routes-through, label: Issuance and redemption }
   - { from: usdc, to: vault, kind: routes-through, label: Mint deposits }
-  - { from: vault, to: core, kind: allocates-to, label: '97.46% net backing' }
-  - { from: core, to: deposit-wallet, kind: routes-through, label: Core–EVM USDC transfer }
-  - { from: core, to: hypercore, kind: deposits-into, label: Basis trades and borrow/lend }
+  - { from: vault, to: custody-core, kind: allocates-to, label: Main custody portfolio }
+  - { from: vault, to: vault-core, kind: allocates-to, label: Vault-operated USDC supply }
+  - { from: vault, to: deposit-wallet, kind: routes-through, label: USDC deposits to HyperCore }
+  - { from: deposit-wallet, to: custody-core, kind: routes-through, label: Custody deposit route }
+  - { from: deposit-wallet, to: vault-core, kind: routes-through, label: Vault deposit route }
+  - { from: custody-core, to: hypercore, kind: deposits-into, label: Basis trades and borrow/lend }
+  - { from: vault-core, to: hypercore, kind: deposits-into, label: USDC supply }
   - { from: vault, to: redeem, kind: routes-through, label: Claim funding }
   - { from: instant, to: vault, kind: routes-through, label: Buffer replenishment }
   - { from: vault, to: yield, kind: routes-through, label: Realized USDC }
@@ -139,9 +148,13 @@ edges:
   - { from: operators, to: vault, kind: holds-role, label: OPERATOR }
   - { from: acl, to: vault, kind: controls, label: Protocol roles }
   - { from: acl, to: usdm, kind: controls, label: Upgrade (UPGRADER) and pause (GUARDIAN) }
+  - { from: acl, to: susdm, kind: controls, label: Upgrade (UPGRADER) and pause (GUARDIAN) }
   - { from: acl, to: instant, kind: controls, label: Buffer, fee and recovery settings }
   - { from: acl, to: insurance, kind: controls, label: GOVERNOR withdrawals }
-  - { from: core-signers, to: core, kind: controls, label: 2-of-3 custody and withdrawals }
-  - { from: core-agent, to: core, kind: manages, label: Delegated trading }
+  - { from: core-signers, to: custody-core, kind: controls, label: 2-of-3 custody and withdrawals }
+  - { from: core-agent, to: custody-core, kind: manages, label: Delegated trading }
+  - { from: safe, to: vault-core, kind: controls, label: GOVERNOR emergency Core actions through Vault }
+  - { from: operators, to: vault-core, kind: manages, label: OPERATOR trades and supply through Vault }
+  - { from: operators, to: accountant, kind: holds-role, label: OPERATOR (supplied-asset registry) }
   - { from: acl, to: config, kind: controls, label: Configuration authority }
   - { from: acl, to: accountant, kind: controls, label: Accounting roles }
