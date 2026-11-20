@@ -35,20 +35,40 @@ nodes:
       can only mint to the issuance treasury 0x264b…97B5 and can only burn
       its own balance.
   - id: sc2
-    label: Supply Controller 2 (1B/hr cap)
+    label: Supply Controller 2 (1B burst, self-whitelisted)
     address: "0x2fb074FA59c9294c71246825C1c9A0c7782d41a4"
     category: infra
     note: >-
-      EOA; 1B cap refilling over 1h. allowAnyMintAndBurnAddress = false —
-      can only mint to itself and can only burn its own balance.
+      EOA; 1B capacity refilling over 1h. allowAnyMintAndBurnAddress = false,
+      but its only whitelisted destination is itself — the single key can
+      mint 1B immediately (~25B per 24h) and transfer it anywhere (simulated
+      at block 26,221,465). Key custody model unknown.
   - id: oft-wrapper
     label: OFTWrapper (LayerZero V2)
     address: "0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4"
     category: infra
     note: >-
-      SC3; 200M USDG per 24h (raised from 45M between Mar and Jun 2026);
+      SC3; 225M USDG token-bucket capacity, 2,604/sec refill — 225M burst,
+      ~450M max per 24h (capacity raised from 45M between Mar and Sep 2026);
       allowAnyMintAndBurnAddress = true. owner() and LayerZero delegate are
       the Operations MPC wallet, with no timelock.
+  - id: sc4
+    label: Supply Controller 4 (10 USDG cap)
+    address: "0x835e20DA02D830d6074Ca2341e2928f438121691"
+    category: infra
+    note: >-
+      EOA, added Sep 18 2026 directly by the MPC wallet; 10 USDG cap
+      refilling over 1h, whitelisted to the issuance treasury only. Unused
+      (nonce 0).
+  - id: sc5-bridge
+    label: SC5 Attestor Bridge (100M burst)
+    address: "0x40D16A860e295fb4E096Cdb5e99C32721194add4"
+    category: infra
+    note: >-
+      ERC1967 proxy, added Oct 2 2026 directly by the MPC wallet. Implementation
+      0xb9de…362f is NOT source-verified. 100M USDG burst, ~200M max per 24h,
+      allowAnyMintAndBurnAddress = true. One ATTESTOR and one WITNESS EOA.
+      Registers USDG, PYUSD, PAXG to an undisclosed chain (id 7). Unused so far.
   - id: facets
     label: Token Facets (5 contracts, 118 selectors)
     address: "0x77fe0365db15a1ec05833b7c1802d68356a363df"
@@ -72,10 +92,19 @@ nodes:
     address: "0x9036566eAa5F83E0b9E1161C6c602b0Adf997654"
     category: governance
     note: >-
-      OpenZeppelin TimelockController; also DEFAULT_ADMIN on SupplyControl.
+      OpenZeppelin TimelockController; also DEFAULT_ADMIN on SupplyControl
+      (upgrades/admin transfer only; mint parameters sit with the SCM).
       Four role grants ever (Jan 22 2026), zero revocations. The MPC wallet
       is the sole proposer, executor AND canceller — the delay is a
       monitoring/exit window, not a circuit breaker.
+  - id: sc5-timelock
+    label: SC5 Bridge Admin Timelock (24h)
+    address: "0xDd05D7769C622Ab60Aed26318B2a5b0308b77683"
+    category: governance
+    note: >-
+      OpenZeppelin TimelockController deployed Sep 30 2026. DEFAULT_ADMIN,
+      BRIDGE_MANAGER, RATE_LIMITER, FEE_WITHDRAWER on SC5. MPC wallet is
+      sole proposer, executor and canceller.
   - id: default-admin-multisig
     label: DEFAULT_ADMIN Multisig (20 owners, thresh 3)
     address: "0x137Dcd97872dE27a4d3bf36A4643c5e18FA40713"
@@ -90,14 +119,18 @@ nodes:
     label: Operations MPC Wallet (Fordefi)
     address: "0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B"
     category: governance
-    note: MPC wallet (key sharded); PAUSE + ASSET_PROTECTION on token; PROPOSER+EXECUTOR+CANCELLER on Timelock; SUPPLY_CONTROLLER_MANAGER on SupplyControl
+    note: >-
+      MPC wallet (key sharded); PAUSE + ASSET_PROTECTION on token;
+      PROPOSER+EXECUTOR+CANCELLER on both timelocks; SUPPLY_CONTROLLER_MANAGER
+      on SupplyControl (add controllers, limits, whitelists — no timelock);
+      PAUSE on SC5.
   - id: gas-station
     label: Issuance Treasury / MPC Gas Station
     address: "0x264bd8291fae1d75db2c5f573b07faa6715997b5"
     category: infra
     note: >-
-      SC1's only permitted mint destination (11.6M USDG held). Also the MPC
-      gas funder — nonce 5.6M+, just-in-time ETH, services 62+ EOAs.
+      SC1's and SC4's only permitted mint destination (11.5M USDG held). Also
+      the MPC gas funder — nonce 6.26M+, just-in-time ETH, services 62+ EOAs.
 
   # === External dependencies ===
   - id: dep-paxos-custody
@@ -109,7 +142,7 @@ nodes:
     category: dependency
     note: >-
       OFTWrapper peers (onchain) — Solana / X Layer / Ink / Arbitrum /
-      Robinhood Chain; 3-of-3 DVN quorum (LayerZero Labs, Canary, Paxos —
+      Robinhood Chain / Mantle; 3-of-3 DVN quorum (LayerZero Labs, Canary, Paxos —
       only two independent of the issuer). Quorum is mutable by the wrapper
       owner with no timelock.
 
@@ -134,7 +167,19 @@ edges:
   - from: ops-mpc
     to: supply-control
     kind: holds-role
-    label: SUPPLY_CONTROLLER_MANAGER
+    label: SUPPLY_CONTROLLER_MANAGER (add controllers, limits, whitelists — NO timelock)
+  - from: ops-mpc
+    to: sc5-timelock
+    kind: holds-role
+    label: PROPOSER + EXECUTOR + CANCELLER (sole holder)
+  - from: sc5-timelock
+    to: sc5-bridge
+    kind: controls
+    label: DEFAULT_ADMIN + BRIDGE_MANAGER + RATE_LIMITER (24h delay)
+  - from: ops-mpc
+    to: sc5-bridge
+    kind: holds-role
+    label: PAUSE (no timelock)
   - from: gas-station
     to: ops-mpc
     kind: routes-through
@@ -168,11 +213,19 @@ edges:
   - from: sc2
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (1B/hr, whitelisted dest)
+    label: SUPPLY_CONTROLLER (1B burst; self-whitelisted, transferable)
   - from: oft-wrapper
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (200M/24h; bridge; any dest)
+    label: SUPPLY_CONTROLLER (225M burst, ~450M/24h; bridge; any dest)
+  - from: sc4
+    to: usdg
+    kind: mints
+    label: SUPPLY_CONTROLLER (10 USDG/hr, whitelisted dest)
+  - from: sc5-bridge
+    to: usdg
+    kind: mints
+    label: SUPPLY_CONTROLLER (100M burst, ~200M/24h; attestor bridge; any dest; unverified source)
 
   # === Supply controller registry ===
   - from: supply-control
@@ -185,6 +238,14 @@ edges:
     label: rate-limited
   - from: supply-control
     to: oft-wrapper
+    kind: manages
+    label: rate-limited
+  - from: supply-control
+    to: sc4
+    kind: manages
+    label: rate-limited
+  - from: supply-control
+    to: sc5-bridge
     kind: manages
     label: rate-limited
 
