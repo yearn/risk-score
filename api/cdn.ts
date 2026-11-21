@@ -1,9 +1,5 @@
 export const config = { runtime: 'edge' }
 
-const REPO_OWNER = 'yearn'
-const REPO_NAME = 'risk-score'
-const HEAD = process.env.VERCEL_GIT_COMMIT_SHA || 'master'
-
 type PathResult =
   | { type: 'direct'; path: string }
   | { type: 'single-vault'; chainId: string; address: string; path: string }
@@ -41,7 +37,7 @@ export function getPath(url: URL): PathResult {
   return { type: 'direct', path }
 }
 
-export default async function handler(req: Request): Promise<Response> {
+export default async function handler(req: Request, assets: { fetch: typeof fetch }): Promise<Response> {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -73,9 +69,7 @@ export default async function handler(req: Request): Promise<Response> {
       return new Response('invalid path', { status: 400 })
     }
 
-    const upstream = `https://cdn.jsdelivr.net/gh/${REPO_OWNER}/${REPO_NAME}@${HEAD}/${pathResult.path}`
-
-    const upstreamRes = await fetch(upstream)
+    const upstreamRes = await assets.fetch(new URL(`/cdn/${pathResult.path}`, url))
 
     if (!upstreamRes.ok || !upstreamRes.body)
       return new Response(`upstream ${upstreamRes.status}`, { status: upstreamRes.status })

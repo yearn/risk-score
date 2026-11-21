@@ -1,0 +1,23 @@
+name: Deploy to Cloudflare
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+cache-mode: none
+
+jobs:
+  deploy:
+    uses: yearn/yearn-gha/.github/workflows/cloudflare-deploy.yml@9a36d8e616e3880589eeef959807e317ccfb9a86
+    with:
+      project: risk-score
+      sync-secrets: true
+      identity-id: ${{ github.event_name == 'pull_request' && vars.DOPPLER_CF_PREVIEW_IDENTITY_ID || vars.DOPPLER_CF_PRODUCTION_IDENTITY_ID }}
+      build-identity-id: ${{ github.event_name == 'pull_request' && vars.DOPPLER_CF_PREVIEW_BUILD_IDENTITY_ID || vars.DOPPLER_CF_PRODUCTION_BUILD_IDENTITY_ID }}
