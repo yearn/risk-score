@@ -6,6 +6,5 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": { "directory": "dist", "binding": "ASSETS", "html_handling": "none" },
   "workers_dev": true,
-  "routes": [{ "pattern": "curation.yearn.fi/*", "zone_name": "yearn.fi" }],
-  "env": { "preview": { "workers_dev": true, "routes": [] } }
+  "env": { "preview": { "workers_dev": true } }
 }
