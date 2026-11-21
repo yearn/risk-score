@@ -15,7 +15,7 @@ cache-mode: none
 
 jobs:
   deploy:
-    uses: yearn/yearn-gha/.github/workflows/cloudflare-deploy.yml@9a36d8e616e3880589eeef959807e317ccfb9a86
+    uses: yearn/yearn-gha/.github/workflows/cloudflare-deploy.yml@7fefbd1d4f12a24818f0228555d172fa01e91df8
     with:
       project: risk-score
       sync-secrets: true
