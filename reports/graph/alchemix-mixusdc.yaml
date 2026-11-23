@@ -148,7 +148,7 @@ nodes:
     label: Fluid Lite Solana strategy
     address: "0x442287DAFF78D5491a93d537aC96f38732bf7d6F"
     category: dependency
-    note: SolanaStrategyL1; 25,225,000 sUSDai bridged Ethereum→Arbitrum→Solana (USD.AI OFT) booked as an outstanding claim (~$28.4M), not reduced by 16.48M USDC returned from Solana over CCTP V2 (Oct 9–12, 2026); owner and custody multisig = Fluid Avocado 6-of-12
+    note: SolanaStrategyL1; 25,225,000 sUSDai bridged Ethereum→Arbitrum→Solana (USD.AI OFT) booked as an outstanding claim (~$28.4M), not reduced by 21.58M USDC returned from the same Solana wallet over CCTP V2 (Sep 24 – Oct 12, 2026), consistent with Solana-side leverage; owner and custody multisig = Fluid Avocado 6-of-12
   - id: fusdc
     label: Fluid fUSDC
     address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
