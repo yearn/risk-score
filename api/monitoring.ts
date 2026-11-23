@@ -1,31 +1,22 @@
-export const config = { runtime: 'edge' }
-
 // Edge proxy for the yearn/monitoring alerts API (github.com/yearn/monitoring, api/server.py).
 // The upstream binds to 127.0.0.1, sets no CORS headers and `Cache-Control: no-store`, so the
 // browser cannot call it directly. This function fetches the internal API server-side and injects
 // CORS + caching. Only the read-only `/v1/protocols`, `/v1/alerts` and `/v1/alerts/{id}` endpoints
 // are exposed, and the alerts querystring is whitelisted to avoid open proxying.
 //
-// Config (Vercel project env): MONITORING_API_URL (required) is the public reverse-proxied base
+// Config (Doppler, pushed as Worker secrets): MONITORING_API_URL (required) is the public reverse-proxied base
 // URL; MONITORING_API_TOKEN (optional) is forwarded as `Authorization: Bearer <token>` and stays
 // server-side — never sent to the browser.
 
 const ALLOWED_PARAMS = ['protocol', 'severity', 'source', 'from', 'to', 'cursor', 'limit']
 const SEVERITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
 
-// The vercel.json `/api/monitoring/:path*` rewrite injects the matched sub-path as a `path`
-// query param. It's a routing artifact (routing uses url.pathname), so skip it here instead of
-// rejecting it as an unsupported param or forwarding it upstream.
-const REWRITE_PARAM = 'path'
-
 type UpstreamResult = { path: string } | { error: string; status: number }
 
-// Validates the alerts params and returns the allowlisted query to forward (the `path` rewrite
-// artifact and anything non-allowlisted are excluded / rejected).
+// Validates the alerts params and returns the allowlisted query to forward; anything else is rejected.
 function validateAlertsQuery(search: URLSearchParams): { query: URLSearchParams } | { error: string; status: number } {
   const out = new URLSearchParams()
   for (const [key, value] of search) {
-    if (key === REWRITE_PARAM) continue
     if (!ALLOWED_PARAMS.includes(key)) {
       return { error: `unsupported query param: ${key}`, status: 400 }
     }
@@ -113,7 +104,7 @@ export default async function handler(req: Request): Promise<Response> {
       return jsonError(resolved.status, code, resolved.error)
     }
 
-    // Forward a bearer token if configured. It stays server-side in the edge function and is
+    // Forward a bearer token if configured. It stays server-side in the Worker and is
     // never sent to the browser. Optional so the unauthenticated local backend still works.
     const requestHeaders: Record<string, string> = { accept: 'application/json' }
     const token = process.env.MONITORING_API_TOKEN
