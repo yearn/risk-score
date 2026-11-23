@@ -1,3 +1,5 @@
-/cdn/*
+/*
   Access-Control-Allow-Origin: *
+
+/cdn/*
   Cache-Control: public, max-age=60
