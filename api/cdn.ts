@@ -69,40 +69,32 @@ export default async function handler(req: Request, assets: { fetch: typeof fetc
       return new Response('invalid path', { status: 400 })
     }
 
-    const upstreamRes = await assets.fetch(new URL(`/cdn/${pathResult.path}`, url))
+    const target = new URL(`/cdn/${pathResult.path}`, url)
+    if (pathResult.type === 'direct') return assets.fetch(new Request(target, req))
+
+    const upstreamRes = await assets.fetch(target)
 
     if (!upstreamRes.ok || !upstreamRes.body)
       return new Response(`upstream ${upstreamRes.status}`, { status: upstreamRes.status })
 
-    // Handle single vault extraction
-    if (pathResult.type === 'single-vault') {
-      try {
-        const chainData = await upstreamRes.json()
-        const vaultData = chainData[pathResult.address]
+    try {
+      const chainData = await upstreamRes.json()
+      const vaultData = chainData[pathResult.address]
 
-        if (!vaultData) {
-          return new Response('vault not found', { status: 404 })
-        }
-
-        const headers = new Headers()
-        headers.set('content-type', 'application/json')
-        headers.set('cache-control', `public, max-age=60, s-maxage=300, stale-while-revalidate=600`)
-        headers.set('access-control-allow-origin', '*')
-
-        return new Response(JSON.stringify(vaultData), { status: 200, headers })
-      } catch (error) {
-        console.error('Error extracting vault:', error)
-        return new Response('error processing vault data', { status: 500 })
+      if (!vaultData) {
+        return new Response('vault not found', { status: 404 })
       }
+
+      const headers = new Headers()
+      headers.set('content-type', 'application/json')
+      headers.set('cache-control', `public, max-age=60, s-maxage=300, stale-while-revalidate=600`)
+      headers.set('access-control-allow-origin', '*')
+
+      return new Response(JSON.stringify(vaultData), { status: 200, headers })
+    } catch (error) {
+      console.error('Error extracting vault:', error)
+      return new Response('error processing vault data', { status: 500 })
     }
-
-    // Direct file access
-    const headers = new Headers()
-    headers.set('content-type', upstreamRes.headers.get('content-type') || 'application/octet-stream')
-    headers.set('cache-control', `public, max-age=60, s-maxage=300, stale-while-revalidate=600`)
-    headers.set('access-control-allow-origin', '*')
-
-    return new Response(upstreamRes.body, { status: 200, headers })
   } catch (error) {
     console.error('CDN error:', error)
     return new Response('internal server error', { status: 500 })
