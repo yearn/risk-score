@@ -96,7 +96,7 @@ nodes:
     label: Core API Agent (single key)
     category: governance
     link: 'https://app.hyperliquid.xyz/explorer/address/0x564Bfb706F0eFdaCF7AaFf44a1a780a9ABB66fAc'
-    note: Single-key API wallet that trades the custody account, which holds about 97% of the backing mark. No Monetrix cumulative loss cap. Valid until January 6, 2027. Full action set unverified.
+    note: Single-key API wallet that trades the custody account, which holds about 97% of the backing mark. No Monetrix cumulative loss cap. Trades can add portfolio-margin borrowing; withdrawals and external transfers need the account's user signature. Valid until January 6, 2027.
   - id: deposit-wallet
     label: Circle CoreDepositWallet
     category: dependency
