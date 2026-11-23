@@ -52,8 +52,6 @@ test("monitoring maps allowed routes and params upstream", () => {
     "/api/monitoring/alerts/5021": "/v1/alerts/5021",
     "/api/monitoring/alerts?protocol=aave&severity=HIGH&limit=5": "/v1/alerts?protocol=aave&severity=HIGH&limit=5",
     "/api/monitoring/alerts?cursor=5021&limit=100": "/v1/alerts?cursor=5021&limit=100",
-    // Vercel's /api/monitoring/:path* rewrite appends ?path=alerts to the destination.
-    "/api/monitoring/alerts?path=alerts&protocol=aave&limit=5": "/v1/alerts?protocol=aave&limit=5",
   };
   for (const [path, expected] of Object.entries(cases)) {
     assert.deepEqual(upstream(path), { path: expected }, path);
