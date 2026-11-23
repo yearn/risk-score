@@ -40,6 +40,7 @@ protocol_tokens:
   USCC: Superstate
   STRC: Strategy Inc.
   USDY: Ondo
+  USDM: Monetrix
   LBTC: Lombard
   tBTC: Threshold
   cbBTC: Coinbase
@@ -1035,3 +1036,17 @@ protocols:
     infrastructure:
     - LayerZero
     - Chainlink
+  monetrix_usdm:
+    name: Monetrix (USDM)
+    chain: hyperevm
+    type: stablecoin
+    address: '0xE2d2959f89B6389DeB624bF076Fe7D9E5401f377'
+    report: reports/report/monetrix-usdm.md
+    collateral:
+    - asset: USDC
+      address: '0xb88339CB7199b77E23DB6E890353E22632Ba630f'
+    - asset: HYPE
+    - asset: BTC
+    infrastructure:
+    - Hyperliquid
+    - Circle CoreDepositWallet
