@@ -35,7 +35,7 @@ nodes:
     address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
     category: governance
   - id: brain
-    label: Brain (3-of-8)
+    label: Brain (3-of-6)
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
   - id: security
@@ -71,25 +71,16 @@ nodes:
 
   # Strategies
   - id: steth-accumulator
-    label: stETH Accumulator (58.4%)
+    label: stETH Accumulator (61.7%)
     address: "0x470e0e048F85CFD72EEf325895e02c8D297E7435"
     category: strategy
-  - id: spark-weth-lender
-    label: Spark WETH Lender (28.2%)
-    address: "0xfca3F21D60d5bC8B4C5c35F169bb5B6402510151"
-    category: strategy
-  - id: wsteth-weth-looper
-    label: wstETH/WETH Spark Looper (11.2%)
-    address: "0x68A14629cb07c74259f481382fE8b6cFD8970121"
-    category: strategy
-    note: LSTAaveLooper — leverages wstETH collateral to borrow WETH on Spark Lend. Upgradeable proxy (impl 0xd377…139c). NOT in default queue.
   - id: yearn-og-weth
-    label: Yearn OG WETH (2.2% / 9.1% effective)
+    label: Yearn OG WETH (38.3%)
     address: "0xE89371eAaAC6D46d4C3ED23453241987916224FC"
     category: strategy
     morphoVault: v1
     link: "https://app.morpho.org/ethereum/vault/0xE89371eAaAC6D46d4C3ED23453241987916224FC/"
-    note: Morpho MetaMorpho vault — confirmed via MORPHO() returning 0xBBBBBbbBBb9cC5e90e3b3Af64bdAF62C37EEFFCb
+    note: Morpho MetaMorpho V1.1 vault (MORPHO() = Morpho Blue). yvWETH-1 holds ~99.1% of its shares. 3-day timelock; owner Security, curator 2-of-3 Safe, guardian Daddy.
 
   # External dependencies
   - id: lido-steth
@@ -104,9 +95,6 @@ nodes:
     label: Lido Withdrawal Queue
     address: "0x889edC2eDab5f40e902b864aD4d7AdE8E412F9B1"
     category: dependency
-  - id: spark-lend
-    label: Spark Lend WETH Market (Sky)
-    category: dependency
 
 # BEGIN GENERATED MORPHO MARKET NODES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
@@ -115,6 +103,11 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e/"
     note: "Morpho market 0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e"
+  - id: morpho-market-37e7484d642d
+    label: "weETH/WETH · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7/"
+    note: "Morpho market 0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7"
   - id: morpho-market-d0e50cdac92f
     label: "wstETH/WETH · 94.5% LLTV"
     category: dependency
@@ -139,19 +132,11 @@ edges:
   - from: yvWETH
     to: steth-accumulator
     kind: allocates-to
-    label: "58.4%"
-  - from: yvWETH
-    to: spark-weth-lender
-    kind: allocates-to
-    label: "28.2%"
-  - from: yvWETH
-    to: wsteth-weth-looper
-    kind: allocates-to
-    label: "11.2% (not in default queue)"
+    label: "61.7%"
   - from: yvWETH
     to: yearn-og-weth
     kind: allocates-to
-    label: "2.2% (193 WETH debt; 807 WETH totalAssets)"
+    label: "38.3%"
 
   # Governance roles on vault
   - from: daddy
@@ -161,7 +146,7 @@ edges:
   - from: brain
     to: yvWETH
     kind: holds-role
-    label: "QUEUE / DEBT / EMERGENCY"
+    label: "REVOKE / QUEUE / REPORTING / DEBT / DEPOSIT_LIMIT / PROFIT_UNLOCK / DEBT_PURCHASER / EMERGENCY"
   - from: security
     to: yvWETH
     kind: holds-role
@@ -180,12 +165,18 @@ edges:
     label: "REPORTING + DEBT_MANAGER"
 
   # Role manager wiring
+  - from: timelock
+    to: role-manager
+    kind: controls
+    label: "governance (7d)"
+  - from: brain
+    to: role-manager
+    kind: holds-role
+    label: "Brain position (removeVault → role manager to Daddy)"
   - from: daddy
     to: role-manager
-    kind: controls
-  - from: security
-    to: role-manager
-    kind: controls
+    kind: holds-role
+    label: "Daddy position / chad"
   - from: role-manager
     to: yvWETH
     kind: manages
@@ -213,18 +204,15 @@ edges:
     to: lido-withdrawal-queue
     kind: routes-through
     label: "stETH → ETH (1:1 redeem)"
-  - from: spark-weth-lender
-    to: spark-lend
-    kind: deposits-into
-    label: "WETH supply (atomic)"
-  - from: wsteth-weth-looper
-    to: spark-lend
-    kind: routes-through
-    label: "wstETH collateral → borrow WETH (leveraged loop)"
-  - from: wsteth-weth-looper
-    to: lido-steth
-    kind: routes-through
-    label: "WETH → wstETH (collateral)"
+  # Strategy-level authority
+  - from: brain
+    to: steth-accumulator
+    kind: holds-role
+    label: "management (manualSwapToAsset, caller-set minOut)"
+  - from: security
+    to: steth-accumulator
+    kind: holds-role
+    label: "emergencyAdmin (shutdown + emergencyWithdraw)"
   # Security multisig owns the Yearn OG WETH MetaMorpho vault contract
   - from: security
     to: yearn-og-weth
@@ -234,15 +222,23 @@ edges:
     to: yearn-og-weth
     kind: holds-role
     label: "curator"
+  - from: daddy
+    to: yearn-og-weth
+    kind: holds-role
+    label: "guardian"
 
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
   - from: yearn-og-weth
     to: morpho-market-b8fc70e82bc5
     kind: deposits-into
-    label: "94.6%"
+    label: "62.6%"
+  - from: yearn-og-weth
+    to: morpho-market-37e7484d642d
+    kind: deposits-into
+    label: "20.0%"
   - from: yearn-og-weth
     to: morpho-market-d0e50cdac92f
     kind: deposits-into
-    label: "5.3%"
+    label: "17.2%"
 # END GENERATED MORPHO MARKET EDGES
