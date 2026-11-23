@@ -75,6 +75,23 @@ nodes:
     address: "0x8392F6669292fA56123F71949B52d883aE57e225"
     category: governance
     note: MultiSigWalletWithTimeLock, 600 s delay; alUSD ADMIN
+  - id: alusd-sentinel
+    label: alUSD SENTINEL EOA
+    address: "0xf4B5b84b8f39bC556ed230FA91A0A89Bb5E8559b"
+    category: governance
+    note: alUSD SENTINEL (setBlacklist, pauseAlchemist); a SENTINEL can unpause the V1 Alchemist
+
+  # === Residual alUSD minters ===
+  - id: v1-alchemist
+    label: V1 Alchemist (paused)
+    address: "0xc21D353FF4ee73C572425697f4F5aaD2109fe35b"
+    category: infra
+    note: Whitelisted alUSD minter, ceiling 70M / 6.18M minted; paused = true; collateral-backed; a SENTINEL can unpause it
+  - id: migration-tool-unverified
+    label: MigrationTool clone (unverified)
+    address: "0xaeff0d3f487f0431318d923f691ff9c484c7564e"
+    category: infra
+    note: Whitelisted by the DAO multisig on February 14, 2025 with an unlimited ceiling; source not verified; never minted. Bytecode exposes MigrationTool selectors targeting the de-whitelisted V2 Alchemist
 
   # === Strategy adapters ===
   - id: siusd-adapter
@@ -92,6 +109,11 @@ nodes:
     address: "0x320e38ca23FB11cC1f673b204E301210d3758653"
     category: strategy
     note: 1.60M USDC; canForceDeallocate = false
+  - id: tokeauto-adapter
+    label: TokeAutoUSD adapter
+    address: "0xBE60E0BC077e5221A05D95bA8EF2BF233C799773"
+    category: strategy
+    note: Still registered with a 5M / 30% cap; 0.51 USDC at the snapshot; canForceDeallocate = false. Auto Finance (Tokemak) autoUSD
 
   # === External dependencies ===
   - id: siusd
@@ -106,7 +128,12 @@ nodes:
     label: Fluid Lite USD Vault (fLiteUSD)
     address: "0x273DA948ACa9261043fbdb2a857BC255ECC29012"
     category: dependency
-    note: Fluid team product (see Fluid report). UUPS proxy; owner FluidTimelockController 0x4d6CE4F4498d59Eed397bCbC687805a07f9b2346 (24 h, proposer Fluid Avocado 6-of-12); exchange price cannot decrease; leveraged loops on Ethereum, Arbitrum, Plasma via CCIP and LayerZero
+    note: Fluid team product (see Fluid report). UUPS proxy owned by the 24 h FluidTimelockController; exchange price cannot decrease; leveraged loops on Ethereum, Arbitrum, Plasma via CCIP and LayerZero
+  - id: fluid-timelock
+    label: Fluid Lite FluidTimelockController (24 h)
+    address: "0x4d6CE4F4498d59Eed397bCbC687805a07f9b2346"
+    category: governance
+    note: fLiteUSD getOwner() (upgrades, roles, owner changes); getMinDelay() = 86,400 s; PROPOSER/CANCELLER = Fluid Avocado 6-of-12, EXECUTOR = 3-of-5 Safe. Not Fluid's GovernorBravo Timelock
   - id: fluid-handler
     label: Fluid Lite strategy handler
     address: "0x066e84CA92529B500592867D0Be89E78563fA965"
@@ -121,7 +148,7 @@ nodes:
     label: Fluid Lite Solana strategy
     address: "0x442287DAFF78D5491a93d537aC96f38732bf7d6F"
     category: dependency
-    note: SolanaStrategyL1; 25,225,000 sUSDai bridged Ethereum→Arbitrum→Solana (USD.AI OFT) booked as an outstanding claim (~$28.4M); owner and custody multisig = Fluid Avocado 6-of-12
+    note: SolanaStrategyL1; 25,225,000 sUSDai bridged Ethereum→Arbitrum→Solana (USD.AI OFT) booked as an outstanding claim (~$28.4M), not reduced by 16.48M USDC returned from Solana over CCTP V2 (Oct 9–12, 2026); owner and custody multisig = Fluid Avocado 6-of-12
   - id: fusdc
     label: Fluid fUSDC
     address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
@@ -199,12 +226,40 @@ edges:
     to: alusd
     kind: holds-role
     label: ADMIN
+  - from: alusd-sentinel
+    to: alusd
+    kind: holds-role
+    label: SENTINEL (blacklist, pause minters)
+  - from: alusd-sentinel
+    to: v1-alchemist
+    kind: holds-role
+    label: SENTINEL (can unpause)
+  - from: admin-safe
+    to: tokeauto-adapter
+    kind: controls
+    label: owner
+  - from: fluid-timelock
+    to: fluid-lite
+    kind: controls
+    label: owner (upgrades, 24 h)
+  - from: fluid-avocado
+    to: fluid-timelock
+    kind: holds-role
+    label: PROPOSER + CANCELLER
 
   # === Mint authority ===
   - from: alchemist
     to: alusd
     kind: mints
     label: whiteList (ceiling 8.67M)
+  - from: v1-alchemist
+    to: alusd
+    kind: mints
+    label: whiteList (ceiling 70M; paused)
+  - from: migration-tool-unverified
+    to: alusd
+    kind: mints
+    label: whiteList (unlimited; unverified source)
 
   # === Capital flow ===
   - from: myt
@@ -219,6 +274,10 @@ edges:
     to: fluid-adapter
     kind: allocates-to
     label: "19.67%"
+  - from: myt
+    to: tokeauto-adapter
+    kind: allocates-to
+    label: "~0% (cap 5M / 30%)"
   - from: siusd-adapter
     to: siusd
     kind: deposits-into

@@ -871,6 +871,43 @@ def saturn_data() -> dict:
     }
 
 
+def alchemix_mixusdc_data() -> dict:
+    """Alchemix mixUSDC (MYT) dependency data from risk assessment report (Nov 2026)."""
+    return {
+        "name": "Alchemix mixUSDC (MYT)",
+        "chain": "ethereum",
+        "type": "yield_vault",
+        "address": "0x9B44efCa3e2a707B63Dc00CE79d646E5E5D24bA5",
+        "report": "reports/report/alchemix-mixusdc.md",
+        "collateral": [
+            {"asset": "USDC", "address": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "infinifi",
+                "assets": ["USDC"],
+                "label": "InfiniFi siUSD (40.4%)",
+            },
+            {
+                "protocol": "yearn",
+                "assets": ["USDC"],
+                "label": "Yearn yvUSD (39.9%, liquidity adapter)",
+            },
+            {
+                "protocol": "fluid_lending",
+                "assets": ["USDC"],
+                "label": "Fluid Lite USD vault (19.7%)",
+            },
+        ],
+        "infrastructure": [
+            "Morpho Vault V2",
+            "Chainlink CCIP",
+            "Circle CCTP",
+            "LayerZero",
+        ],
+    }
+
+
 def main():
     data: dict = {
         "protocol_tokens": PROTOCOL_TOKENS,
@@ -955,6 +992,7 @@ def main():
     data["protocols"]["superstate_ustb"] = superstate_ustb_data()
     data["protocols"]["saturn"] = saturn_data()
     data["protocols"]["ondo_usdy"] = ondo_usdy_data()
+    data["protocols"]["alchemix_mixusdc"] = alchemix_mixusdc_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
