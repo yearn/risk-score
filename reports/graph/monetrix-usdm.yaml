@@ -87,11 +87,11 @@ nodes:
   - id: operators
     label: Vault Operators (4 EOAs)
     category: governance
-    note: Each EOA can act individually. Hedge calls take caller-set limit prices with no oracle bound or cumulative loss cap. Operators also edit the Accountant's supplied-asset registries.
+    note: Each EOA can trade from the Vault's Core account. HyperCore checks individual orders and Monetrix sets no cumulative loss cap. Operators also edit the Accountant's supplied-asset registries.
   - id: core-signers
     label: Core Custody Multisig (2-of-3)
     category: governance
-    note: Native HyperCore multisig signers for the custody account; one signer overlaps with the Foundation Safe.
+    note: Two signers can transfer available custody backing under HyperCore margin rules without a Monetrix timelock. One signer overlaps with the Foundation Safe.
   - id: core-agent
     label: Core Trading Agent
     category: governance
@@ -101,19 +101,19 @@ nodes:
     category: dependency
     address: '0x6B9E773128f453f5c2C60935Ee2DE2CBc5390A24'
   - id: usdc
-    label: Circle USDC
+    label: Native USDC
     category: dependency
     address: '0xb88339CB7199b77E23DB6E890353E22632Ba630f'
   - id: custody-core
     label: Core Custody Account
     category: strategy
     link: 'https://app.hyperliquid.xyz/explorer/address/0x6E25e5D971BDa9799F7A5242f4720b5B3f939200'
-    note: Native 2-of-3 custody account with primarily HYPE basis exposure, a smaller BTC leg and USDC borrowing. Account-level net backing at the snapshot remains unverified.
+    note: Main USDM backing account with primarily HYPE basis exposure, a smaller BTC leg and USDC borrowing.
   - id: vault-core
     label: Vault Core Account
     category: strategy
     link: 'https://app.hyperliquid.xyz/explorer/address/0x5586c2c8223C73Ec0B41D6352748e6c173372E11'
-    note: The Vault contract's own Core account supplies USDC and is subject to its governor and operators. Account-level net backing at the snapshot remains unverified.
+    note: The Vault contract's own Core account supplies USDC and is subject to its governor and operators.
   - id: hypercore
     label: HyperCore Markets and Margin
     category: dependency
