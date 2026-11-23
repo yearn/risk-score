@@ -93,9 +93,10 @@ nodes:
     category: governance
     note: Two signers can transfer available custody backing under HyperCore margin rules without a Monetrix timelock. One signer overlaps with the Foundation Safe.
   - id: core-agent
-    label: Core Trading Agent
+    label: Core API Agent (single key)
     category: governance
-    note: API wallet delegated by the custody account. Permitted actions and limits are unverified.
+    link: 'https://app.hyperliquid.xyz/explorer/address/0x564Bfb706F0eFdaCF7AaFf44a1a780a9ABB66fAc'
+    note: Single-key API wallet that trades the custody account, which holds about 97% of the backing mark. No Monetrix cumulative loss cap. Valid until January 6, 2027. Full action set unverified.
   - id: deposit-wallet
     label: Circle CoreDepositWallet
     category: dependency
