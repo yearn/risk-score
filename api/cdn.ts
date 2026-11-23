@@ -1,5 +1,3 @@
-export const config = { runtime: 'edge' }
-
 type PathResult =
   | { type: 'direct'; path: string }
   | { type: 'single-vault'; chainId: string; address: string; path: string }

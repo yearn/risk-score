@@ -2,25 +2,6 @@ name: Tests
 
 on:
   pull_request:
-    paths:
-      - 'api/**'
-      - 'scripts/**'
-      - 'src/lib/**'
-      - 'tests/**'
-      - '.agents/**'
-      - '.claude/**'
-      - '.pi/**'
-      - 'AGENTS.md'
-      - 'CLAUDE.md'
-      - 'reports/README.md'
-      - 'reports/report/**'
-      - 'reports/reassessment.json'
-      - 'reports/TEMPLATE.md'
-      - 'package.json'
-      - 'bun.lock'
-      - 'pyproject.toml'
-      - 'uv.lock'
-      - '.github/workflows/tests.yml'
   workflow_dispatch:
 
 permissions:

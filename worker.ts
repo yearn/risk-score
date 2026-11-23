@@ -1,6 +1,6 @@
 import { STATUS_CODES } from 'node:http'
-import cdn from './api/cdn'
-import monitoring from './api/monitoring'
+import cdn from './api/cdn.ts'
+import monitoring from './api/monitoring.ts'
 
 async function cached(req: Request, ctx: ExecutionContext, handler: (req: Request) => Promise<Response>) {
   if (req.method !== 'GET') return handler(req)
