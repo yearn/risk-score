@@ -6,14 +6,14 @@ export const config = { runtime: 'edge' }
 // CORS + caching. Only the read-only `/v1/protocols`, `/v1/alerts` and `/v1/alerts/{id}` endpoints
 // are exposed, and the alerts querystring is whitelisted to avoid open proxying.
 //
-// Config (Vercel project env): MONITORING_API_URL (required) is the public reverse-proxied base
+// Config (Doppler, pushed as Worker secrets): MONITORING_API_URL (required) is the public reverse-proxied base
 // URL; MONITORING_API_TOKEN (optional) is forwarded as `Authorization: Bearer <token>` and stays
 // server-side — never sent to the browser.
 
 const ALLOWED_PARAMS = ['protocol', 'severity', 'source', 'from', 'to', 'cursor', 'limit']
 const SEVERITIES = new Set(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
 
-// The vercel.json `/api/monitoring/:path*` rewrite injects the matched sub-path as a `path`
+// The old vercel.json `/api/monitoring/:path*` rewrite injected the matched sub-path as a `path`
 // query param. It's a routing artifact (routing uses url.pathname), so skip it here instead of
 // rejecting it as an unsupported param or forwarding it upstream.
 const REWRITE_PARAM = 'path'

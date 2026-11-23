@@ -54,3 +54,6 @@ node_modules/
 reports/data/**/cache/
 reports/data/**/out/
 reports/data/**/lib/
+
+# Cloudflare
+.wrangler/
