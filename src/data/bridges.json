@@ -531,7 +531,7 @@
           "kind": "indirect",
           "model": "lock",
           "integration": "fxUSD collateral via the LayerZero V2 OFT Adapter",
-          "detail": "Two Tangent markets with 802,286 USG of debt (30.2%) use FXN LP collateral containing fxUSD. The Ethereum [fxUSD adapter](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438#readContract) escrows 39,678 fxUSD (0.20% of Ethereum fxUSD supply) for the [Base OFT](https://basescan.org/address/0x55380fe7A1910fF29A47B622057ab4139DA42C5). The bridge can release escrowed fxUSD. A loss of escrow could affect the fxUSD price and Tangent's backing.",
+          "detail": "Two Tangent markets with 802,286 USG of debt (30.2%) use FXN LP collateral containing fxUSD. The Ethereum [fxUSD adapter](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438#readContract) escrows 39,678 fxUSD (0.20% of Ethereum fxUSD supply) for the [Base OFT](https://basescan.org/address/0x55380fe7A1910dFf29A47B622057ab4139DA42C5). The bridge can release escrowed fxUSD. A loss of escrow could affect the fxUSD price and Tangent's backing.",
           "security": {
             "label": "4-of-6",
             "confirmations": 20,
@@ -544,7 +544,7 @@
               "Canary"
             ],
             "route": "Base→Ethereum (escrow release)",
-            "note": "LayerZero Labs, Twinstake (Nethermind DVN address), and Google are required, plus one of Horizen, Polyhedra zkBridge, or Canary.",
+            "note": "LayerZero Labs, Twinstake, and Google are required, plus one of Horizen, Polyhedra zkBridge (deprecated in the LayerZero registry), or Canary.",
             "weak": false,
             "verifiedAt": "2026-11-24",
             "link": "https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438"
