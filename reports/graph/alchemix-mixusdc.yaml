@@ -1,0 +1,339 @@
+slug: alchemix-mixusdc
+title: Alchemix USDC Mix Yield Token (mixUSDC) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Adapter (Strategy)
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: myt
+    label: mixUSDC (MYT)
+    address: "0x9B44efCa3e2a707B63Dc00CE79d646E5E5D24bA5"
+    category: vault
+    note: Morpho VaultV2 (immutable). 8.14M USDC at block 26,428,200; all curator timelocks 0; no adapter registry
+  - id: alusd
+    label: alUSD
+    address: "0xBC6DA0FE9aD5f3b0d58160288917AA56653660E9"
+    category: vault
+    note: Legacy AlToken (whitelist + ceiling mint model), supply 10.82M; shared with Alchemix V2
+
+  # === Alchemix V3 infra ===
+  - id: alchemist
+    label: AlchemistV3 (proxy)
+    address: "0xeB83112d925268BeDe86654C13D423a987587e3E"
+    category: infra
+    note: Upgradeable CDP; holds 6.30M MYT collateral vs 3.41M alUSD debt; implementation 0xd5f26c90ead033554bf36227d0bbe993f6f76570
+  - id: proxy-admin
+    label: Alchemist ProxyAdmin
+    address: "0xdf0dd1203a3a607d34ac01824abbd4f91367272b"
+    category: governance
+    note: owner() = v3 admin Safe; no timelock
+  - id: transmuter
+    label: Transmuter
+    address: "0x2584E8b0616b3E750492c9629a3b27679C410cb9"
+    category: infra
+    note: Not upgradeable. 2.5M alUSD cap (12,458 free), ~121-day vest, 1% early exit; holds 1.41M MYT for claims
+  - id: curator
+    label: AlchemistCurator
+    address: "0x7d61E3cDe8B58C4be192a7A35E9d626c419302A4"
+    category: governance
+    note: MYT curator; PermissionedProxy admin + sole operator = v3 admin Safe; operators may forward submit(bytes)
+  - id: allocator
+    label: AlchemistAllocator
+    address: "0x693b7594Ae0633d9c5574D0da46a040f92F5b281"
+    category: governance
+    note: Sole MYT allocator; admin + sole operator = v3 admin Safe
+  - id: classifier
+    label: StrategyClassifier
+    address: "0xdb7d25b0bfd1585a797f6BF7d7CCBa26E77253cc"
+    category: infra
+    note: Risk-class caps checked by the allocator (Moderate 60%)
+
+  # === Governance ===
+  - id: admin-safe
+    label: v3 admin Safe (3/7)
+    address: "0xF56D660138815fC5d7a06cd0E1630225E788293D"
+    category: governance
+    note: MYT owner; curator/allocator admin+operator; adapter owner; Alchemist admin; ProxyAdmin owner; Transmuter admin. No timelock on any path
+  - id: dao-safe
+    label: DAO multisig (3/7)
+    address: "0x9e2b6378ee8ad2A4A95Fe481d63CAba8FB0EBBF9"
+    category: governance
+    note: MYT sentinel, Alchemist guardian, fee receiver, alUSD ADMIN; 6 of 7 owners shared with the v3 admin Safe
+  - id: legacy-msig
+    label: Legacy dev multisig (4/7)
+    address: "0x8392F6669292fA56123F71949B52d883aE57e225"
+    category: governance
+    note: MultiSigWalletWithTimeLock, 600 s delay; alUSD ADMIN
+  - id: alusd-sentinel
+    label: alUSD SENTINEL EOA
+    address: "0xf4B5b84b8f39bC556ed230FA91A0A89Bb5E8559b"
+    category: governance
+    note: alUSD SENTINEL (setBlacklist, pauseAlchemist); a SENTINEL can unpause the V1 Alchemist
+
+  # === Residual alUSD minters ===
+  - id: v1-alchemist
+    label: V1 Alchemist (paused)
+    address: "0xc21D353FF4ee73C572425697f4F5aaD2109fe35b"
+    category: infra
+    note: Whitelisted alUSD minter, ceiling 70M / 6.18M minted; paused = true; collateral-backed; a SENTINEL can unpause it
+  - id: migration-tool-unverified
+    label: MigrationTool clone (unverified)
+    address: "0xaeff0d3f487f0431318d923f691ff9c484c7564e"
+    category: infra
+    note: Whitelisted by the DAO multisig on February 14, 2025 with an unlimited ceiling; source not verified; never minted. Bytecode exposes MigrationTool selectors targeting the de-whitelisted V2 Alchemist
+
+  # === Strategy adapters ===
+  - id: siusd-adapter
+    label: SiUSD adapter
+    address: "0x688Af26Bb164FDA2C9c87FCb9066e38eF28Fc3eF"
+    category: strategy
+    note: 3.29M USDC; force-deallocatable (2% penalty); unwrap-and-swap path via 0x
+  - id: yvusd-adapter
+    label: Yearn yvUSD adapter (liquidity)
+    address: "0xdFDC17F784e16D7634AC270911D98755C68Ae220"
+    category: strategy
+    note: MYT liquidityAdapter; 3.25M USDC = 24.3% of yvUSD supply
+  - id: fluid-adapter
+    label: Fluid Lite adapter
+    address: "0x320e38ca23FB11cC1f673b204E301210d3758653"
+    category: strategy
+    note: 1.60M USDC; canForceDeallocate = false
+  - id: tokeauto-adapter
+    label: TokeAutoUSD adapter
+    address: "0xBE60E0BC077e5221A05D95bA8EF2BF233C799773"
+    category: strategy
+    note: Still registered with a 5M / 30% cap; 0.51 USDC at the snapshot; canForceDeallocate = false. Auto Finance (Tokemak) autoUSD
+
+  # === External dependencies ===
+  - id: siusd
+    label: InfiniFi siUSD
+    address: "0xDBDC1Ef57537E34680B898E1FEBD3D68c7389bCB"
+    category: dependency
+  - id: yvusd
+    label: Yearn yvUSD
+    address: "0x696d02Db93291651ED510704c9b286841d506987"
+    category: dependency
+  - id: fluid-lite
+    label: Fluid Lite USD Vault (fLiteUSD)
+    address: "0x273DA948ACa9261043fbdb2a857BC255ECC29012"
+    category: dependency
+    note: Fluid team product (see Fluid report). UUPS proxy owned by the 24 h FluidTimelockController; exchange price cannot decrease; leveraged loops on Ethereum, Arbitrum, Plasma via CCIP and LayerZero
+  - id: fluid-timelock
+    label: Fluid Lite FluidTimelockController (24 h)
+    address: "0x4d6CE4F4498d59Eed397bCbC687805a07f9b2346"
+    category: governance
+    note: fLiteUSD getOwner() (upgrades, roles, owner changes); getMinDelay() = 86,400 s; PROPOSER/CANCELLER = Fluid Avocado 6-of-12, EXECUTOR = 3-of-5 Safe. Not Fluid's GovernorBravo Timelock
+  - id: fluid-handler
+    label: Fluid Lite strategy handler
+    address: "0x066e84CA92529B500592867D0Be89E78563fA965"
+    category: dependency
+    note: Infinite Proxy; admin = Fluid Avocado 6-of-12 with no timelock; sole caller of pullFunds and updateExchangePrice
+  - id: fluid-avocado
+    label: Fluid Avocado multisig (6/12)
+    address: "0x4F6F977aCDD1177DCD81aB83074855EcB9C2D49e"
+    category: governance
+    note: Fluid Guardian/Team multisig (see Fluid report); fLiteUSD secondary owner and AUTH role (pause withdrawals)
+  - id: fluid-solana
+    label: Fluid Lite Solana strategy
+    address: "0x442287DAFF78D5491a93d537aC96f38732bf7d6F"
+    category: dependency
+    note: SolanaStrategyL1; 25,225,000 sUSDai bridged Ethereum→Arbitrum→Solana (USD.AI OFT) booked as an outstanding claim (~$28.4M), held on Solana as collateral in six Jupiter Lend borrowing positions (largest ~85% LTV; ~$7.6M total net equity) by a 3-of-5 Squads multisig with no time lock; 21.58M USDC of borrowings returned over CCTP V2 without reducing the claim; owner and custody multisig = Fluid Avocado 6-of-12
+  - id: fusdc
+    label: Fluid fUSDC
+    address: "0x9Fb7b4477576Fe5B32be4C1843aFB1e55F251B33"
+    category: dependency
+    note: Fluid Lite idle balance (7.93M USDC at snapshot)
+  - id: curve-alusd
+    label: Curve alUSD pools
+    address: "0x17f9682c9cd1a448b31c0428f1d0783ed13a9fa3"
+    category: dependency
+    note: Largest venue alUSD/frxUSD; also alUSD/USDC 0x1EDD809bc939dC80630cd9f7aEa2247a83440fE5 and alUSD/sDOLA 0x460638e6f7605b866736e38045c0de8294d7d87f. Entry/early-exit for the Transmuter path
+
+edges:
+  # === Governance ===
+  - from: admin-safe
+    to: myt
+    kind: holds-role
+    label: owner
+  - from: admin-safe
+    to: curator
+    kind: controls
+    label: admin + operator
+  - from: admin-safe
+    to: allocator
+    kind: controls
+    label: admin + operator
+  - from: admin-safe
+    to: classifier
+    kind: controls
+    label: admin
+  - from: admin-safe
+    to: proxy-admin
+    kind: controls
+    label: owner
+  - from: proxy-admin
+    to: alchemist
+    kind: controls
+    label: upgrade (no timelock)
+  - from: admin-safe
+    to: alchemist
+    kind: holds-role
+    label: admin
+  - from: admin-safe
+    to: transmuter
+    kind: holds-role
+    label: admin (fees ≤ 100%, setAlchemist)
+  - from: admin-safe
+    to: siusd-adapter
+    kind: controls
+    label: owner (slippage, oracle, allowanceHolder)
+  - from: admin-safe
+    to: yvusd-adapter
+    kind: controls
+    label: owner
+  - from: admin-safe
+    to: fluid-adapter
+    kind: controls
+    label: owner
+  - from: curator
+    to: myt
+    kind: holds-role
+    label: curator (timelock 0)
+  - from: allocator
+    to: myt
+    kind: holds-role
+    label: allocator
+  - from: dao-safe
+    to: myt
+    kind: holds-role
+    label: sentinel
+  - from: dao-safe
+    to: alusd
+    kind: holds-role
+    label: ADMIN
+  - from: legacy-msig
+    to: alusd
+    kind: holds-role
+    label: ADMIN
+  - from: alusd-sentinel
+    to: alusd
+    kind: holds-role
+    label: SENTINEL (blacklist, pause minters)
+  - from: alusd-sentinel
+    to: v1-alchemist
+    kind: holds-role
+    label: SENTINEL (can unpause)
+  - from: admin-safe
+    to: tokeauto-adapter
+    kind: controls
+    label: owner
+  - from: fluid-timelock
+    to: fluid-lite
+    kind: controls
+    label: owner (upgrades, 24 h)
+  - from: fluid-avocado
+    to: fluid-timelock
+    kind: holds-role
+    label: PROPOSER + CANCELLER
+
+  # === Mint authority ===
+  - from: alchemist
+    to: alusd
+    kind: mints
+    label: whiteList (ceiling 8.67M)
+  - from: v1-alchemist
+    to: alusd
+    kind: mints
+    label: whiteList (ceiling 70M; paused)
+  - from: migration-tool-unverified
+    to: alusd
+    kind: mints
+    label: whiteList (unlimited; unverified source)
+
+  # === Capital flow ===
+  - from: myt
+    to: siusd-adapter
+    kind: allocates-to
+    label: "40.40%"
+  - from: myt
+    to: yvusd-adapter
+    kind: allocates-to
+    label: "39.93%"
+  - from: myt
+    to: fluid-adapter
+    kind: allocates-to
+    label: "19.67%"
+  - from: myt
+    to: tokeauto-adapter
+    kind: allocates-to
+    label: "~0% (cap 5M / 30%)"
+  - from: siusd-adapter
+    to: siusd
+    kind: deposits-into
+  - from: yvusd-adapter
+    to: yvusd
+    kind: deposits-into
+  - from: fluid-adapter
+    to: fluid-lite
+    kind: deposits-into
+  - from: fluid-lite
+    to: fusdc
+    kind: deposits-into
+    label: idle buffer (21.3%)
+  - from: fluid-lite
+    to: fluid-handler
+    kind: routes-through
+    label: pullFunds → leveraged strategies
+  - from: fluid-handler
+    to: fluid-solana
+    kind: routes-through
+    label: largest reported NAV leg (sUSDai on Solana)
+  - from: fluid-avocado
+    to: fluid-solana
+    kind: controls
+    label: owner + TEAM_MULTISIG (sendToTeamMultisig)
+  - from: fluid-avocado
+    to: fluid-handler
+    kind: controls
+    label: proxy admin (no timelock)
+  - from: fluid-avocado
+    to: fluid-lite
+    kind: holds-role
+    label: secondary owner + AUTH (pause); timelock PROPOSER
+  - from: alchemist
+    to: myt
+    kind: routes-through
+    label: 6.30M MYT collateral (79.6% of supply)
+  - from: transmuter
+    to: alchemist
+    kind: routes-through
+    label: redeem earmarked debt → MYT
+  - from: alusd
+    to: transmuter
+    kind: routes-through
+    label: createRedemption (alUSD → MYT 1:1)
+  - from: curve-alusd
+    to: alusd
+    kind: routes-through
+    label: buy alUSD below par
+
+  # === Fees ===
+  - from: myt
+    to: dao-safe
+    kind: routes-fees-to
+    label: 15% performance fee
+  - from: transmuter
+    to: dao-safe
+    kind: routes-fees-to
+    label: exit fee 1%
