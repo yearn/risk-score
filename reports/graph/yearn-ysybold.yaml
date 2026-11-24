@@ -112,7 +112,7 @@ nodes:
     label: Brain (3-of-6)
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
-    note: Manages ysyBOLD and all three strategies. Can redirect Accountant fees and initiate a role-manager handoff to ySafe. These powers have no delay.
+    note: Manages ysyBOLD and all three strategies. Can redirect Accountant fees, initiate a role-manager handoff to ySafe, and use QUEUE_MANAGER to force an empty yBOLD withdrawal queue that blocks BOLD redemptions while idle is zero. These powers have no delay.
   - id: security
     label: Security (4-of-7)
     address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
@@ -262,11 +262,11 @@ edges:
   - from: daddy
     to: ybold
     kind: holds-role
-    label: "0x3FF6 includes FORCE_REVOKE / WITHDRAW_LIMIT"
+    label: "0x3FF6 includes FORCE_REVOKE / WITHDRAW_LIMIT / QUEUE"
   - from: brain
     to: ybold
     kind: holds-role
-    label: "0x3972 includes DEBT / DEPOSIT_LIMIT / EMERGENCY"
+    label: "0x3972 includes QUEUE / DEBT / DEPOSIT_LIMIT / EMERGENCY"
   - from: security
     to: ybold
     kind: holds-role

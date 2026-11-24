@@ -4,7 +4,7 @@
 - **Token:** ysyBOLD (Staked yBOLD)
 - **Chain:** Ethereum
 - **Token Address:** [`0x23346B04a7f55b8760E5860AA5A77383D63491cD`](https://etherscan.io/address/0x23346B04a7f55b8760E5860AA5A77383D63491cD)
-- **Final Score: 2.30/5.0**
+- **Final Score: 2.38/5.0**
 
 ## Overview + Links
 
@@ -188,7 +188,7 @@ Each round extracted only ~3,200–7,460 BOLD, because sBOLD refuses redemptions
 Other details from the post-mortem:
 
 - Pendle's SY-sBOLD (12.79% of sBOLD shares) was also affected.
-- K3 identified counterparties holding 894.50 ETH and **131,316 yBOLD** from the exploit and listed Yearn among the parties committed to the recovery. The Historical Track Record section records the same-size Accountant distribution and the outstanding question about its purpose.
+- K3 identified counterparties holding 894.50 ETH and **131,316 yBOLD** from the exploit and listed Yearn among the parties committed to the recovery. Yearn paid the matching 131,316 BOLD to K3's recovery address on November 23, 2026 (see Historical Track Record).
 - Recovery address: [`0x2f02BCd2163176B29C7B070B43A1660A5341C795`](https://etherscan.io/address/0x2f02BCd2163176B29C7B070B43A1660A5341C795), with a 15% bounty.
 
 > Early reports ([CoinDesk](https://www.coindesk.com/tech/2026/11/19/ethereum-block-builders-received-the-most-in-a-usd3-4-million-vault-hack-data-shows), [Cryptonews / Blockaid](https://cryptonews.net/news/security/33775498/), [Altcoinbuzz / Bitquery / DefiLlama](https://www.altcoinbuzz.io/3-42-million-drained-from-k3-capital-s-sbold-vault-in-eight-minutes)) said self-liquidations or collateral "excluded below a threshold" were involved. The post-mortem rules out liquidations. The 7,500-BOLD collateral cap that limited each round is probably the "threshold" those reports meant.
@@ -247,7 +247,11 @@ Liquidation collateral replaces burned BOLD, so the value exposed to dilution in
 | Nov 19, 2026 | [26,450,218](https://etherscan.io/block/26450218) | 7,613,634 | 7,407,856 | 1.104266 |
 
 - **Reported losses:** zero across 1,258 yBOLD `StrategyReported` events and 329 ysyBOLD `Reported` events through the snapshot. Vault redemptions can realize losses in the withdrawal flow. `TODO`: reconcile historical withdrawals against their share value at execution to quantify any losses outside reports. [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
-- **Accountant distribution:** at [block 26,448,914](https://etherscan.io/block/26448914), Brain switched the fee recipient from ysyBOLD to itself, received **131,316 yBOLD**, and restored ysyBOLD as recipient in the same transaction. Brain still held 131,316 yBOLD at the snapshot, and the Accountant balance was zero. Cumulative yBOLD strategy gains were 809,808.95 BOLD and cumulative ysyBOLD reported gains were 678,492.95 yBOLD. The difference matches this distribution at the 1:1 vault rate. The amount also matches the yBOLD amount K3 identified in its recovery update. `TODO`: verify with Yearn whether the transfer was part of that recovery and how it affected ysyBOLD holders. [Distribution transaction](https://etherscan.io/tx/0x27bd72f9a183359b68b2c313a1f145e03d3bb7539069eb43ffee367cdbf2a677) · [K3 post-mortem](https://x.com/k3_capital/status/2123395654214967426)
+- **sBOLD recovery payment from Accountant fees:**
+  - **November 19, 2026 ([block 26,448,914](https://etherscan.io/block/26448914)):** Brain switched the Accountant's fee recipient from ysyBOLD to itself, received **131,316 yBOLD**, and restored ysyBOLD as recipient in the same transaction. Brain still held the 131,316 yBOLD at the snapshot, and the Accountant balance was zero. Cumulative yBOLD strategy gains were 809,808.95 BOLD and cumulative ysyBOLD reported gains were 678,492.95 yBOLD. The difference matches this distribution at the 1:1 vault rate. [Distribution transaction](https://etherscan.io/tx/0x27bd72f9a183359b68b2c313a1f145e03d3bb7539069eb43ffee367cdbf2a677)
+  - **November 23, 2026 ([block 26,479,748](https://etherscan.io/block/26479748), after the snapshot):** Brain redeemed exactly 131,316 yBOLD. In the same transaction the vault withdrew BOLD from the WETH strategy and paid **131,316 BOLD** directly to K3's recovery address [`0x2f02BCd2163176B29C7B070B43A1660A5341C795`](https://etherscan.io/address/0x2f02BCd2163176B29C7B070B43A1660A5341C795). Brain's yBOLD balance went to zero, and yBOLD `pricePerShare()` remained 1e18 after the transaction. [Recovery transaction](https://etherscan.io/tx/0xff9abbc9b96b93e21c568477434bb5cfffb1bdc2ca6caec90743c93fab4f0c10)
+  - **Attribution:** as [reported by TokenPost](https://www.tokenpost.com/news/technology/61511), Yearn said the ~131,000 BOLD came from borrowing fees paid by the sBOLD attacker that flowed through yBOLD into ysyBOLD, and that user deposits and normal returns were unaffected. This matches the 131,316 yBOLD that [K3's post-mortem](https://x.com/k3_capital/status/2123395654214967426) attributed to the exploit. This report did not locate Yearn's primary statement.
+  - **What this shows:** the payment returned exploit-derived fees and did not touch principal. It used Brain's untimelocked `feeManager` authority to divert fee shares from ysyBOLD before they reached stakers. That authority remains a governance risk (see Critical Permission Paths).
 - **Security incidents:** none known for yBOLD or ysyBOLD.
 - **Liquity V2 incidents:** a Stability Pool issue in the original Liquity V2 deployment led to a **redeployment and relaunch on May 19, 2025** ([Liquity blog](https://www.liquity.org/blog/stability-pool-issue), [relaunch](https://www.liquity.org/blog/liquity-v2-redeployment)). yBOLD launched on the redeployed contracts.
 - **Liquity V2 TVL:** $67.2M on November 19, 2026, down from a $180.0M peak on October 7, 2025 ([DeFiLlama](https://defillama.com/protocol/liquity-v2), `fetch_defillama_tvl.py liquity-v2`). All three branches have `shutdownTime() = 0` (not shut down).
@@ -271,7 +275,11 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 
 - **ysyBOLD deposits / withdrawals:** anyone can deposit or withdraw yBOLD (ERC-4626). `availableDepositLimit` and `availableWithdrawLimit` are unlimited. There is no cooldown. Exits are atomic.
 - **yBOLD deposits:** anyone can deposit BOLD, unless yBOLD's price per share is below 1.0 (`OnLossDepositLimit`).
-- **yBOLD withdrawals:** permissionless and atomic when the strategy queue can fulfill the request. A withdrawal limit module can cap exits. The module address was zero at the snapshot. [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
+- **yBOLD withdrawals:** permissionless and atomic when the strategy queue can fulfill the request. Two privileged settings can stop them:
+  - a withdrawal limit module (ySafe). The module address was zero at the snapshot;
+  - the withdrawal queue (Brain or ySafe as QUEUE_MANAGER). At the snapshot the default queue held all three strategies and `use_default_queue` was false, so callers could also pass their own queue.
+
+  [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
 - **Fees:** yBOLD charges 100% on gains remaining after recovery to par. Brain controls the Accountant's recipient, which was ysyBOLD at the snapshot. ysyBOLD takes a 10% performance fee and no management fee.
 
 ### Token Mint Authority
@@ -317,7 +325,44 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 
 - **Primary exit:** ysyBOLD `redeem` → yBOLD `redeem` → BOLD. Both calls can be bundled. The underlying yBOLD redemption leg returned 7,407,855.86 BOLD at the snapshot with `max_loss = 0`. [Snapshot block](https://etherscan.io/block/26450218)
 - **After a liquidation:** the withdrawal queue can draw from other strategies when one branch has less live BOLD than its stored debt. A redemption can revert if the queue runs out of withdrawable BOLD or the realized loss exceeds the caller's limit. The default three-argument yBOLD `redeem` accepts losses, so specify `max_loss` explicitly when quoting an exit. [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
-- **Exit asset:** BOLD. Converting BOLD to USD depends on BOLD's secondary-market depth and peg, which this report did not quote (`TODO`: Curve / Uniswap BOLD pool depth at 1M, 5M and 10M).
+- **Brain or ySafe can block the BOLD leg** by forcing an empty withdrawal queue (see Critical Permission Paths).
+- **Exit asset:** BOLD. The direct exit ends in BOLD. Converting BOLD into USDC or into Liquity collateral is a separate step with its own cost, measured below.
+
+**BOLD → USDC.** Venues were found through the Curve API and DeFiLlama pool listings, then checked onchain. Material venues:
+
+- Curve [BOLD/USDC](https://etherscan.io/address/0xEFc6516323FbD28e80B85A497B65A86243a54B3E) StableSwap-NG, holding 5.70M BOLD and 3.95M USDC;
+- Uniswap v4 BOLD/USDC 0.05% (no hooks), pool ID [`0x5d0e…f893`](https://app.uniswap.org/explore/pools/ethereum/0x5d0ed52610c76d7bf729130ce7ddc0488b2f4bd0a0db1f12adbe6a32deaff893);
+- Uniswap v3 [BOLD/USDC 0.05%](https://etherscan.io/address/0x1E4DBb639eBBF725fd243A6190dF5440eE38740E).
+
+The other BOLD pools are small or not USD exits:
+
+- Curve [BOLD/LUSD](https://etherscan.io/address/0x7ED17e037B7d88A8270c89B3aFA9C38e5218F12b): 1M BOLD returned 403,274 LUSD.
+- Curve [BOLD/avUSD](https://etherscan.io/address/0xc3b723b0dAE2Df9668F876236a1922f72Bcb438d): ~$128k TVL.
+- Uniswap v4 ETH/BOLD: ~$338k TVL.
+
+Quotes are executable outputs at block 26,450,218 on a local fork. They come from Curve `get_dy`, Uniswap [QuoterV2](https://etherscan.io/address/0x61fFE014bA17989E743c5F6cB21bF9697530B21e) and [V4Quoter](https://etherscan.io/address/0x52F0E24D1c21C8A0cB1e5a5dD6198556BD9E1203). "Best split" allocates the order across the three venues in 100k BOLD steps and treats them as independent, with no arbitrage between legs.
+
+| BOLD sold | Curve alone (USDC) | Uniswap v4 alone | Uniswap v3 alone | Best split (USDC) | Loss vs 1:1 |
+|----------:|-------------------:|-----------------:|-----------------:|------------------:|------------:|
+| 1,000,000 | 997,292 | 997,367 | 658,264 (pool exhausted) | 997,873 | 0.21% |
+| 2,000,000 | 1,990,959 | 1,991,402 | 658,264 | 1,994,711 | 0.26% |
+| 5,000,000 | 3,918,195 | 2,112,518 (exhausted) | 658,264 | 4,972,124 | 0.56% |
+| 6,000,000 | — | — | — | 5,939,698 | 1.01% |
+| 7,400,000 (≈ staker position) | 3,941,813 (7,407,856 BOLD) | 2,112,519 | 658,264 | 6,662,005 | 9.97% |
+
+About $5M of BOLD converts to USDC within 0.6%. Above ~$6M the three pools run out of USDC, so selling the full staker position at once loses ~10%. `TODO`: LP concentration of the Curve and Uniswap v4 pools (liquidity may be removable).
+
+**BOLD → collateral (Liquity redemption).** [`CollateralRegistry.getRedemptionRateForRedeemedAmount`](https://etherscan.io/address/0xf949982B91C8c61e952B3bA942cbbfaef5386684#readContract) at the snapshot. The rate assumes the whole amount is redeemed in one call. Proceeds are paid in WETH, wstETH and rETH, not USD.
+
+| BOLD redeemed | Redemption fee |
+|--------------:|---------------:|
+| 100,000 | 1.25% |
+| 1,000,000 | 4.23% |
+| 5,000,000 | 17.46% |
+| 7,407,856 | 25.43% |
+
+Selling on secondary markets cost less than redemption at every size quoted.
+
 - **Secondary markets for ysyBOLD/yBOLD:** not inventoried (`TODO`). Redemption is direct, so they aren't needed.
 
 ## Centralization & Control Risks
@@ -331,7 +376,7 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 - **Timelock:** the 7-day TimelockController held ADD_STRATEGY and ACCOUNTANT_MANAGER at the snapshot. ySafe is the only proposer. ySafe and Brain can cancel. The Role Manager handoff can move these powers outside the timelock.
 - **Untimelocked powers:**
   - Brain (3-of-6) is `management` of ysyBOLD and all strategies, and `feeManager` of the Accountant.
-  - Brain and ySafe hold DEPOSIT_LIMIT_MANAGER and DEBT roles on yBOLD.
+  - Brain and ySafe hold QUEUE_MANAGER, DEPOSIT_LIMIT_MANAGER and DEBT roles on yBOLD.
   - ySafe holds FORCE_REVOKE_MANAGER and WITHDRAW_LIMIT_MANAGER directly.
 - **Pause / emergency:**
   - EMERGENCY_MANAGER (ySafe, Brain, Security) can shut down yBOLD.
@@ -348,9 +393,10 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 | Replace yBOLD Accountant (`set_accountant`) | Timelock currently holds ACCOUNTANT_MANAGER. ySafe can acquire the role through the handoff. | The current Accountant caps fees at the gain. Vault v3.0.4 has no independent gain-based cap on fees returned by a replacement. The staker continues to call its original immutable `ACCOUNTANT`. | Accrued yield, future yield, and depositor share value through fee dilution |
 | Force-revoke a strategy with debt (`force_revoke_strategy`) | **ySafe 6-of-9** directly, or the Timelock | No delay for ySafe. The vault writes off the strategy's debt and removes it from the withdrawal queue. Recovery requires subsequent vault action. | Up to all 7.61M BOLD of recorded debt across the three strategies |
 | Restrict yBOLD exits (`set_withdraw_limit_module`) | **ySafe 6-of-9** directly | No delay. Module is unset at the snapshot. | Redemption access for all yBOLD depositors, including ysyBOLD |
+| Block yBOLD exits through the queue: `set_use_default_queue(true)` plus `set_default_queue([])` | **Brain 3-of-6** (role `0x3972` includes QUEUE_MANAGER), also ySafe | No delay. With idle at 0, redemptions can draw only from idle BOLD. On a fork at the snapshot block, a 1 BOLD redemption reverted with `insufficient assets in vault`, including when the caller supplied its own queue. ySafe can restore the queue. Any DEBT_MANAGER (Security, Debt Allocator, Brain, ySafe) can pull debt to idle with `update_debt`. On the fork this restored 2.31M BOLD of exits for the WETH strategy. Brain can also redeploy idle BOLD. | Redemption access to all 7.61M BOLD of yBOLD principal, including the BOLD leg of ysyBOLD exits. ysyBOLD → yBOLD stays open. |
 | Change strategy deposit access and loss health checks relevant to Sherlock H-2 | **Brain 3-of-6** (`management` of each strategy) | No timelock. Requires unrecovered liquidation collateral for the documented dilution risk. | Recoverable value of burned BOLD and liquidation proceeds. Unsold collateral was zero at the snapshot. |
 | Remove the auction floor: `setMinAuctionPriceBps(0)` | **Brain 3-of-6** | No timelock. Start price is still oracle-based; anyone can buy (MEV competition) | Unsold liquidation collateral |
-| Redirect yBOLD fees via `Accountant.setFeeRecipient` | **Brain 3-of-6** (`feeManager`) | No timelock. The recipient may change and return to ysyBOLD within one transaction. | Accrued fee shares and future yield. Brain received 131,316 yBOLD through this authority before the snapshot. |
+| Redirect yBOLD fees via `Accountant.setFeeRecipient` | **Brain 3-of-6** (`feeManager`) | No timelock. The recipient may change and return to ysyBOLD within one transaction. | Accrued fee shares and future yield. Brain used this authority to take 131,316 yBOLD, which it redeemed to K3's sBOLD recovery address on November 23, 2026. |
 | ysyBOLD fees: `setPerformanceFee` (≤ 50% by TokenizedStrategy), `setPerformanceFeeRecipient`, `setProfitMaxUnlockTime` | **Brain 3-of-6** | No timelock. Fee capped at 50% of profit | Future yield only |
 | Remove the yBOLD deposit stop below par (`set_deposit_limit_module`) | Brain or ySafe | No timelock | Dilution of existing yBOLD holders if shares are issued below the value of recoverable assets |
 | Shutdown / emergency withdraw | ySafe, Brain, Security | Withdrawals stay open; funds stay in the strategy | None (liveness only) |
@@ -359,6 +405,7 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 
 - **ySafe alone can write off recorded debt and interrupt principal recovery immediately.** ySafe 6-of-9 held FORCE_REVOKE_MANAGER at the snapshot. Each forced revocation can remove a strategy's full debt from vault accounting, while its assets remain in the strategy until recovered. The three strategies accounted for all 7.61M BOLD of vault debt. [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
 - **Brain and ySafe together can gain immediate authority over all deployed principal.** The Role Manager permits Brain to initiate the handoff to ySafe. The vault lets the accepted role manager assign strategy and accountant roles. The BORG guard was in blacklist mode and had no policy against calls to either contract at the snapshot. [Role Manager source](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41#code) · [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code) · [BORG guard](https://etherscan.io/address/0xe1c90a1f8a9553b31110dd6feead76e79a6ed419#code)
+- **Brain alone can block every yBOLD principal exit immediately.** As QUEUE_MANAGER, the 3-of-6 Safe can force an empty default queue. Idle BOLD was 0 at the snapshot, so every yBOLD redemption reverts until ySafe restores the queue or a DEBT_MANAGER pulls debt to idle. This blocks exits but does not move funds. [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
 - **Brain alone can put liquidation recovery and fee shares at risk immediately.** The 3-of-6 Safe controls the strategy loss and deposit settings, auction floor, and Accountant fee recipient. Liquidation proceeds include collateral acquired with deposited BOLD. The snapshot's zero unsold collateral is a point-in-time observation. [Deployed strategy source](https://etherscan.io/address/0xc5e7D3F76a03006540f17668A0267C668FFb5b75#code) · [Accountant source](https://etherscan.io/address/0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa#code)
 
 ### Programmability
@@ -391,7 +438,7 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 | Contract | Address | Monitor |
 |----------|---------|---------|
 | ysyBOLD | [`0x23346B04a7f55b8760E5860AA5A77383D63491cD`](https://etherscan.io/address/0x23346B04a7f55b8760E5860AA5A77383D63491cD) | `pricePerShare()` (must not fall), `totalAssets()`, `profitMaxUnlockTime()` (alert if < 1 day), `performanceFee()`, `management()`, `Reported` events with a loss |
-| yBOLD | [`0x9F4330700a36B29952869fac9b33f45EEdd8A3d8`](https://etherscan.io/address/0x9F4330700a36B29952869fac9b33f45EEdd8A3d8) | `pricePerShare()` (alert if ≠ 1e18), `deposit_limit_module()`, `withdraw_limit_module()`, `accountant()`, `StrategyChanged`, `DebtUpdated`, `RoleSet`, `UpdateFutureRoleManager`, `UpdateRoleManager`, `UpdateWithdrawLimitModule`, `StrategyReported` with loss > 0 |
+| yBOLD | [`0x9F4330700a36B29952869fac9b33f45EEdd8A3d8`](https://etherscan.io/address/0x9F4330700a36B29952869fac9b33f45EEdd8A3d8) | `pricePerShare()` (alert if ≠ 1e18), `deposit_limit_module()`, `withdraw_limit_module()`, `get_default_queue()`, `use_default_queue()`, `accountant()`, `StrategyChanged`, `DebtUpdated`, `RoleSet`, `UpdateFutureRoleManager`, `UpdateRoleManager`, `UpdateWithdrawLimitModule`, `UpdateDefaultQueue`, `UpdateUseDefaultQueue`, `StrategyReported` with loss > 0 |
 | Strategies (×3) | [`0xc5e7…5b75`](https://etherscan.io/address/0xc5e7D3F76a03006540f17668A0267C668FFb5b75), [`0x3589…49a5`](https://etherscan.io/address/0x3589b93CaDb464b6E1974Cc9fc0c9be698Ee49a5), [`0x6ED5…9005`](https://etherscan.io/address/0x6ED566B76838A08d04cBd6323231B08a2eC69005) | **sBOLD/H-2 guards:** `openDeposits()` must stay false; alert on any `setAllowed`. Alert if `lossLimitRatio()` ≠ 0 or `doHealthCheck()` is false. Alert if `minAuctionPriceBps()` < 9500 or `bufferPercentage()` changes. Also watch `profitMaxUnlockTime()`, `management()`, `keeper()`, and unsold collateral (`SP.getDepositorCollGain + stashedColl + COLL.balanceOf(strategy) + COLL.balanceOf(AUCTION)`) |
 | Auctions (×3) | [`0x61C9…9381`](https://etherscan.io/address/0x61C9e1113661C991fb6377B3610804476Dcd9381), [`0x64e8…5CcA`](https://etherscan.io/address/0x64e8050D33BB296d48FE8eb08d09F00633e45CcA), [`0x3793…8091`](https://etherscan.io/address/0x3793405FBcE404f351e76fa115209488aC0e8091) | `governanceOnlyKick()` must stay true; `Approval` events from the auctions to any spender other than CoW's `GPv2VaultRelayer` (sBOLD-style leftover-approval guard); `minimumPrice()` vs Liquity `lastGoodPrice()`; `AuctionKicked`, sales events; auctions that end without selling |
 | Accountant | [`0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa`](https://etherscan.io/address/0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa) | `feeRecipient()`, `feeManager()`, `defaultConfig()`, `UpdateFeeRecipient`, `DistributeRewards` and outgoing yBOLD `Transfer` events |
@@ -411,6 +458,7 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 | `minAuctionPriceBps` / auction `minimumPrice` | < 95% of oracle | Daily |
 | Accountant recipient and distributions | Any `UpdateFeeRecipient`, or any outgoing yBOLD transfer to a recipient other than ysyBOLD. Inspect every event in the transaction. | Event-driven |
 | yBOLD role administration or exit module | Any `UpdateFutureRoleManager`, `UpdateRoleManager`, `RoleSet`, `UpdateWithdrawLimitModule`, or Role Manager `RemovedVault` for yBOLD | Event-driven |
+| yBOLD withdrawal queue | Any `UpdateDefaultQueue` or `UpdateUseDefaultQueue`. Critical if the default queue omits a strategy with debt while `use_default_queue()` is true | Event-driven |
 | yBOLD live BOLD backing and redemptions | Alert when live BOLD backing falls below recorded assets or a redemption returns less than its share value. Compare strategy BOLD balances and compounded SP deposits plus vault BOLD against `totalAssets()`. | Hourly and on withdrawals |
 | Liquity branch `shutdownTime()` | ≠ 0 | Hourly |
 | yBOLD share of a Stability Pool | > 75% | Daily |
@@ -445,8 +493,8 @@ Each strategy deposits BOLD into one Liquity V2 Stability Pool. Interest is clai
 
 Governance: ySafe 6/9 ──propose/execute──▶ Timelock (7d) ──ADD_STRATEGY / ACCOUNTANT──▶ yBOLD
             Brain 3/6 ──Role Manager handoff──▶ ySafe 6/9 ──accept role administration──▶ yBOLD
-            ySafe 6/9 ── FORCE_REVOKE / WITHDRAW_LIMIT on yBOLD without delay
-            Brain 3/6 ── management of ysyBOLD + strategies, Accountant feeManager, DEBT / DEPOSIT_LIMIT on yBOLD
+            ySafe 6/9 ── FORCE_REVOKE / WITHDRAW_LIMIT / QUEUE on yBOLD without delay
+            Brain 3/6 ── management of ysyBOLD + strategies, Accountant feeManager, QUEUE / DEBT / DEPOSIT_LIMIT on yBOLD
             Security 4/7 ── DEBT / MAX_DEBT / EMERGENCY on yBOLD, emergencyAdmin of strategies
             Keeper (yHaaS) ── report / tend;  Debt Allocator ── REPORTING + DEBT_MANAGER
 ```
@@ -461,21 +509,22 @@ Governance: ySafe 6/9 ──propose/execute──▶ Timelock (7d) ──ADD_STR
 - **Strategy safeguards against Sherlock H-2.** At the snapshot, strategies restricted deposits to their allowlists and blocked net-loss reports. The vault's below-par deposit gate and the staker's profit unlock operate at their own layers.
 - **Zero reported losses** across 1,258 vault reports and 329 staker reports over ~18 months. ysyBOLD PPS rose 10.4% since launch.
 - **Onchain accounting and fixed implementations.** Strategy deposits, withdrawals, loans offset by Liquity, and auction collateral can be reconciled against stored balances.
-- **Full-size BOLD exit at the snapshot.** The staker's 7,407,855.86 yBOLD redeemed for the same amount of BOLD in the pinned call with zero loss tolerance.
+- **Full-size BOLD exit at the snapshot.** The staker's 7,407,855.86 yBOLD redeemed for the same amount of BOLD in the pinned call with zero loss tolerance. About 5M BOLD could then be sold for USDC within 0.6% across Curve and Uniswap.
 
 ### Key Risks
 
 - **Brain can relax strategy safeguards without a delay.** Sherlock H-2 was marked "won't fix". Brain can open strategy deposits and relax loss-report checks. The collateral at risk includes value received in exchange for burned depositor BOLD.
-- **Brain can redirect accrued fee shares and future yield.** It received 131,316 yBOLD before the snapshot and restored ysyBOLD as fee recipient within the same transaction. [Distribution transaction](https://etherscan.io/tx/0x27bd72f9a183359b68b2c313a1f145e03d3bb7539069eb43ffee367cdbf2a677)
+- **Brain can redirect accrued fee shares and future yield.** It diverted 131,316 yBOLD of fees before the snapshot and restored ysyBOLD as fee recipient within the same transaction. On November 23, 2026 it paid the matching 131,316 BOLD to K3's sBOLD recovery address. Yearn attributed the fees to the attacker's borrowing and said deposits and normal returns were unaffected. The authority to divert fees remains. [Distribution transaction](https://etherscan.io/tx/0x27bd72f9a183359b68b2c313a1f145e03d3bb7539069eb43ffee367cdbf2a677) · [Recovery transaction](https://etherscan.io/tx/0xff9abbc9b96b93e21c568477434bb5cfffb1bdc2ca6caec90743c93fab4f0c10)
 - **Single-protocol dependency:** 100% in Liquity V2 Stability Pools, which are first-loss capital for liquidations. Liquity V2 needed a redeployment in 2025 and its TVL has fallen from $180M to $67M.
 - **Concentration in Liquity:** yBOLD is ~50% of all Stability Pool BOLD and ~25% of BOLD supply (68.5% of the rETH pool). A large yBOLD exit materially shrinks Liquity's liquidation capacity.
 - **Collateral sales rely on outside buyers.** Auctions floor at 95% of the Liquity oracle. In fast markets sales may stall (floor too high) or clear below market (floor stale and low). Brain can lower the floor without a timelock.
 - **Deployed code differs from the audited code:** the live strategies, Accountant and staker include post-contest changes (auction pricing, oracle handling) that were reviewed only internally.
 - **Small TVL:** ~$7.4M.
+- **Limited BOLD → USD depth:** the three USDC pools could pay out at most ~6.7M USDC at the snapshot. Selling the full staker position at once loses ~10%, and redeeming it through Liquity costs 25.43%.
 
 ### Critical Risks
 
-- **Principal recovery depends on ySafe 6-of-9.** ySafe can force-revoke debt or restrict exits immediately. Brain and ySafe can also transfer role administration to ySafe without the 7-day delay, exposing all vault principal to strategy and accounting changes. [Role Manager source](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41#code) · [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
+- **Principal recovery depends on ySafe 6-of-9, and exits depend on Brain 3-of-6.** ySafe can force-revoke debt or restrict exits immediately. Brain can block all yBOLD redemptions immediately by forcing an empty withdrawal queue. Brain and ySafe can also transfer role administration to ySafe without the 7-day delay, exposing all vault principal to strategy and accounting changes. [Role Manager source](https://etherscan.io/address/0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41#code) · [Vault implementation](https://etherscan.io/address/0xd8063123bba3b480569244ae66bfe72b6c84b00d#code)
 
 ---
 
@@ -501,7 +550,7 @@ Governance: ySafe 6/9 ──propose/execute──▶ Timelock (7d) ──ADD_STR
 
 #### Category 2: Centralization & Control Risks (Weight: 30%)
 
-- **Governance: 4.0.** ySafe 6-of-9 can immediately write off strategy debt or restrict exits. Brain 3-of-6 can immediately change protections on liquidation recoveries and redirect fees. Together the Safes can transfer vault role administration without the 7-day delay.
+- **Governance: 4.0.** ySafe 6-of-9 can immediately write off strategy debt or restrict exits. Brain 3-of-6 can immediately block all yBOLD redemptions through the withdrawal queue, change protections on liquidation recoveries, and redirect fees. Together the Safes can transfer vault role administration without the 7-day delay.
 - **Programmability: 2.0.** Accounting is onchain. Keeper reports recognize gains and losses, the staker unlocks gains over time, and collateral conversion depends on keeper `tend()` and auction buyers.
 - **Dependencies: 3.5.** One critical dependency (Liquity V2, also the BOLD issuer). It is well audited and immutable, but was redeployed in 2025, has shrinking TVL, and yBOLD is about half its Stability Pool liquidity. Also depends on Chainlink-based Liquity price feeds for auctions.
 
@@ -516,7 +565,12 @@ Governance: ySafe 6/9 ──propose/execute──▶ Timelock (7d) ──ADD_STR
 
 #### Category 4: Liquidity Risk (Weight: 15%)
 
-**Score: 1.5/5.** The staker's full yBOLD position redeemed to BOLD at par in the zero-loss snapshot simulation. Liquidation collateral can delay recovery of BOLD and the withdrawal queue is subject to available strategy liquidity. `TODO`: quantify BOLD market depth to size an exit beyond the vault.
+**Score: 2.0/5.**
+
+- **Withdrawal to BOLD (score 1):** instant and 1:1. The staker's full yBOLD position redeemed to BOLD at par in the zero-loss snapshot simulation.
+- **Conversion to USD (score 2):** the best split across Curve, Uniswap v4 and Uniswap v3 absorbed 5M BOLD at 0.56% and 6M at 1.01%. That matches the ">$5M, <1%" tier, not the ">$10M, <0.5%" tier.
+- **Full-size exit:** selling the full 7.4M position at once loses ~10% because the pools run out of USDC. Redeeming the full amount through Liquity costs a 25.43% fee and pays out ETH collateral.
+- **Other factors:** liquidation collateral can delay recovery of BOLD, and the withdrawal queue depends on available strategy liquidity.
 
 #### Category 5: Operational Risk (Weight: 5%)
 
@@ -529,9 +583,9 @@ Governance: ySafe 6/9 ──propose/execute──▶ Timelock (7d) ──ADD_STR
 | Audits & Historical | 2.75 | 20% | 0.550 |
 | Centralization & Control | 3.167 | 30% | 0.950 |
 | Funds Management | 1.75 | 30% | 0.525 |
-| Liquidity Risk | 1.5 | 15% | 0.225 |
+| Liquidity Risk | 2.0 | 15% | 0.300 |
 | Operational Risk | 1.0 | 5% | 0.050 |
-| **Final Score** | | | **2.30/5.0** |
+| **Final Score** | | | **2.38/5.0** |
 
 No optional modifiers apply: under 2 years live and under $500M TVL.
 
@@ -545,14 +599,14 @@ No optional modifiers apply: under 2 years live and under $500M TVL.
 | 3.50–4.49 | Elevated Risk | Limited approval, strict limits |
 | 4.50–5.00 | High Risk | Not recommended |
 
-**Final Risk Tier: Low Risk (2.30/5.0)**
+**Final Risk Tier: Low Risk (2.38/5.0)**
 
 ---
 
 ## Reassessment Triggers
 
 - **Time-based:** every 6 months (May 2027).
-- **Configuration-based:** any role-manager handoff, vault role change, withdrawal-limit module change, Accountant replacement or fee recipient change. Reassess changes to strategy deposit access, health checks, auction pricing, yBOLD's deposit-limit module, and ysyBOLD's profit unlock period.
+- **Configuration-based:** any role-manager handoff, vault role change, withdrawal-limit module or withdrawal-queue change, Accountant replacement or fee recipient change. Reassess changes to strategy deposit access, health checks, auction pricing, yBOLD's deposit-limit module, and ysyBOLD's profit unlock period.
 - **TVL-based:** yBOLD TVL changes by more than ±50% (from ~7.6M BOLD), or yBOLD's share of any Stability Pool exceeds 75%.
 - **Incident-based:** any reported loss on yBOLD or ysyBOLD, a Liquity V2 branch shutdown, a BOLD depeg above 2%, any update to K3's sBOLD analysis that also applies to yBOLD, or any finding against CoW relayer approvals or the Auction's `isValidSignature`.
 
@@ -560,4 +614,4 @@ No optional modifiers apply: under 2 years live and under $500M TVL.
 
 | Date | Score | Notes |
 | --- | --- | --- |
-| November 19, 2026 | 2.30 | Initial assessment at block 26,450,218. The score reflects immediate principal write-off and role-handoff powers, Brain's fee authority, and the distinction between snapshot redemption and liquidity after liquidations. |
+| November 19, 2026 | 2.38 | Initial assessment at block 26,450,218. The score reflects immediate principal write-off, role-handoff and withdrawal-queue powers, and Brain's fee authority. Liquidity is 2.0: BOLD redemption is instant, and BOLD → USDC depth is about $5M within 0.6%. Includes the November 23, 2026 payment of 131,316 BOLD to the sBOLD recovery address. |
