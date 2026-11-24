@@ -639,7 +639,7 @@ The protocol is ~12 months in production with no incidents, but TVL volatility c
 
 ## Reassessment Triggers
 
-- **Time-based**: Reassess in 60 days (per reassessment-scan threshold) or sooner if any of the below trigger
+- **Time-based**: Reassess in 60 days, or sooner if any of the triggers below apply
 - **TVL-based**: Reassess if TVL changes by more than 50% (from current ~$34.7M)
 - **Repository-based**: Track [`Strata-Markets/contracts`](https://github.com/Strata-Markets/contracts), not the frozen original repo; the `feat/multi-strategy-dys` branch would change the srUSDe strategy architecture if merged and deployed
 - **Incident-based**: Reassess after any exploit, governance change, collateral modification, or Ethena incident

@@ -54,7 +54,7 @@ nodes:
   # === Protocol infra ===
   - id: operator
     label: Operator EOA (price setter)
-    address: "0x39878253374355DBcc15C86458F084fb6f2d6DE7"
+    address: "0x739212d5bAfE6AAC8Be49a60B7d003bD41DBf38b"
     category: infra
     note: No timelock; sets traderate0/1, bounded by crossPrice
   - id: morpho-wrapper
@@ -63,9 +63,10 @@ nodes:
     category: infra
     note: Abstract4626MarketWrapper; owner = Timelock
   - id: harvester
-    label: Harvester Safe (MORPHO rewards)
+    label: Harvester Safe 2/8 (MORPHO rewards)
     address: "0x4FF1b9D9ba8558F5EAfCec096318eA0d8b541971"
     category: infra
+    note: Also guardian of the WETH ARM Morpho vault
 
   # === Strategy / external markets ===
   - id: lido-wq
@@ -96,7 +97,7 @@ nodes:
     label: Curve OETH / ARM-WETH-stETH
     address: "0x95753095f15870acc0cb0ed224478ea61aeb0b8e"
     category: dependency
-    note: ~$222K TVL secondary exit venue
+    note: ~14.6 ETH (~$35K) secondary exit venue
 
 # BEGIN GENERATED MORPHO MARKET NODES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
@@ -105,6 +106,11 @@ nodes:
     category: dependency
     link: "https://app.morpho.org/ethereum/market/0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e/"
     note: "Morpho market 0xb8fc70e82bc5bb53e773626fcc6a23f7eefa036918d7ef216ecfb1950a94a85e"
+  - id: morpho-market-37e7484d642d
+    label: "weETH/WETH · 94.5% LLTV"
+    category: dependency
+    link: "https://app.morpho.org/ethereum/market/0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7/"
+    note: "Morpho market 0x37e7484d642d90f14451f1910ba4b7b8e4c3ccdd0ec28f8b2bdb35479e472ba7"
   - id: morpho-market-d0e50cdac92f
     label: "wstETH/WETH · 94.5% LLTV"
     category: dependency
@@ -155,11 +161,11 @@ edges:
   - from: arm
     to: lido-wq
     kind: deposits-into
-    label: ~99% (request → claim 1-3d)
+    label: 52.9% (request → claim 1-3d)
   - from: arm
     to: morpho-wrapper
     kind: allocates-to
-    label: idle WETH buffer
+    label: 38.8% (idle WETH)
   - from: morpho-wrapper
     to: morpho-vault
     kind: deposits-into
@@ -184,15 +190,23 @@ edges:
     to: morpho-vault
     kind: holds-role
     label: "curator"
+  - from: harvester
+    to: morpho-vault
+    kind: holds-role
+    label: "guardian"
 
 # BEGIN GENERATED MORPHO MARKET EDGES
 # Managed by scripts/update_morpho_graph_markets.mjs — do not edit.
   - from: morpho-vault
     to: morpho-market-b8fc70e82bc5
     kind: deposits-into
-    label: "60.5%"
+    label: "89.4%"
+  - from: morpho-vault
+    to: morpho-market-37e7484d642d
+    kind: deposits-into
+    label: "7.5%"
   - from: morpho-vault
     to: morpho-market-d0e50cdac92f
     kind: deposits-into
-    label: "39.4%"
+    label: "2.9%"
 # END GENERATED MORPHO MARKET EDGES

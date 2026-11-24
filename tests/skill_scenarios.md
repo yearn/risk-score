@@ -39,3 +39,18 @@ additional onchain or offchain reserves. Evidence confirms the shortfall.”
 
 Expected: reports 80% coverage and a $20m shortfall; treats the deficit as a risk
 finding instead of assuming more collateral must exist or blocking the report.
+
+## Reassessment eligibility during authoring
+
+Skill: [report generation](../.agents/skills/generating-risk-reports/SKILL.md).
+
+Prompt: “Finish authoring `example-protocol.md`. Supplied Yearn integration
+evidence shows its strategy is approved but currently has zero debt. Also add a
+`yearn-example.md` vault report. A third assessment, `unintegrated.md`, is research
+only and has no approved Yearn integration. Maintain scheduled reassessment scope
+using these supplied facts; do not make network calls.”
+
+Expected: adds only `example-protocol` to the external dependency list, keeps it
+sorted and unique, records the qualifying evidence, and relies on automatic
+discovery for `yearn-example`. Does not schedule `unintegrated` merely because it
+has an assessment.

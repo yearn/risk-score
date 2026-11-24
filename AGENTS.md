@@ -32,6 +32,12 @@ shell commands are relative to the repository root; run commands there.
   value on the correct explorer. This includes bridge-index `detail` strings.
 - Trace indirect loss paths: minting, upgrades, role escalation, oracle control,
   custody, redemption gates, fees, migrations, and dependency failures.
+- Inventory permissioned roles across the assessed fund and control paths.
+  Identify the weakest credible path to a material loss (loss of user-deposited
+  collateral or main asset), including direct fund-moving authority and
+  indirect control through role grants or upgrades.
+  State the holder, action, enforceable limits, delay, and funds at risk; mark
+  incomplete enumeration or unverifiable exposure `TODO`.
 
 ## Report and graph authoring workflow
 
@@ -39,8 +45,11 @@ shell commands are relative to the repository root; run commands there.
   or merge `origin/master` into the existing report branch, including in worktrees.
   Preserve uncommitted work and resolve merge conflicts before editing the report.
 - Read an existing report end-to-end before editing it. Keep report work within
-  `reports/`, plus `src/data/bridges.json` for bridge dependency changes.
-- New reports require `reports/graph/<slug>.yaml`; keep companion artifacts consistent.
+  `reports/`, plus `src/data/bridges.json` for bridge dependency changes and
+  `scripts/dependencies/` for the protocol dependency entry.
+- New reports require `reports/graph/<slug>.yaml` and a `scripts/dependencies/protocols.yaml`
+  entry with a `report:` field, mirrored in `scripts/dependencies/fetch_protocols.py`;
+  keep companion artifacts consistent.
 - Run the [validation](#validation) appropriate to the changed files. When the
   requested authoring task is ready, open a draft PR with a concise summary,
   validation results, and unresolved facts. Review-only tasks return findings.
@@ -56,6 +65,7 @@ npm test            # run after code, validator, or agent-configuration changes
 npm run check-graphs    # strict graph warnings
 npm run check-bridges   # strict bridge-mention coverage
 uv run scripts/check_defillama_links.py <files>
+uv run scripts/check_dependency_coverage.py  # reports ↔ protocols.yaml sync
 ```
 
 Resolve warnings introduced by the change; report unrelated existing failures

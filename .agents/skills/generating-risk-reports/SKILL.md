@@ -5,6 +5,13 @@ description: Procedure for producing a new or substantially updated Yearn risk a
 
 # Generating risk assessment reports
 
+## Contents
+
+- [Investigation](#investigation)
+- [Negative claims and liquidity](#negative-claims-and-liquidity)
+- [Tools and completion](#tools-and-completion)
+- [Source-fetching recipes](references/fetching-sources.md)
+
 Follow [AGENTS.md](../../../AGENTS.md). The [scoring framework](../../../reports/README.md) and
 [template](../../../reports/TEMPLATE.md) define the output and scoring rules.
 Create `reports/report/<slug>.md`.
@@ -23,11 +30,15 @@ Create `reports/report/<slug>.md`.
    custody locations, actual undercollateralization, or unavailable offchain
    evidence: establish which, or mark the gap `TODO`. Do not assume all deficits
    are undiscovered collateral.
-3. **Enumerate mint authority and control.** Follow
-   [onchain verification](../verifying-onchain-data/SKILL.md). Trace every mint
-   entrypoint and caller-side restriction, including who can grant roles or
-   upgrade implementations. Explain mint/redemption backing requirements and atomicity.
-   Apply the [multisig standard](../verifying-onchain-data/references/governance.md).
+3. **Enumerate permissions and control.** Follow
+   [onchain verification](../verifying-onchain-data/SKILL.md) across the full
+   assessed fund and control paths. Trace every mint entrypoint and caller-side
+   restriction, including who can grant roles or upgrade implementations.
+   Explain mint/redemption backing requirements and atomicity. Apply the
+   [multisig standard](../verifying-onchain-data/references/governance.md).
+   Complete the template's Critical Permission Paths and Weakest Link section;
+   do not bury a fund-moving EOA or low-threshold Safe in a generic governance
+   description.
 4. **Investigate cross-chain exposure** using the
    [bridge skill](../assessing-bridge-dependencies/SKILL.md) when the asset or
    its underlying dependencies cross chains.
@@ -63,3 +74,13 @@ Read [source-fetching recipes](references/fetching-sources.md) only when a linke
 Google Doc, Notion page, or GitBook page cannot be retrieved normally.
 
 Create or update the [dependency graph](../generating-dependency-graphs/SKILL.md).
+
+Check [scheduled reassessment eligibility](../../../reports/README.md#scheduled-reassessment).
+Yearn asset reports named `yearn-*.md` are included automatically. For an external
+protocol/asset used by Yearn, including collateral and approved but unfunded
+integrations, add its slug to [reassessment.json](../../../reports/reassessment.json)
+in sorted order. Record the qualifying Yearn use and supporting evidence in the
+report or PR. A requested or completed assessment alone does not qualify; mark
+unclear usage `TODO` rather than assuming approval. When updating a Yearn vault's
+allocations, check eligibility of its added and removed dependencies too; retain
+an external slug while any other qualifying Yearn use remains.
