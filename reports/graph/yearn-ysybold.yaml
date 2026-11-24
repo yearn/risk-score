@@ -1,0 +1,343 @@
+slug: yearn-ysybold
+title: ysyBOLD — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault
+  - id: strategy
+    label: Strategy
+  - id: governance
+    label: Governance / Multisig
+  - id: infra
+    label: Yearn Infra / Bot
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # Vault layer
+  - id: ysybold
+    label: ysyBOLD (Staked yBOLD)
+    address: "0x23346B04a7f55b8760E5860AA5A77383D63491cD"
+    category: vault
+    note: TokenizedStrategy v3.0.4 holding yBOLD. Configured recipient of yBOLD fees at the snapshot, with a 3-day profit unlock and 10% performance fee.
+  - id: ybold
+    label: yBOLD (Yearn BOLD vault)
+    address: "0x9F4330700a36B29952869fac9b33f45EEdd8A3d8"
+    category: vault
+    note: Yearn V3 vault v3.0.4. Stored PPS was 1.0 BOLD at the snapshot. OnLossDepositLimit blocks new deposits when stored PPS falls below 1.0.
+  - id: ybold-accountant
+    label: yBOLD Accountant (100% perf fee)
+    address: "0x53acEBB9470Cfc9D231075154f5dcF1586A4c6fa"
+    category: infra
+    note: Brain can redirect accrued fees and future yield without a delay. Recipient was ysyBOLD at the snapshot. Gains first cover any shortfall to 1 BOLD per share.
+  - id: on-loss-limit
+    label: OnLossDepositLimit
+    address: "0x746C238E34a6dBFE1d35d50471467Bd7Bf898f62"
+    category: infra
+    note: yBOLD deposit limit module. Returns 0 when stored yBOLD PPS is below 1e18. Applies to vault deposits.
+  - id: yearn-accountant
+    label: Yearn Accountant (ysyBOLD fees)
+    address: "0x5A74Cb32D36f2f517DB6f7b0A0591e09b22cDE69"
+    category: infra
+
+  # Strategies
+  - id: strat-wsteth
+    label: Liquity V2 wstETH SP (45.5%)
+    address: "0x3589b93CaDb464b6E1974Cc9fc0c9be698Ee49a5"
+    category: strategy
+    note: Deposits are allowlisted and yBOLD owns all shares at the snapshot. Loss limit and profit unlock are both zero. Collateral is sold through a dedicated Dutch auction.
+  - id: strat-weth
+    label: Liquity V2 WETH SP (30.3%)
+    address: "0xc5e7D3F76a03006540f17668A0267C668FFb5b75"
+    category: strategy
+    note: Deposits are allowlisted and yBOLD owns all shares at the snapshot. Loss limit and profit unlock are both zero. Collateral is sold through a dedicated Dutch auction.
+  - id: strat-reth
+    label: Liquity V2 rETH SP (24.2%)
+    address: "0x6ED566B76838A08d04cBd6323231B08a2eC69005"
+    category: strategy
+    note: Deposits are allowlisted and yBOLD owns all shares at the snapshot. Loss limit and profit unlock are both zero. Collateral is sold through a dedicated Dutch auction.
+
+  # Auctions
+  - id: auction-wsteth
+    label: wstETH → BOLD Auction
+    address: "0x64e8050D33BB296d48FE8eb08d09F00633e45CcA"
+    category: infra
+    note: Auction v1.0.4 minimal proxy. governanceOnlyKick with governance = strategy; floor 95% of Liquity oracle; anyone can take.
+  - id: auction-weth
+    label: WETH → BOLD Auction
+    address: "0x61C9e1113661C991fb6377B3610804476Dcd9381"
+    category: infra
+    note: Auction v1.0.4 minimal proxy. governanceOnlyKick with governance = strategy; floor 95% of Liquity oracle; anyone can take.
+  - id: auction-reth
+    label: rETH → BOLD Auction
+    address: "0x3793405FBcE404f351e76fa115209488aC0e8091"
+    category: infra
+    note: Auction v1.0.4 minimal proxy. governanceOnlyKick with governance = strategy; floor 95% of Liquity oracle; anyone can take.
+
+  # External dependencies
+  - id: sp-wsteth
+    label: Liquity V2 wstETH Stability Pool
+    address: "0x9502b7c397E9aa22FE9dB7EF7DAF21cD2AEBe56B"
+    category: dependency
+    note: yBOLD holds ~52.7% of pool BOLD at the November 19, 2026 snapshot.
+  - id: sp-weth
+    label: Liquity V2 WETH Stability Pool
+    address: "0x5721cbbd64fc7Ae3Ef44A0A3F9a790A9264Cf9BF"
+    category: dependency
+    note: yBOLD holds ~39.4% of pool BOLD at the November 19, 2026 snapshot.
+  - id: sp-reth
+    label: Liquity V2 rETH Stability Pool
+    address: "0xd442E41019B7F5C4dD78F50dc03726C446148695"
+    category: dependency
+    note: yBOLD holds ~68.5% of pool BOLD at the November 19, 2026 snapshot.
+  - id: bold
+    label: BOLD (Liquity V2)
+    address: "0x6440f144b7e50D6a8439336510312d2F54beB01D"
+    category: dependency
+    link: "https://docs.liquity.org/v2-documentation/technical-docs-and-audits"
+  - id: liquity-oracles
+    label: Liquity V2 price feeds (WETH/wstETH/rETH)
+    address: "0xCC5F8102eb670c89a4a3c567C13851260303c24F"
+    category: dependency
+    note: Chainlink-based PriceFeeds. WETH 0xCC5F8102eb670c89a4a3c567C13851260303c24F, wstETH 0xe7Aa2Ba9E086A379d3beb224098bC634a46e314E, rETH 0x34F1E9c7dcc279ec70d3c4488EB2D80FBa8B7b2B. Used only for auction floor and starting price.
+
+  # Governance
+  - id: daddy
+    label: Daddy / ySafe (6-of-9)
+    address: "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"
+    category: governance
+    note: Directly holds FORCE_REVOKE_MANAGER and WITHDRAW_LIMIT_MANAGER. Can accept yBOLD role administration after a handoff initiated by Brain.
+  - id: brain
+    label: Brain (3-of-6)
+    address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
+    category: governance
+    note: Manages ysyBOLD and all three strategies. Can redirect Accountant fees, initiate a role-manager handoff to ySafe, and use QUEUE_MANAGER to force an empty yBOLD withdrawal queue that blocks BOLD redemptions while idle is zero. These powers have no delay.
+  - id: security
+    label: Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+  - id: timelock
+    label: Strategy Manager (7-day Timelock)
+    address: "0x88Ba032be87d5EF1fbE87336b7090767F367BF73"
+    category: governance
+  - id: role-manager
+    label: Yearn V3 Role Manager
+    address: "0xb3bd6B2E61753C311EFbCF0111f75D29706D9a41"
+    category: governance
+    note: Governed by the Timelock. Brain can initiate transfer of the vault's role administration to the fixed chad address, ySafe, without a delay.
+  - id: borg-guard
+    label: ySafe BORG Guard
+    address: "0xe1c90a1f8a9553b31110dd6feead76e79a6ed419"
+    category: governance
+    note: Blacklist mode at the snapshot, with no policy entry for yBOLD or its Role Manager.
+
+  # Bots
+  - id: keeper
+    label: Keeper (yHaaSRelayer)
+    address: "0x604e586F17cE106B64185A7a0d2c1Da5bAce711E"
+    category: infra
+  - id: debt-allocator
+    label: Debt Allocator
+    address: "0x1e9eB053228B1156831759401dE0E115356b8671"
+    category: infra
+
+edges:
+  # Capital flow
+  - from: ysybold
+    to: ybold
+    kind: deposits-into
+    label: "holds 97.3% of yBOLD"
+  - from: ybold
+    to: strat-wsteth
+    kind: allocates-to
+    label: "45.5%"
+  - from: ybold
+    to: strat-weth
+    kind: allocates-to
+    label: "30.3%"
+  - from: ybold
+    to: strat-reth
+    kind: allocates-to
+    label: "24.2%"
+  - from: strat-wsteth
+    to: sp-wsteth
+    kind: deposits-into
+    label: "3.46M BOLD"
+  - from: strat-weth
+    to: sp-weth
+    kind: deposits-into
+    label: "2.31M BOLD"
+  - from: strat-reth
+    to: sp-reth
+    kind: deposits-into
+    label: "1.85M BOLD"
+  - from: strat-wsteth
+    to: auction-wsteth
+    kind: routes-through
+    label: "liquidation collateral → BOLD"
+  - from: strat-weth
+    to: auction-weth
+    kind: routes-through
+    label: "liquidation collateral → BOLD"
+  - from: strat-reth
+    to: auction-reth
+    kind: routes-through
+    label: "liquidation collateral → BOLD"
+  - from: sp-wsteth
+    to: bold
+    kind: routes-through
+  - from: sp-weth
+    to: bold
+    kind: routes-through
+  - from: sp-reth
+    to: bold
+    kind: routes-through
+  - from: auction-wsteth
+    to: liquity-oracles
+    kind: routes-through
+    label: "floor / start price"
+  - from: auction-weth
+    to: liquity-oracles
+    kind: routes-through
+    label: "floor / start price"
+  - from: auction-reth
+    to: liquity-oracles
+    kind: routes-through
+    label: "floor / start price"
+
+  # Fees
+  - from: ybold
+    to: ybold-accountant
+    kind: routes-fees-to
+    label: "100% of gains above shortfall to par"
+  - from: ybold-accountant
+    to: ysybold
+    kind: routes-fees-to
+    label: "feeRecipient at snapshot"
+  - from: ysybold
+    to: yearn-accountant
+    kind: routes-fees-to
+    label: "10% performance fee"
+  - from: on-loss-limit
+    to: ybold
+    kind: controls
+    label: "deposit_limit_module"
+
+  # Auction control
+  - from: strat-wsteth
+    to: auction-wsteth
+    kind: controls
+    label: "governance (only kicker)"
+  - from: strat-weth
+    to: auction-weth
+    kind: controls
+    label: "governance (only kicker)"
+  - from: strat-reth
+    to: auction-reth
+    kind: controls
+    label: "governance (only kicker)"
+
+  # Governance roles on yBOLD
+  - from: role-manager
+    to: ybold
+    kind: manages
+    label: "vault role administration"
+  - from: timelock
+    to: role-manager
+    kind: controls
+    label: "governance"
+  - from: brain
+    to: role-manager
+    kind: holds-role
+    label: "initiates role handoff to ySafe without delay"
+  - from: daddy
+    to: role-manager
+    kind: holds-role
+    label: "chad, can accept vault role administration"
+  - from: borg-guard
+    to: daddy
+    kind: controls
+    label: "Safe transaction guard"
+  - from: daddy
+    to: ybold
+    kind: holds-role
+    label: "0x3FF6 includes FORCE_REVOKE / WITHDRAW_LIMIT / QUEUE"
+  - from: brain
+    to: ybold
+    kind: holds-role
+    label: "0x3972 includes QUEUE / DEBT / DEPOSIT_LIMIT / EMERGENCY"
+  - from: security
+    to: ybold
+    kind: holds-role
+    label: "DEBT / MAX_DEBT / EMERGENCY"
+  - from: timelock
+    to: ybold
+    kind: holds-role
+    label: "ADD_STRATEGY / ACCOUNTANT / MAX_DEBT (7d)"
+  - from: keeper
+    to: ybold
+    kind: holds-role
+    label: "REPORTING"
+  - from: debt-allocator
+    to: ybold
+    kind: holds-role
+    label: "REPORTING + DEBT_MANAGER"
+  - from: daddy
+    to: timelock
+    kind: proposes-on
+    label: "PROPOSER + EXECUTOR"
+  - from: brain
+    to: timelock
+    kind: cancels-on
+    label: "CANCELLER"
+
+  # Strategy / staker / accountant management
+  - from: brain
+    to: ysybold
+    kind: holds-role
+    label: "management + emergencyAdmin"
+  - from: brain
+    to: strat-wsteth
+    kind: holds-role
+    label: "management"
+  - from: brain
+    to: strat-weth
+    kind: holds-role
+    label: "management"
+  - from: brain
+    to: strat-reth
+    kind: holds-role
+    label: "management"
+  - from: brain
+    to: ybold-accountant
+    kind: holds-role
+    label: "feeManager"
+  - from: security
+    to: strat-wsteth
+    kind: holds-role
+    label: "emergencyAdmin"
+  - from: security
+    to: strat-weth
+    kind: holds-role
+    label: "emergencyAdmin"
+  - from: security
+    to: strat-reth
+    kind: holds-role
+    label: "emergencyAdmin"
+  - from: keeper
+    to: ysybold
+    kind: holds-role
+    label: "keeper (report)"
+  - from: keeper
+    to: strat-wsteth
+    kind: holds-role
+    label: "keeper (report / tend)"
+  - from: keeper
+    to: strat-weth
+    kind: holds-role
+    label: "keeper (report / tend)"
+  - from: keeper
+    to: strat-reth
+    kind: holds-role
+    label: "keeper (report / tend)"
