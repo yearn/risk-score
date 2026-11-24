@@ -76,7 +76,7 @@ The smart contract architecture involves: PrincipalToken, YieldToken, AMBeacon, 
 
 **Security Incidents:**
 
-1. **Router Exploit (July 23, 2024):** 168 ETH (~$73K) lost. Arbitrary call vulnerability in the `execute` function's `_dispatch` handler allowed an attacker to drain tokens approved to the router via the `KYBER_SWAP` command type. 4 wallets affected. **Core protocol was unaffected** — only the router contract had the vulnerability. [Post-mortem published](https://mirror.xyz/spectraprotocol.eth/7Y1L_0y8CxA5rkneK5DAUelhb8v3GLEeGbEX39y9790).
+1. **Router Exploit (July 23, 2024):** 168 ETH (~$73K) lost. Arbitrary call vulnerability in the `execute` function's `_dispatch` handler allowed an attacker to drain tokens approved to the router via the `KYBER_SWAP` command type. 4 wallets affected. **Core protocol was unaffected** — only the router contract had the vulnerability. [Post-mortem published](https://paragraph.com/@spectraprotocol/23-july-2024-incident-post-mortem).
 
 2. **APWine Critical Delegation Bug (pre-rebrand):** Discovered by whitehat `setuid0` via Immunefi before exploitation. Incorrect check in PT `beforeTokenTransfer` allowed bypassing delegation amount checks when burning tokens (since `to == address(0)`). Could have enabled yield theft after ~6 months. **$100,000 bounty paid**. Patched before any exploitation.
 
@@ -477,7 +477,7 @@ Governance uses **Zodiac contracts** attached to a **Gnosis SAFE multisig** with
 
 ### Curator Whitelisted Operations
 
-Curators execute via `execTransactionWithRole` through the Zodiac Roles module ([source](https://curator.docs.spectra.finance/technical/whitelisted-actions)):
+Curators execute via `execTransactionWithRole` through the Zodiac Roles module ([source](https://dev.spectra.finance/docs/metavaults/access-control-and-roles)):
 
 **Immediate actions:**
 - Token approvals (only to approved contracts)
