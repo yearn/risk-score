@@ -367,6 +367,29 @@
           "owner": "Adapter owner: Paxos Operations MPC wallet [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B)."
         },
         {
+          "slug": "paxos-usdg",
+          "name": "Paxos USDG",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "USDG0 OFTWrapper lock adapter (Paxos Labs) — Ethereum ↔ HyperEVM/Hyperliquid",
+          "detail": "Upgradeable `OFTWrapper` [`0xa755…6A65`](https://etherscan.io/address/0xa755782A71Bb7ae05cE9B74646ddb52206b96A65) escrows **917,644.75 USDG** (2026-11-24, block 26,481,596) backing `USDG0` [`0x9522…1505`](https://hyperevmscan.io/address/0x9522133c663ba8C2a8A7b4F63Dd2aC8DccCe1505) on HyperEVM. It is not a USDG supply controller, so it can release escrow but cannot mint canonical USDG. On HyperEVM the same address is USDG0's only supply controller.",
+          "icon": "stablecoin:global-dollar",
+          "security": {
+            "label": "3-of-3",
+            "confirmations": 1,
+            "providers": [
+              "Deutsche Telekom",
+              "LayerZero Labs",
+              "Nethermind"
+            ],
+            "route": "HyperEVM→Ethereum (escrow-release side)",
+            "weak": false,
+            "verifiedAt": "2026-11-24",
+            "link": "https://etherscan.io/address/0xa755782A71Bb7ae05cE9B74646ddb52206b96A65"
+          },
+          "owner": "Adapter owner, proxy-admin owner, and LayerZero delegate: OneSig [`0xD3f6…697d`](https://etherscan.io/address/0xD3f64a0018F3eEC5CFf4D2e7e0BD1626Baeb697d) (3-of-5), no timelock."
+        },
+        {
           "slug": "re-reusd",
           "name": "Re (reUSD)",
           "kind": "direct",
@@ -654,7 +677,7 @@
       "url": "https://etherscan.io/address/0x40D16A860e295fb4E096Cdb5e99C32721194add4",
       "finality": "TODO: no public documentation; a mint requires one witness signature over the source-chain burn receipt and one attestor signature with an expiry (verified source), but source-chain finality rules are offchain.",
       "admin": "ERC1967 proxy whose `owner()`/`defaultAdmin()` is a 24h TimelockController [`0xDd05…7683`](https://etherscan.io/address/0xDd05D7769C622Ab60Aed26318B2a5b0308b77683); the Paxos Operations MPC wallet [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) is that timelock's sole proposer, executor, and canceller, and holds `PAUSE_ROLE` on the bridge.",
-      "description": "Paxos-deployed `CrossChainBridgeMessenger` (\"PATH\") registered on October 2, 2026 as a USDG supply controller, independent of LayerZero. Mints are authorized by one witness and one attestor signature from two distinct keys rather than a third-party verifier network. Its implementation is source-verified, but no audit is public and it is not listed in the Paxos bug bounty scope. It carries USDG, PYUSD, and PAXG; USDG routes to six PATH chains (ids 2, 4, 5, 7, 8, 9) whose names are undisclosed. Live since October 21, 2026.",
+      "description": "Paxos-deployed `CrossChainBridgeMessenger` (\"PATH\") registered on October 2, 2026 as a USDG supply controller, independent of LayerZero. Mints are authorized by one witness and one attestor signature from two distinct keys rather than a third-party verifier network. Its implementation is source-verified, but no audit is public and it is not listed in the Paxos bug bounty scope. It carries USDG, PYUSD, and PAXG; USDG routes to Arbitrum (PATH 2), Ink (4), X Layer (5), Solana (7), Robinhood Chain (8), and Mantle (9). The remote messengers are administered by the Paxos MPC wallet directly (Solana: keypair `2apB…YJjk`), with no timelock on upgrades. Live since October 21, 2026.",
       "keywords": [
         "attestor bridge"
       ],
@@ -665,7 +688,7 @@
           "name": "Paxos USDG",
           "kind": "direct",
           "model": "mint",
-          "integration": "Paxos attestor bridge (SC5) — Ethereum ↔ six undisclosed PATH chains",
+          "integration": "Paxos attestor bridge (SC5) — Ethereum ↔ Arbitrum, Ink, X Layer, Solana, Robinhood Chain, Mantle",
           "detail": "Proxy [`0x40D1…add4`](https://etherscan.io/address/0x40D16A860e295fb4E096Cdb5e99C32721194add4) is Supply Controller SC5 with `allowAnyMintAndBurnAddress = true`. Its SupplyControl bucket is **300M USDG**, refilling at 3,472.2 USDG/sec, so it can mint a 300M burst and up to ~600M in any 24 hours to any address. The MPC wallet raised it from 100M directly on November 6, 2026 ([tx](https://etherscan.io/tx/0xabf73ad16bf27f2c51cbce7cef1de1630c6d5a674bf01e9095c4034ddacc968d)). Implementation [`0xb9de…362f`](https://etherscan.io/address/0xb9de5840469185bc07c217077685fa1eec7b362f#code) is source-verified. `completeSend` requires a signature from the single `WITNESS_ROLE` holder [`0x800a…8025`](https://etherscan.io/address/0x800ac3242a6bacfca4b510be2cc6a156f9c28025) and the single `ATTESTOR_ROLE` holder [`0x531f…bfea`](https://etherscan.io/address/0x531f8a5df301199c1a307fdf0353335f0295bfea), both fresh EOAs; the roles are mutually exclusive. Each USDG source route has a 100M inbound bucket. Added directly by the MPC wallet via `SUPPLY_CONTROLLER_MANAGER_ROLE` with no timelock ([tx](https://etherscan.io/tx/0xd36764fe139d60bcdfae02a3b394c2d557ba3d040a81912fcf47497ca35b2fd6)). By 2026-11-24 it had minted 25.35M and burned 54.50M USDG on Ethereum.",
           "icon": "stablecoin:global-dollar",
           "owner": "Admin: 24h TimelockController [`0xDd05…7683`](https://etherscan.io/address/0xDd05D7769C622Ab60Aed26318B2a5b0308b77683) (MPC wallet [`0x3Af3…024B`](https://etherscan.io/address/0x3Af3e85f4f97De7AD0f000B724Fb77fE5ffc024B) sole proposer/executor/canceller)."

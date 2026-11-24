@@ -71,9 +71,10 @@ nodes:
       Implementation 0xb9de…362f (CrossChainBridgeMessenger) is
       source-verified but unaudited. 300M USDG burst, ~600M max per 24h,
       allowAnyMintAndBurnAddress = true. A mint needs one WITNESS and one
-      ATTESTOR EOA signature (roles mutually exclusive). USDG routes to six
-      PATH chains (ids 2, 4, 5, 7, 8, 9; names undisclosed), 100M inbound
-      bucket each. Live since Oct 21 2026.
+      ATTESTOR EOA signature (roles mutually exclusive). USDG routes to
+      Arbitrum, Ink, X Layer, Solana, Robinhood Chain, Mantle (100M inbound
+      bucket each); remote messengers are admin'd by the MPC wallet (Solana:
+      keypair 2apB) with no timelock. Live since Oct 21 2026.
   - id: facets
     label: Token Facets (5 contracts, 118 selectors)
     address: "0x77fe0365db15a1ec05833b7c1802d68356a363df"
