@@ -371,7 +371,7 @@
           "kind": "direct",
           "model": "mint",
           "integration": "LayerZero OFT (ReMintBurnAdapter)",
-          "detail": "ReMintBurnAdapter holds a live cross-chain mint path on reUSD; active on Avalanche, Arbitrum, Base, BNB; 2.5M/24h rate limit",
+          "detail": "The Ethereum [ReMintBurnAdapter](https://etherscan.io/address/0x2BB4046022B9161f3F84Ad8E35cac1d5946e0e85#readContract) has configured peers for Avalanche, Arbitrum, Base and BNB Chain. At [block 26,482,155](https://etherscan.io/block/26482155), the adapter is paused and its [mint handler](https://etherscan.io/address/0x0DfB42aA18CEed719617CD554304f6CA412a6B18#code) lacks reUSD's MINTER_ROLE, so the configured route cannot currently mint native Ethereum reUSD.",
           "security": {
             "label": "2-of-2",
             "confirmations": 20,
@@ -524,6 +524,32 @@
             "link": "https://etherscan.io/address/0x98020c586807681b577f5ee0a6444d4c22f0f45a"
           },
           "owner": "Adapter owner and ProxyAdmin owner: 48h Timelock [`0xb2A3…B706`](https://etherscan.io/address/0xb2A3CF69C97AFD4dE7882E5fEE120e4efC77B706); LayerZero endpoint delegate: 24h Reserve Timelock [`0x90de…aff4`](https://etherscan.io/address/0x90de209907c5a4BF527A75fC16aBD639c77aaff4). Plasma OFT owner: Plasma 48h timelock [`0xa62b…96ce`](https://plasmascan.to/address/0xa62b204099277762d1669d283732dcc1b3aa96ce)."
+        },
+        {
+          "slug": "tangent-susg",
+          "name": "Tangent sUSG (fxUSD collateral)",
+          "kind": "indirect",
+          "model": "lock",
+          "integration": "fxUSD collateral via the LayerZero V2 OFT Adapter",
+          "detail": "Two Tangent markets with 802,286 USG of debt (30.2%) use FXN LP collateral containing fxUSD. The Ethereum [fxUSD adapter](https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438#readContract) escrows 39,678 fxUSD (0.20% of Ethereum fxUSD supply) for the [Base OFT](https://basescan.org/address/0x55380fe7A1910fF29A47B622057ab4139DA42C5). The bridge can release escrowed fxUSD. A loss of escrow could affect the fxUSD price and Tangent's backing.",
+          "security": {
+            "label": "4-of-6",
+            "confirmations": 20,
+            "providers": [
+              "LayerZero Labs",
+              "Twinstake",
+              "Google",
+              "Horizen",
+              "Polyhedra zkBridge",
+              "Canary"
+            ],
+            "route": "Base→Ethereum (escrow release)",
+            "note": "LayerZero Labs, Twinstake (Nethermind DVN address), and Google are required, plus one of Horizen, Polyhedra zkBridge, or Canary.",
+            "weak": false,
+            "verifiedAt": "2026-11-24",
+            "link": "https://etherscan.io/address/0xA07d8cc424421cC2bce0544a65481376f010A438"
+          },
+          "owner": "Ethereum adapter owner and endpoint delegate: 6-of-9 Safe [`0x26B2…7BbF`](https://etherscan.io/address/0x26B2ec4E02ebe2F54583af25b647b1D619e67BbF)."
         },
         {
           "slug": "fluid",

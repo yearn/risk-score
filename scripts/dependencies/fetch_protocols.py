@@ -856,6 +856,40 @@ def ondo_usdy_data() -> dict:
     }
 
 
+def tangent_susg_data() -> dict:
+    """Tangent (sUSG) dependency data from risk assessment report (Nov 2026).
+
+    sUSG is an idle Yearn V3 vault holding USG; USG is a CDP stablecoin minted
+    against Curve LP collateral wrapped in Convex, Stake DAO, and Curve gauges.
+    """
+    return {
+        "name": "Tangent (sUSG)",
+        "chain": "ethereum",
+        "type": "yield_vault",
+        "address": "0xf17d6f98a5c6eaa99d149079984119e0a4ef6900",
+        "report": "reports/report/tangent-susg.md",
+        "collateral": [
+            {"asset": "USG", "address": "0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1"},
+        ],
+        "yield_sources": [
+            {
+                "protocol": "tangent",
+                "assets": ["USG"],
+                "label": "Discretionary weekly USG top-ups from Tangent revenue Safe (USG CDP markets on Curve/Convex/Stake DAO LP collateral)",
+            },
+        ],
+        "infrastructure": [
+            "Yearn V3",
+            "Curve",
+            "Convex",
+            "Stake DAO",
+            "Chainlink",
+            "Redstone",
+            "LayerZero",
+        ],
+    }
+
+
 def saturn_data() -> dict:
     """Saturn (USDat) dependency data from risk assessment report (May 2026)."""
     return {
@@ -955,6 +989,7 @@ def main():
     data["protocols"]["superstate_ustb"] = superstate_ustb_data()
     data["protocols"]["saturn"] = saturn_data()
     data["protocols"]["ondo_usdy"] = ondo_usdy_data()
+    data["protocols"]["tangent_susg"] = tangent_susg_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
