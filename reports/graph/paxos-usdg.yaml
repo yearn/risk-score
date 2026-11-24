@@ -42,7 +42,8 @@ nodes:
       EOA; 1B capacity refilling over 1h. allowAnyMintAndBurnAddress = false,
       but its only whitelisted destination is itself — the single key can
       mint 1B immediately (~25B per 24h) and transfer it anywhere (simulated
-      at block 26,221,465). Key custody model unknown.
+      at block 26,481,596). Key custody model unknown. Weakest path to
+      unbacked supply.
   - id: oft-wrapper
     label: OFTWrapper (LayerZero V2)
     address: "0x147BdE4F997f0d4C7544ED0C55eAcf1E5E6bf9c4"
@@ -58,17 +59,21 @@ nodes:
     category: infra
     note: >-
       EOA, added Sep 18 2026 directly by the MPC wallet; 10 USDG cap
-      refilling over 1h, whitelisted to the issuance treasury only. Unused
-      (nonce 0).
+      refilling over 1h, whitelisted to the issuance treasury only. Has not
+      minted USDG.
   - id: sc5-bridge
-    label: SC5 Attestor Bridge (100M burst)
+    label: SC5 Attestor Bridge (300M burst)
     address: "0x40D16A860e295fb4E096Cdb5e99C32721194add4"
     category: infra
     note: >-
-      ERC1967 proxy, added Oct 2 2026 directly by the MPC wallet. Implementation
-      0xb9de…362f is NOT source-verified. 100M USDG burst, ~200M max per 24h,
-      allowAnyMintAndBurnAddress = true. One ATTESTOR and one WITNESS EOA.
-      Registers USDG, PYUSD, PAXG to an undisclosed chain (id 7). Unused so far.
+      ERC1967 proxy, added Oct 2 2026 directly by the MPC wallet; capacity
+      raised 100M → 300M directly by the MPC wallet on Nov 6 2026.
+      Implementation 0xb9de…362f (CrossChainBridgeMessenger) is
+      source-verified but unaudited. 300M USDG burst, ~600M max per 24h,
+      allowAnyMintAndBurnAddress = true. A mint needs one WITNESS and one
+      ATTESTOR EOA signature (roles mutually exclusive). USDG routes to six
+      PATH chains (ids 2, 4, 5, 7, 8, 9; names undisclosed), 100M inbound
+      bucket each. Live since Oct 21 2026.
   - id: facets
     label: Token Facets (5 contracts, 118 selectors)
     address: "0x77fe0365db15a1ec05833b7c1802d68356a363df"
@@ -129,8 +134,8 @@ nodes:
     address: "0x264bd8291fae1d75db2c5f573b07faa6715997b5"
     category: infra
     note: >-
-      SC1's and SC4's only permitted mint destination (11.5M USDG held). Also
-      the MPC gas funder — nonce 6.26M+, just-in-time ETH, services 62+ EOAs.
+      SC1's and SC4's only permitted mint destination (5.9M USDG held). Also
+      the MPC gas funder — nonce 6.48M+, just-in-time ETH, services 62+ EOAs.
 
   # === External dependencies ===
   - id: dep-paxos-custody
@@ -225,7 +230,7 @@ edges:
   - from: sc5-bridge
     to: usdg
     kind: mints
-    label: SUPPLY_CONTROLLER (100M burst, ~200M/24h; attestor bridge; any dest; unverified source)
+    label: SUPPLY_CONTROLLER (300M burst, ~600M/24h; attestor bridge; any dest; unaudited)
 
   # === Supply controller registry ===
   - from: supply-control
