@@ -89,7 +89,15 @@ Both strategies were added on September 18, 2026 and sit in the default queue (`
 - **Yearn V3:** the vault and TokenizedStrategy framework are covered by Yearn's V3 audits (ChainSecurity, yAcademy, Statemind; see [yvUSDC-1](./yearn-yvusdc.md#yearn-v3-core-audits)). The vault runs v3.1.0, a later release than the v3.0.2 audited by Statemind.
 - **Flex:** six published reviews, including two Dedaub audits; the August 2026 Dedaub review of the deployed v1.1 code found no Critical, High, Medium or Low issues ([Flex report](./flex.md#audits-and-due-diligence-disclosures)). The `FlexLenderStrategy` and the yvWETH-2 market's `morpho_oracle.vy` wrapper are in the reviewed code.
 - **yvWETH-2 strategies:** Yearn V3 strategies (Spark lender-borrower, LST Aave looper, Lido accumulator) under Yearn's internal review process. No strategy-specific external audit is published in [yearn-security](https://github.com/yearn/yearn-security/tree/master/audits).
-- **Bug bounty:** Yearn's [Immunefi program](https://immunefi.com/bug-bounty/yearnfinance/scope/) ($200K max) lists the v3.0.4 Vault Factory and TokenizedStrategy among its assets; the v3.1.0 factory that deployed this vault, the Flex strategy and Flex's contracts were not among the listed assets checked. Flex has no bug bounty.
+
+### Bug Bounty
+
+- **Yearn — [Immunefi](https://immunefi.com/bug-bounty/yearnfinance/scope/)** (live since July 2021, max payout $200K). Its assets include the Vault V3.1.0 implementation ([`0xdD3FA86409658d207A9BE0141eE560C8db557824`](https://etherscan.io/address/0xdD3FA86409658d207A9BE0141eE560C8db557824)) behind this vault, the [V3.1.0 Vault Factory](https://etherscan.io/address/0x310aC28ACF5E514abDbFF9Ab25e21f1bfe22bcAC) that deployed it and TokenizedStrategy V3.1.0 ([`0x310f5Db015E9d6E542fd41bd4542640790791e76`](https://etherscan.io/address/0x310f5Db015E9d6E542fd41bd4542640790791e76)), all added June 23, 2026; the v3.0.4 Vault Factory and TokenizedStrategy are listed as well. Yearn also runs a [Sherlock bug bounty](https://audits.sherlock.xyz/bug-bounties/30).
+- **Flex — [Mantis](https://mantis.inverse.finance/orgs/flex/bounties/flex)**, published November 18, 2026 (after this report's snapshot; read from Mantis's public [bounty API](https://mantis.inverse.finance/api/v1/bounties) on November 25, 2026). Rewards: **critical $20K–$200K, high $5K–$20K** (USD); no medium or low tier.
+  - **Scope:** deployed, Flex-owned code in [flex-contracts](https://github.com/flexmeow/flex-contracts) and [flex-allocator](https://github.com/flexmeow/flex-allocator), "including the allocator strategies and exit router". Flex's [deployment list](https://github.com/flexmeow/flex-allocator/blob/master/script/README.md) names this vault's `FlexLenderStrategy` and the `FlexExitRouter`; the endorsed v1.1 yvWETH-2/WETH Lender and TroveManager are Flex-contracts code.
+  - **Excluded:** Yearn vaults and shared Yearn code (reported to Yearn's programs), third-party price sources such as the Morpho oracle under this market's oracle, findings that depend on an administrator using existing privileges, expected outcomes of liquidations, redemptions, auctions or bad-debt handling, unendorsed markets, pre-v1.1 contracts, undeployed code, and issues acknowledged in Flex's audits.
+  - **Known issue (medium):** a Lender redemption scans at most 1,000 Troves; if they do not cover the request, the Lender still burns all submitted shares while auctioning only the collateral reached. Mantis notes that allocator routes can set a collateral minimum, but the deployed router and strategy used by this vault have none (see *Liquidity Risk*). The market has 8 Troves, so the limit is not reachable today.
+- **SEAL Safe Harbor:** TODO — neither Yearn's nor Flex's adoption was checked against the [Safe Harbor registry](https://safeharbor.securityalliance.org/); the [Flex report](./flex.md) found Flex absent from it.
 
 ## Historical Track Record
 
@@ -131,6 +139,7 @@ yvWETH-2 ([`0xAc37729B76db6438CE62042AE1270ee574CA7571`](https://etherscan.io/ad
 | [wstETH/WETH Spark Looper](https://etherscan.io/address/0x68A14629cb07c74259f481382fE8b6cFD8970121) | 1,041.98 | 26.1% | 6,633.69 wstETH collateral against 7,240.92 WETH debt on Spark: **7.94x leverage** (target 8.0x, max 8.5x), LTV 87.41% vs a 93% liquidation threshold | 1,043.38, but **not in the default queue** (`use_default_queue = true`) |
 | [Spark WETH/USDS (yvUSD) Lender Borrower](https://etherscan.io/address/0x5E8A9Acd00AdCED69b30D36929CbF7D4d4F9AE1F) | 439.48 | 11.0% | 439.97 WETH collateral, 563,896 USDS borrowed and lent into yvUSD. LTV 60.77% vs an 86% liquidation threshold | 439.97 |
 | yvWETH-1 | 1 wei | 0% | — | — |
+| [Morpho Y-WETH Compounder](https://etherscan.io/address/0xd9BA99D93ea94a65b5BC838a0106cA3AbC82Ec4F) | 0 | 0% | Approved and in the default queue with a 10,000 WETH `max_debt`; Brain or the debt allocator can fund it without a timelocked strategy addition | — |
 
 **Consequences for this vault:**
 
@@ -173,6 +182,7 @@ yvWETH-2 ([`0xAc37729B76db6438CE62042AE1270ee574CA7571`](https://etherscan.io/ad
 
 - **Standard redemption: 0 WETH.** `maxWithdraw` for the Recovery Vault returns 0 at the snapshot. The yearn.fi interface's withdraw paths (direct ERC-4626, Enso zap, and two vault-specific zappers in [`yearn/yearn.fi`](https://github.com/yearn/yearn.fi) `main` at [`1e0f1b7`](https://github.com/yearn/yearn.fi/commit/1e0f1b7)) call the vault directly and do not use the router. Flex's own [lend page](https://flexmeow.com/lend/0xfaC55fAFD0b55BFb8dD41F735EfCc195adA9891F/withdraw) does not either: for allocator vaults it calls `withdraw(amount, user, user, maxLoss = 0)` on the vault and caps the amount at `maxWithdraw` (page source read November 10, 2026). **Neither interface can withdraw anything from this vault today**; the router exit is reachable only by calling the contract directly.
 - **Router exit: asynchronous.** `FlexExitRouter.redeem()` sets the exiting holder as the strategy's proceeds receiver. The Lender then redeems the lowest-rate Troves and sells their yvWETH-2 in one-day Dutch auctions starting at 100% of oracle value and floored at 99%; proceeds go to the holder as auctions are taken. The vault books the not-yet-delivered portion as a loss on that withdrawal only, so the caller must pass a high `maxLoss`, and the exiting holder bears execution.
+- **No collateral minimum on the deployed exit path.** The deployed [`FlexExitRouter`](https://etherscan.io/address/0xe8a511403B0C83e7b85513e00Ed39996B48c2aeD#code) exposes `redeem(vault, shares, receiver, maxLoss, strategies)` and the deployed strategy's `forceFreeFunds(_amount, _minOut)` checks only atomically delivered WETH. Neither checks how much collateral the redemption auctioned. Flex's newer `flex-allocator` code adds a per-strategy `_minCollateralOut`, but it is not deployed. The [Mantis bounty](https://mantis.inverse.finance/orgs/flex/bounties/flex) lists the related known issue: a redemption that exhausts the TroveManager's 1,000-Trove scan burns all submitted Lender shares while auctioning less collateral. With 8 Troves this is not reachable today.
 - **Auction takers depend on yvWETH-2 liquidity.** A taker clears near par by redeeming yvWETH-2 for WETH. yvWETH-2's standard queue can pay out ~440 WETH (the WETH/USDS lender-borrower). That covers the market's 348.43 WETH of collateral today, but it is shared with yvWETH-2's other holders, and the accumulator (62.8%) returns a withdraw limit of 0. The looper's 1,043 WETH sits outside the default queue.
 - **Large holder impact.** The Recovery Vault holds 96.8% of shares and the vault is the market's only lender, so a full exit means auctioning essentially all of the market's yvWETH-2 collateral.
 - **Same-value asset:** WETH in, WETH out; the auctioned collateral is WETH-denominated.
@@ -185,6 +195,23 @@ The vault uses the **standard Yearn V3 governance pattern**: immutable vault, Ye
 
 **Flex governance is outside this layer.** Flex's `Daddy` contract is the Lender's `management` and performance-fee recipient and can change its fee, keeper, deposit limit and shutdown, with no timelock; per the Flex team the developer holds two of the three signatures its 3-of-5 Safe requires ([Flex report](./flex.md#governance)). No Yearn role can override it. It cannot seize Lender assets or borrower collateral. The yvWETH-2 market's oracle has no admin switch.
 
+### Critical Permission Paths and Weakest Link
+
+Roles were read at block 26382003 with `roles(address)` on the vault and yvWETH-2, `management()` / `emergencyAdmin()` / `keeper()` on the strategy and Lender, `getThreshold()` on each Safe, and `hasRole` plus a full `RoleGranted` scan (from the timelock's creation block 24242692) on the [TimelockController](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336B7090767F367BF73). Every holder below is a Safe or a contract; no EOA holds a vault, strategy or Lender role. The [`TimelockExecutor`](https://etherscan.io/address/0xF8f60BF9456A6e0141149Db2DD6f02C60da5779B) that holds `EXECUTOR_ROLE` lists only Brain in `getExecutors()`, and the keeper and debt allocator are governed by Brain.
+
+| Capability and target | Current holder / control path | Safeguards | Assets exposed |
+|-----------------------|-------------------------------|------------|----------------|
+| Add a strategy or change the accountant on the vault (`add_strategy`, `set_accountant`) | [Timelock](https://etherscan.io/address/0x88ba032be87d5eF1FbE87336B7090767F367BF73) (bitmask `143`); Daddy is the sole proposer | 7-day delay; Daddy 6-of-9 to propose; Brain can cancel | All 310.31 WETH |
+| Write off a strategy's debt (`force_revoke_strategy`) or reorder/revoke strategies on the vault | [Daddy](https://etherscan.io/address/0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52) (bitmask `16374`) | 6-of-9 Safe; **no timelock** | Debt of the revoked strategy, up to 310.31 WETH booked as loss |
+| Move debt between approved strategies (`update_debt`), set queue, deposit limit, profit unlock | [Brain](https://etherscan.io/address/0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7) (`14706`), [Security](https://etherscan.io/address/0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0) (`8384`), [debt allocator](https://etherscan.io/address/0x1e9eB053228B1156831759401dE0E115356b8671) (`96`, governed by Brain) | 3-of-6 / 4-of-7 Safes; **no timelock**; only the vault's two approved strategies (yvWETH-1 and Flex) | Allocation only; funds stay in Yearn or Flex |
+| Force a Lender redemption (`FlexLenderStrategy.forceFreeFunds(_amount, _minOut)`) | Brain as strategy `management` | 3-of-6 Safe; **no timelock**; `_minOut` covers only atomically delivered WETH, no collateral minimum | Lender position; collateral sold in one-day Dutch auctions floored at 99% of oracle value |
+| Shut down the strategy and `emergencyWithdraw` | Security as strategy `emergencyAdmin`; Brain as `management` | 4-of-7 / 3-of-6 Safe; no minimum on the redemption | Same as above |
+| yvWETH-2 strategy parameters (looper leverage, lender-borrower LTV targets) | Brain as `management` of all three yvWETH-2 strategies | 3-of-6 Safe; no timelock; code caps such as the looper's 8.5x max | yvWETH-2 PPS, which is this market's only collateral price input |
+| Lender fee, keeper, deposit limit, shutdown | Flex [`Daddy`](https://etherscan.io/address/0x4e8341C77c94cCE982AB96d92BB28D69f4638290) contract, owned by the [Flex 3-of-5 Safe](https://etherscan.io/address/0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67) (developer holds two of the three required signatures) | No timelock; `performanceFee` capped by `MAX_FEE() = 5000` (50% of profit); Lender has no `_emergencyWithdraw` ([Flex report](./flex.md#governance)) | Yield only; cannot move principal or collateral |
+| Market oracle and TroveManager parameters | None: immutable EIP-1167 clones; oracle has no admin switch | Code | — |
+
+**Weakest credible path to material loss:** **Brain (3-of-6 Safe, no timelock)**. As strategy `management` it can force a Lender redemption that auctions the market's yvWETH-2 collateral with no collateral minimum, and as `management` of the yvWETH-2 strategies it can push the leverage that sets this market's collateral price. Neither action can send funds to Brain; losses are bounded by the auction floor (99%) and by yvWETH-2's strategy caps, but they would land on this vault as the market's sole lender. Comparably weak: **Daddy (6-of-9)** can instantly `force_revoke_strategy`, writing off the Flex strategy's 310.31 WETH of debt as a vault loss. The **Flex 3-of-5 Safe** is effectively two-party, but its Lender powers are yield-side only. No EOA or Safe below three signers holds a fund-moving, loss-reporting or oracle path, so the total-centralization gate is not triggered.
+
 ### Programmability
 
 - Vault PPS, deposits and withdrawals are onchain and programmatic; reports are keeper-driven.
@@ -195,7 +222,7 @@ The vault uses the **standard Yearn V3 governance pattern**: immutable vault, Ye
 
 | Dependency | Criticality | Notes |
 |---|---|---|
-| **Flex — yvWETH-2/WETH market** | Critical | 100% of debt in one isolated market of a ~6-month-old protocol with untimelocked, effectively two-party governance and no bug bounty. [Flex report](./flex.md) |
+| **Flex — yvWETH-2/WETH market** | Critical | 100% of debt in one isolated market of a ~6-month-old protocol with untimelocked, effectively two-party governance and a week-old bug bounty (Mantis, since November 18, 2026, max $200K). [Flex report](./flex.md) |
 | **yvWETH-2** | Critical | Sole collateral and sole price input (feedless Morpho oracle on its `convertToAssets`). Leveraged, partly illiquid, unassessed |
 | **yvUSD** | High | ~74% of yvWETH-2 lends borrowed USDS into it. [yvUSD report](./yearn-yvusd.md) |
 | **Spark / Lido wstETH** | High | Venue for all three yvWETH-2 strategies; wstETH collateral |
@@ -275,7 +302,7 @@ Existing coverage: Yearn's generic Large Flows and timelock monitors (the vault 
 
 #### Category 1: Audits & Historical Track Record (Weight: 20%)
 
-**Subcategory A: Audits** — Yearn V3 audited by three top firms and Flex reviewed six times, but the vault runs v3.1.0, the yvWETH-2 strategies have no published external audit, and Flex has no bug bounty. → **2**
+**Subcategory A: Audits** — Yearn V3 audited by three top firms and Flex reviewed six times, but the vault runs v3.1.0 and the yvWETH-2 strategies have no published external audit. Yearn (Immunefi) and Flex (Mantis, launched November 18, 2026) bounties each cap at $200K, not above the rubric's >$200K bar. → **2**
 
 **Subcategory B: Historical Track Record** — ~8 weeks in production, ~3.5 weeks at its current ~$655K: the rubric's <3 months row. → **5**
 

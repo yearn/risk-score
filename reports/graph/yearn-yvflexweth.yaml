@@ -67,6 +67,21 @@ nodes:
     address: "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"
     category: governance
     note: Operational vault roles; management on the Flex strategy and all yvWETH-2 strategies.
+  - id: security
+    label: Yearn Security (4-of-7)
+    address: "0xe5e2Baf96198c56380dDD5E992D7d1ADa0e989c0"
+    category: governance
+    note: DEBT_MANAGER, MAX_DEBT and EMERGENCY on the vault (bitmask 8384); emergencyAdmin on the Flex strategy.
+  - id: keeper
+    label: yHaaS Keeper
+    address: "0x604e586F17cE106B64185A7a0d2c1Da5bAce711E"
+    category: governance
+    note: REPORTING on the vault (bitmask 32) and keeper of the Flex strategy; owned by Brain.
+  - id: debt-allocator
+    label: Yearn Debt Allocator
+    address: "0x1e9eB053228B1156831759401dE0E115356b8671"
+    category: governance
+    note: REPORTING and DEBT_MANAGER on the vault (bitmask 96); governed by Brain. Moves deposits from yvWETH-1 to Flex.
   - id: flex-daddy-safe
     label: Flex governance Safe (3-of-5)
     address: "0x687b82dA9753C9db280d4D9aBD7BCAC022Ef3B67"
@@ -125,6 +140,11 @@ edges:
   - { from: brain, to: yvflexweth, kind: holds-role, label: "revoke, queue, debt, deposit limit, emergency" }
   - { from: brain, to: strat-flex, kind: holds-role, label: "management" }
   - { from: role-manager, to: yvweth2, kind: controls, label: "role_manager" }
+  - { from: security, to: yvflexweth, kind: holds-role, label: "debt, max debt, emergency" }
+  - { from: security, to: strat-flex, kind: holds-role, label: "emergencyAdmin" }
+  - { from: keeper, to: yvflexweth, kind: holds-role, label: "REPORTING" }
+  - { from: keeper, to: strat-flex, kind: holds-role, label: "keeper" }
+  - { from: debt-allocator, to: yvflexweth, kind: holds-role, label: "REPORTING + DEBT_MANAGER" }
   - { from: flex-daddy-safe, to: lender, kind: holds-role, label: "via Daddy: management + performanceFeeRecipient" }
 
   - { from: yeth-recovery, to: yvflexweth, kind: deposits-into, label: "96.8% of shares" }
