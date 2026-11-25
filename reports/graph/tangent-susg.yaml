@@ -151,6 +151,11 @@ nodes:
     address: "0xe08c2512F87cF63fb7D2325EDd08aEC7920aC2f6"
     category: governance
     note: ControlTower isPauser and PauserProxy pauser; pause-only
+  - id: emergency-pauser-eoa
+    label: Emergency pauser EOA
+    address: "0x433a2561E1A7c2bE3DA5bD8F853093Fc9e5C0F14"
+    category: governance
+    note: PauserProxy emergencyPauser; pause-only (unpause is owner-only)
 
   # === External dependencies ===
   - id: curve-usg-usdc
@@ -413,6 +418,14 @@ edges:
     to: control-tower
     kind: holds-role
     label: isPauser (pause-only)
+  - from: pauser-eoa
+    to: pauser-proxy
+    kind: holds-role
+    label: pauser (pauseAll only)
+  - from: emergency-pauser-eoa
+    to: pauser-proxy
+    kind: holds-role
+    label: emergencyPauser (pauseAll only)
   - from: pauser-proxy
     to: control-tower
     kind: holds-role
