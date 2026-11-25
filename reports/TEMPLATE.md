@@ -472,6 +472,11 @@ Not Rated: for terminal reports (Status: HACKED / DEAD), set Final Score to
   Use exactly three columns: | Date | Score | Notes |. The Date cell is a
   hyperlink to the PR (e.g. `[July 13, 2026](https://github.com/.../pull/313)`).
   Do not add a separate PR column.
+
+  Keep Notes to at most three short sentences: the main changed facts, then
+  the category score changes (e.g. `Liquidity 2.5 → 3.0; Governance held`).
+  Put supporting detail, addresses, and evidence in the report body and the PR
+  description, not in this table.
 -->
 
 | Date | Score | Notes |

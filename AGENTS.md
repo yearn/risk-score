@@ -45,8 +45,11 @@ shell commands are relative to the repository root; run commands there.
   or merge `origin/master` into the existing report branch, including in worktrees.
   Preserve uncommitted work and resolve merge conflicts before editing the report.
 - Read an existing report end-to-end before editing it. Keep report work within
-  `reports/`, plus `src/data/bridges.json` for bridge dependency changes.
-- New reports require `reports/graph/<slug>.yaml`; keep companion artifacts consistent.
+  `reports/`, plus `src/data/bridges.json` for bridge dependency changes and
+  `scripts/dependencies/` for the protocol dependency entry.
+- New reports require `reports/graph/<slug>.yaml` and a `scripts/dependencies/protocols.yaml`
+  entry with a `report:` field, mirrored in `scripts/dependencies/fetch_protocols.py`;
+  keep companion artifacts consistent.
 - Run the [validation](#validation) appropriate to the changed files. When the
   requested authoring task is ready, open a draft PR with a concise summary,
   validation results, and unresolved facts. Review-only tasks return findings.
@@ -62,6 +65,7 @@ npm test            # run after code, validator, or agent-configuration changes
 npm run check-graphs    # strict graph warnings
 npm run check-bridges   # strict bridge-mention coverage
 uv run scripts/check_defillama_links.py <files>
+uv run scripts/check_dependency_coverage.py  # reports ↔ protocols.yaml sync
 ```
 
 Resolve warnings introduced by the change; report unrelated existing failures

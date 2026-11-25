@@ -443,6 +443,23 @@
             "testing": 5
         }
     },
+    "0x30ed3282c624b25dc2193b2b434842730c2d20be": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 1,
+            "comment": "Monolith SWAN Compounder: stakes SWAN 1:1 in Monolith sSWAN (immutable EIP-1167 clone, no owner, instant withdraw, no fees), sells swanUSD rewards for SWAN via Yearn auction. Principal cannot be moved by Monolith governance; RevenueRouter owner (2-day timelock) can only redirect rewards. Deployed Oct 2026, ~$7M TVL.",
+            "complexity": 1,
+            "externalProtocolAudit": 2,
+            "externalProtocolCentralisation": 2,
+            "externalProtocolLongevity": 5,
+            "externalProtocolTvl": 5,
+            "externalProtocolType": 3,
+            "protocolIntegration": 1,
+            "review": 2,
+            "riskExposure": 1,
+            "testing": 1
+        }
+    },
     "0x310b7ea7475a0b449cfd73be81522f1b88efafaa": {
         "riskLevel": 1,
         "riskScore": {
@@ -1705,6 +1722,23 @@
             "review": 1,
             "riskExposure": 4,
             "testing": 5
+        }
+    },
+    "0xce918671e6d9e56e19c5cbc4dc45655d80c65265": {
+        "riskLevel": 2,
+        "riskScore": {
+            "centralizationRisk": 0,
+            "comment": "",
+            "complexity": 0,
+            "externalProtocolAudit": 0,
+            "externalProtocolCentralisation": 0,
+            "externalProtocolLongevity": 0,
+            "externalProtocolTvl": 0,
+            "externalProtocolType": 0,
+            "protocolIntegration": 0,
+            "review": 0,
+            "riskExposure": 0,
+            "testing": 0
         }
     },
     "0xd2efb90c569ebd5b83d5cfb8632322edfac203a5": {
