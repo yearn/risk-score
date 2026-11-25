@@ -1,0 +1,1375 @@
+{
+  "snapshot": {
+    "chainId": 1,
+    "blockNumber": 26294115,
+    "blockHash": "0xb912715c1f481f0ad114b21777b3f988f99d0a7dd0cf13d395aab282d4645e1c",
+    "timestamp": "2026-10-28T22:06:59Z"
+  },
+  "verifiedAt": "2026-11-06T04:43:28.518332+00:00",
+  "scope": "Targeted corrections to PR #567; Ethereum permissions at the original snapshot. This does not reproduce the mixed-date multi-chain reserve reconciliation.",
+  "sources": [
+    {
+      "address": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "name": "TransparentUpgradeableProxy",
+      "url": "https://etherscan.io/address/0x94e7A5dCbE816e498b89aB752661904E2F56c485#code"
+    },
+    {
+      "address": "0xabd0e26fe17bde4f1f1187ed8aa80c274e03d8b5",
+      "name": "SpokeInstance",
+      "url": "https://etherscan.io/address/0xabd0e26fe17bde4f1f1187ed8aa80c274e03d8b5#code"
+    },
+    {
+      "address": "0xcca852bc40e560adc3b1cc58ca5b55638ce826c9",
+      "name": "TransparentUpgradeableProxy",
+      "url": "https://etherscan.io/address/0xcca852bc40e560adc3b1cc58ca5b55638ce826c9#code"
+    },
+    {
+      "address": "0xfe89fd96f270ac3c0f11921af0390dbb1340f704",
+      "name": "HubInstance",
+      "url": "https://etherscan.io/address/0xfe89fd96f270ac3c0f11921af0390dbb1340f704#code"
+    },
+    {
+      "address": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "name": "AccessManagerEnumerable",
+      "url": "https://etherscan.io/address/0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01#code"
+    },
+    {
+      "address": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "name": "SafeProxy",
+      "url": "https://etherscan.io/address/0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9#code"
+    },
+    {
+      "address": "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A",
+      "name": "Executor",
+      "url": "https://etherscan.io/address/0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A#code"
+    },
+    {
+      "address": "0x9362B7986E162E99e5d28969214e5797682D7a39",
+      "name": "RequestsManagerV2",
+      "url": "https://etherscan.io/address/0x9362B7986E162E99e5d28969214e5797682D7a39#code"
+    },
+    {
+      "address": "0x511c025ed8c04e363d398c21d165563adddbee99",
+      "name": "PriceStorage",
+      "url": "https://etherscan.io/address/0x511c025ed8c04e363d398c21d165563adddbee99#code"
+    },
+    {
+      "address": "0xdAbad81aF85554E9ae636395611C58F7eC1aAEc5",
+      "name": "TransparentUpgradeableProxy",
+      "url": "https://etherscan.io/address/0xdAbad81aF85554E9ae636395611C58F7eC1aAEc5#code"
+    },
+    {
+      "address": "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+      "name": "SpokeConfigurator",
+      "url": "https://etherscan.io/address/0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a#code"
+    },
+    {
+      "address": "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+      "name": "HubConfigurator",
+      "url": "https://etherscan.io/address/0x1F0753480bB03EaA00863224602267B7E0525C3d#code"
+    },
+    {
+      "address": "0x14339e2178A954d5FB839D5Ff31644fE0F25F517",
+      "name": "Executor",
+      "url": "https://etherscan.io/address/0x14339e2178A954d5FB839D5Ff31644fE0F25F517#code"
+    },
+    {
+      "address": "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "name": "RiskSteward",
+      "url": "https://etherscan.io/address/0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1#code"
+    }
+  ],
+  "reads": [
+    {
+      "label": "Aave V4 admin Safe delay",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "0",
+        "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Aave V4 admin executor delay",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "0",
+        "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Aave V4 collateral reserve 0",
+      "target": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "function": "getUserSuppliedAssets(uint256,address)(uint256)",
+      "args": [
+        "0",
+        "0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD"
+      ],
+      "result": "4167745747309408658265 [4.167e21]"
+    },
+    {
+      "label": "Aave V4 collateral reserve 1",
+      "target": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "function": "getUserSuppliedAssets(uint256,address)(uint256)",
+      "args": [
+        "1",
+        "0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD"
+      ],
+      "result": "550000000000000000000 [5.5e20]"
+    },
+    {
+      "label": "Aave V4 collateral reserve 2",
+      "target": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "function": "getUserSuppliedAssets(uint256,address)(uint256)",
+      "args": [
+        "2",
+        "0x6CC60A0b57bc882A0471980D0e2D4aD7DDf3C4bD"
+      ],
+      "result": "4680806763533837434591 [4.68e21]"
+    },
+    {
+      "label": "Aave V4 executor owner",
+      "target": "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A",
+      "function": "owner()(address)",
+      "args": [],
+      "result": "0xdAbad81aF85554E9ae636395611C58F7eC1aAEc5"
+    },
+    {
+      "label": "AccessManager admin count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "0"
+      ],
+      "result": "2"
+    },
+    {
+      "label": "AccessManager admin members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "0",
+        "0",
+        "20"
+      ],
+      "result": "[0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A]"
+    },
+    {
+      "label": "AccessManager role count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleCount()(uint256)",
+      "args": [],
+      "result": "9"
+    },
+    {
+      "label": "AccessManager roles",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoles(uint256,uint256)(uint64[])",
+      "args": [
+        "0",
+        "20"
+      ],
+      "result": "[100, 101, 102, 103, 200, 300, 301, 302, 400]"
+    },
+    {
+      "label": "Configuration path owner 0x14339e2178A954d5FB839D5Ff31644fE0F25F517",
+      "target": "0x14339e2178A954d5FB839D5Ff31644fE0F25F517",
+      "function": "owner()(address)",
+      "args": [],
+      "result": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+    },
+    {
+      "label": "Configuration path owner 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "target": "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "function": "owner()(address)",
+      "args": [],
+      "result": "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+    },
+    {
+      "label": "Configurator authority 0x1F0753480bB03EaA00863224602267B7E0525C3d",
+      "target": "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+      "function": "authority()(address)",
+      "args": [],
+      "result": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01"
+    },
+    {
+      "label": "Configurator authority 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+      "target": "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+      "function": "authority()(address)",
+      "args": [],
+      "result": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01"
+    },
+    {
+      "label": "Configurator role 0 delay 0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "0",
+        "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 0 delay 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "0",
+        "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 0 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "0",
+        "0",
+        "20"
+      ],
+      "result": "[0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A]"
+    },
+    {
+      "label": "Configurator role 200 delay 0x14339e2178A954d5FB839D5Ff31644fE0F25F517",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "200",
+        "0x14339e2178A954d5FB839D5Ff31644fE0F25F517"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 200 delay 0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "200",
+        "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 200 delay 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "200",
+        "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 200 delay 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "200",
+        "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 200 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "200",
+        "0",
+        "20"
+      ],
+      "result": "[0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A, 0x14339e2178A954d5FB839D5Ff31644fE0F25F517, 0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1]"
+    },
+    {
+      "label": "Configurator role 400 delay 0x14339e2178A954d5FB839D5Ff31644fE0F25F517",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "400",
+        "0x14339e2178A954d5FB839D5Ff31644fE0F25F517"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 400 delay 0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "400",
+        "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 400 delay 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "400",
+        "0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 400 delay 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "400",
+        "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Configurator role 400 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "400",
+        "0",
+        "20"
+      ],
+      "result": "[0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x14339e2178A954d5FB839D5Ff31644fE0F25F517, 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A, 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1]"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d addAsset(address,address,address,uint256,address,bytes)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xa7aeae20"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d addAssetWithDecimals(address,address,uint8,address,uint256,address,bytes)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x1947e190"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d addSpoke(address,address,uint256,(uint40,uint40,uint24,bool,bool))",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x7cf1dbc5"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d addSpokeToAssets(address,address,uint256[],(uint40,uint40,uint24,bool,bool)[])",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xbc3a425e"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d deactivateAsset(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x7f0633c5"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d deactivateSpoke(address,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x0e50f67a"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d haltAsset(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x486b0e0e"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d haltSpoke(address,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xa2455af2"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d resetAssetCaps(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xa9fe6404"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d resetSpokeCaps(address,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x86803a1f"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d setAuthority(address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x7a9e5e4b"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateFeeConfig(address,uint256,uint256,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x27e732a9"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateFeeReceiver(address,uint256,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xe25867bf"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateInterestRateData(address,uint256,bytes)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xc987da38"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateInterestRateStrategy(address,uint256,address,bytes)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xc279178b"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateLiquidityFee(address,uint256,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x0f8916cf"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateReinvestmentController(address,uint256,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xdc3848de"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateSpokeActive(address,uint256,address,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x98456711"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateSpokeAddCap(address,uint256,address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x493e28ae"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateSpokeCaps(address,uint256,address,uint256,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0xa3254c90"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateSpokeDrawCap(address,uint256,address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x7427ca5f"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateSpokeHalted(address,uint256,address,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x91c28cf9"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x1F0753480bB03EaA00863224602267B7E0525C3d updateSpokeRiskPremiumThreshold(address,uint256,address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d",
+        "0x7441ce91"
+      ],
+      "result": "200"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a addCollateralFactor(address,uint256,uint16)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0xdf517545"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a addDynamicReserveConfig(address,uint256,(uint16,uint32,uint16))",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0xcb51c394"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a addLiquidationFee(address,uint256,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x063c7dc0"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a addMaxLiquidationBonus(address,uint256,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x710bc180"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a addReserve(address,address,uint256,address,(uint24,bool,bool,bool,bool),(uint16,uint32,uint16))",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x727ae397"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a freezeAllReserves(address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x99b44258"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a freezeReserve(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x7492b5ec"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a pauseAllReserves(address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x6a8b9a27"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a pauseReserve(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x36f1dfa0"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a setAuthority(address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x7a9e5e4b"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateBorrowable(address,uint256,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x46bfdc72"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateCollateralFactor(address,uint256,uint32,uint16)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x092622b7"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateCollateralRisk(address,uint256,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0xf165fdea"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateDynamicReserveConfig(address,uint256,uint32,(uint16,uint32,uint16))",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x404f0b2c"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateFrozen(address,uint256,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x3a84f85a"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateHealthFactorForMaxBonus(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0xde3487b8"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateLiquidationBonusFactor(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x579b47eb"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateLiquidationConfig(address,(uint128,uint64,uint16))",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0xd15916be"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateLiquidationFee(address,uint256,uint32,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0xfd19d8f7"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateLiquidationTargetHealthFactor(address,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x98e7856f"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateMaxLiquidationBonus(address,uint256,uint32,uint256)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x3b0beccf"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updatePaused(address,uint256,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x5f42a73b"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updatePositionManager(address,address,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x152ef832"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateReceiveSharesEnabled(address,uint256,bool)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x722c65ee"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Configurator selector 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a updateReservePriceSource(address,uint256,address)",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+        "0x7f1e3675"
+      ],
+      "result": "400"
+    },
+    {
+      "label": "Hub ProxyAdmin",
+      "target": "0xcca852bc40e560adc3b1cc58ca5b55638ce826c9",
+      "slot": "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
+      "result": "0x00000000000000000000000055b71c0aed3c616162ee7c608c089a1055cea3bf"
+    },
+    {
+      "label": "Hub ProxyAdmin owner",
+      "target": "0x55b71c0aed3c616162ee7c608c089a1055cea3bf",
+      "function": "owner()(address)",
+      "args": [],
+      "result": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+    },
+    {
+      "label": "Hub asset config setter role",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0xcca852bc40e560adc3b1cc58ca5b55638ce826c9",
+        "0x24e4c1af"
+      ],
+      "result": "101"
+    },
+    {
+      "label": "Hub asset config setter role delay 0x1F0753480bB03EaA00863224602267B7E0525C3d",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "101",
+        "0x1F0753480bB03EaA00863224602267B7E0525C3d"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Hub asset config setter role members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "101",
+        "0",
+        "20"
+      ],
+      "result": "[0x1F0753480bB03EaA00863224602267B7E0525C3d]"
+    },
+    {
+      "label": "Hub authority",
+      "target": "0xcca852bc40e560adc3b1cc58ca5b55638ce826c9",
+      "function": "authority()(address)",
+      "args": [],
+      "result": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01"
+    },
+    {
+      "label": "Hub implementation",
+      "target": "0xcca852bc40e560adc3b1cc58ca5b55638ce826c9",
+      "slot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+      "result": "0x000000000000000000000000fe89fd96f270ac3c0f11921af0390dbb1340f704"
+    },
+    {
+      "label": "Junior manager avETH allowed",
+      "target": "0x9362B7986E162E99e5d28969214e5797682D7a39",
+      "function": "allowedTokens(address)(bool)",
+      "args": [
+        "0x9469470C9878bf3d6d0604831d9A3A366156f7EE"
+      ],
+      "result": "true"
+    },
+    {
+      "label": "Junior manager paused",
+      "target": "0x9362B7986E162E99e5d28969214e5797682D7a39",
+      "function": "paused()(bool)",
+      "args": [],
+      "result": "false"
+    },
+    {
+      "label": "Junior manager treasury",
+      "target": "0x9362B7986E162E99e5d28969214e5797682D7a39",
+      "function": "treasuryAddress()(address)",
+      "args": [],
+      "result": "0xdD71CDd615f677E98C604bFF5679294cC7a6089b"
+    },
+    {
+      "label": "Junior treasury allowance",
+      "target": "0x9469470C9878bf3d6d0604831d9A3A366156f7EE",
+      "function": "allowance(address,address)(uint256)",
+      "args": [
+        "0xdD71CDd615f677E98C604bFF5679294cC7a6089b",
+        "0x9362B7986E162E99e5d28969214e5797682D7a39"
+      ],
+      "result": "115792089237316195423570985008687907853269984665640564039457584007913129639935 [1.157e77]"
+    },
+    {
+      "label": "Junior treasury avETH balance",
+      "target": "0x9469470C9878bf3d6d0604831d9A3A366156f7EE",
+      "function": "balanceOf(address)(uint256)",
+      "args": [
+        "0xdD71CDd615f677E98C604bFF5679294cC7a6089b"
+      ],
+      "result": "1381455147189454037666 [1.381e21]"
+    },
+    {
+      "label": "Legacy junior allowance",
+      "target": "0x9469470C9878bf3d6d0604831d9A3A366156f7EE",
+      "function": "allowance(address,address)(uint256)",
+      "args": [
+        "0x29b091B0b70D24FEd3BEC3f511B92CC54307c0F6",
+        "0x9362B7986E162E99e5d28969214e5797682D7a39"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Manager SERVICE_ROLE",
+      "target": "0x9362B7986E162E99e5d28969214e5797682D7a39",
+      "function": "hasRole(bytes32,address)(bool)",
+      "args": [
+        "0xd8a7a79547af723ee3e12b59a480111268d8969c634e1a34a144d2c8b91d635b",
+        "0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2"
+      ],
+      "result": "true"
+    },
+    {
+      "label": "Price SERVICE_ROLE",
+      "target": "0x985b5eF57dBE19B4EE1eD43b9AdEB1A61f2f6f23",
+      "function": "hasRole(bytes32,address)(bool)",
+      "args": [
+        "0xd8a7a79547af723ee3e12b59a480111268d8969c634e1a34a144d2c8b91d635b",
+        "0xaf6fd55a83b0f85b4f330e2b25512c2b669786d2"
+      ],
+      "result": "true"
+    },
+    {
+      "label": "Proxy-owner Safe modules",
+      "target": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "function": "getModulesPaginated(address,uint256)(address[],address)",
+      "args": [
+        "0x0000000000000000000000000000000000000001",
+        "100"
+      ],
+      "result": "[]\n0x0000000000000000000000000000000000000001"
+    },
+    {
+      "label": "Proxy-owner Safe owners",
+      "target": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "function": "getOwners()(address[])",
+      "args": [],
+      "result": "[0x9440850335c7C2a644dc2abEBBA93463c9736F2C, 0xbf113Fa52454A94185b65e6f2E818B7f178f937a, 0x75C26ED4D9c5D331665766394D933E12f8597a55, 0x437B97618dFB8c8B1f403Bd2E9436730f0f9D884, 0xc0A15667D6c63ac2CBFCAf5ABbFA0639018B2065, 0x9AB4e51a7cd8cE1279D9dbfA01Ad61367C3e3749, 0x76c82c2cB7C5dB3B053A251F3281081C6EC40FDF, 0x606dC57cd166643760E049609bfd1D8a698D3bAc]"
+    },
+    {
+      "label": "Proxy-owner Safe threshold",
+      "target": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "function": "getThreshold()(uint256)",
+      "args": [],
+      "result": "5"
+    },
+    {
+      "label": "RiskSteward RISK_COUNCIL",
+      "target": "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "function": "RISK_COUNCIL()(address)",
+      "args": [],
+      "result": "0x47c71dFEB55Ebaa431Ae3fbF99Ea50e0D3d30fA8"
+    },
+    {
+      "label": "RiskSteward getConfig",
+      "target": "0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1",
+      "function": "getConfig()(((address,((uint40,uint208,bool),(uint40,uint208,bool),(uint40,uint208,bool),(uint40,uint208,bool)),((uint40,uint208,bool),(uint40,uint208,bool))),(address,(uint40,uint208,bool),((uint40,uint208,bool),(uint40,uint208,bool)),((uint40,uint208,bool),(uint40,uint208,bool)),((uint40,uint208,bool),(uint40,uint208,bool),(uint40,uint208,bool))),((uint40,uint208,bool),(uint40,uint208,bool),(uint40,uint208,bool))))",
+      "args": [],
+      "result": "((0x1F0753480bB03EaA00863224602267B7E0525C3d, ((129600 [1.296e5], 300, false), (129600 [1.296e5], 300, false), (129600 [1.296e5], 300, false), (129600 [1.296e5], 2000, false)), ((129600 [1.296e5], 10000 [1e4], true), (129600 [1.296e5], 10000 [1e4], true))), (0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a, (129600 [1.296e5], 30000 [3e4], false), ((259200 [2.592e5], 50, false), (259200 [2.592e5], 50, false)), ((259200 [2.592e5], 500, false), (259200 [2.592e5], 50, false)), ((259200 [2.592e5], 500, true), (259200 [2.592e5], 500, true), (259200 [2.592e5], 500, false))), ((259200 [2.592e5], 500, true), (259200 [2.592e5], 50, true), (172800 [1.728e5], 25000000000000000 [2.5e16], false)))"
+    },
+    {
+      "label": "Role 0 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "0"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 0 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "0"
+      ],
+      "result": "2"
+    },
+    {
+      "label": "Role 0 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "0",
+        "0",
+        "20"
+      ],
+      "result": "[0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A]"
+    },
+    {
+      "label": "Role 100 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "100"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 100 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "100"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 100 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "100",
+        "0",
+        "20"
+      ],
+      "result": "[]"
+    },
+    {
+      "label": "Role 101 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "101"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 101 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "101"
+      ],
+      "result": "1"
+    },
+    {
+      "label": "Role 101 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "101",
+        "0",
+        "20"
+      ],
+      "result": "[0x1F0753480bB03EaA00863224602267B7E0525C3d]"
+    },
+    {
+      "label": "Role 102 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "102"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 102 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "102"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 102 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "102",
+        "0",
+        "20"
+      ],
+      "result": "[]"
+    },
+    {
+      "label": "Role 103 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "103"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 103 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "103"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 103 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "103",
+        "0",
+        "20"
+      ],
+      "result": "[]"
+    },
+    {
+      "label": "Role 200 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "200"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 200 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "200"
+      ],
+      "result": "4"
+    },
+    {
+      "label": "Role 200 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "200",
+        "0",
+        "20"
+      ],
+      "result": "[0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A, 0x14339e2178A954d5FB839D5Ff31644fE0F25F517, 0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1]"
+    },
+    {
+      "label": "Role 300 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "300"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 300 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "300"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 300 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "300",
+        "0",
+        "20"
+      ],
+      "result": "[]"
+    },
+    {
+      "label": "Role 301 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "301"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 301 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "301"
+      ],
+      "result": "1"
+    },
+    {
+      "label": "Role 301 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "301",
+        "0",
+        "20"
+      ],
+      "result": "[0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a]"
+    },
+    {
+      "label": "Role 302 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "302"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 302 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "302"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 302 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "302",
+        "0",
+        "20"
+      ],
+      "result": "[]"
+    },
+    {
+      "label": "Role 400 admin",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleAdmin(uint64)(uint64)",
+      "args": [
+        "400"
+      ],
+      "result": "0"
+    },
+    {
+      "label": "Role 400 count",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMemberCount(uint64)(uint256)",
+      "args": [
+        "400"
+      ],
+      "result": "4"
+    },
+    {
+      "label": "Role 400 members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "400",
+        "0",
+        "20"
+      ],
+      "result": "[0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9, 0x14339e2178A954d5FB839D5Ff31644fE0F25F517, 0x5300A1a15135EA4dc7aD5a167152C01EFc9b192A, 0x6f48d9Cdb8EE6E17c96B2d8Aec128af426A295c1]"
+    },
+    {
+      "label": "Spoke ProxyAdmin",
+      "target": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "slot": "0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103",
+      "result": "0x000000000000000000000000ffeaccad70f4393701272212dacd791c01957f7f"
+    },
+    {
+      "label": "Spoke ProxyAdmin owner",
+      "target": "0xffeaccad70f4393701272212dacd791c01957f7f",
+      "function": "owner()(address)",
+      "args": [],
+      "result": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9"
+    },
+    {
+      "label": "Spoke authority",
+      "target": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "function": "authority()(address)",
+      "args": [],
+      "result": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01"
+    },
+    {
+      "label": "Spoke collateral setter role",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+        "0xe903e1bd"
+      ],
+      "result": "301"
+    },
+    {
+      "label": "Spoke collateral setter role delay 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "301",
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Spoke collateral setter role members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "301",
+        "0",
+        "20"
+      ],
+      "result": "[0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a]"
+    },
+    {
+      "label": "Spoke implementation",
+      "target": "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+      "slot": "0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc",
+      "result": "0x000000000000000000000000abd0e26fe17bde4f1f1187ed8aa80c274e03d8b5"
+    },
+    {
+      "label": "Spoke oracle setter role",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getTargetFunctionRole(address,bytes4)(uint64)",
+      "args": [
+        "0x94e7A5dCbE816e498b89aB752661904E2F56c485",
+        "0xb2380e93"
+      ],
+      "result": "301"
+    },
+    {
+      "label": "Spoke oracle setter role delay 0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "hasRole(uint64,address)(bool,uint32)",
+      "args": [
+        "301",
+        "0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a"
+      ],
+      "result": "true\n0"
+    },
+    {
+      "label": "Spoke oracle setter role members",
+      "target": "0x08aE3BE30958cDd1847ec58fFfd4C451a87fDF01",
+      "function": "getRoleMembers(uint64,uint256,uint256)(address[])",
+      "args": [
+        "301",
+        "0",
+        "20"
+      ],
+      "result": "[0x9BFFf48BFb5A7AE70c348d4d4cb97E8DEFa5389a]"
+    },
+    {
+      "label": "V4 upgrade Safe guard",
+      "target": "0x187AAE17d4931310B3fc75743e7F16Bdc9eD77e9",
+      "slot": "0x4a204f620c8c5ccdca3fd54d003badd85ba500436a431f0cbda4f558c93c34c8",
+      "result": "0x0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "limitations": [
+    "Original Ethereum block retained; these are review corrections, not a November 6 state refresh.",
+    "The October 28\u201329 multi-chain net NAV and the approximately 1,008 ETH missing backing have not been independently re-reconciled.",
+    "Ultimate governance behind the V4 governance Executor owner, Risk Council approval policy/cumulative exposure and other venue controllers remain TODO in the report."
+  ]
+}
