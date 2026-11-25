@@ -276,18 +276,18 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero OFT Adapter (\"LayerZero vault\")",
-          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows 6.787M stcUSD (10.21% of Ethereum supply at October 13 block 26,180,755, after a 3.50M release from MegaETH on October 11), pooled across Katana, MegaETH, and Tempo; full remote mesh verified at October 3 blocks; Ethereum receive routes and MegaETH/Tempo inbound routes re-read October 13. It cannot mint canonical stcUSD. All 12 receive routes in the fully enumerated four-chain mesh, with matching send configurations, require LayerZero Labs, Canary, and Nethermind (3-of-3, 15 confirmations). At October 13 matching-time blocks, remote supplies total 6,786,846.913229 stcUSD, 3.000000 below canonical escrow (unchanged surplus since October 3). Tempo uses a separate TIP-20 token; its sole issuer is the [adapter](https://explore.tempo.xyz/address/0x4eec5b8fdfbcdd45dfb29f666d9c34ad38c7afa5), with remote timelock admin.",
+          "detail": "Adapter [`0x983a…4137`](https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137) escrows 6.763M stcUSD (9.77% of Ethereum supply at October 27 block 26,283,075), pooled across Katana, MegaETH, and Tempo; full remote mesh verified at October 3 blocks; Ethereum send/receive routes and all nine remote receive routes re-read at October 27 matching-time blocks. It cannot mint canonical stcUSD. All 12 receive routes in the fully enumerated four-chain mesh, with matching send configurations, require LayerZero Labs, Canary, and Twinstake (LayerZero metadata id `nethermind`; 3-of-3, 15 confirmations). At October 27 matching-time blocks, remote supplies total 6,763,262.741261 stcUSD, 3.000000 below canonical escrow (unchanged surplus since October 3). Tempo uses a separate TIP-20 token; its sole issuer is the [adapter](https://explore.tempo.xyz/address/0x4eec5b8fdfbcdd45dfb29f666d9c34ad38c7afa5), with remote timelock admin.",
           "security": {
             "label": "3-of-3",
             "confirmations": 15,
             "providers": [
               "LayerZero Labs",
               "Canary",
-              "Nethermind"
+              "Twinstake"
             ],
             "route": "Ethereum↔Katana / MegaETH / Tempo, including remote↔remote peer routes",
             "weak": false,
-            "verifiedAt": "2026-10-04",
+            "verifiedAt": "2026-10-27",
             "link": "https://etherscan.io/address/0x983AEAaA0d0426839158435C43725EA7F45d4137"
           },
           "owner": "Owner/UUPS upgrades: 24h Timelock [`0xD823…29ab`](https://etherscan.io/address/0xD8236031d8279d82E615aF2BFab5FC0127A329ab). Endpoint delegate: Safe [`0xb8FC…8793`](https://etherscan.io/address/0xb8FC49402dF3ee4f8587268FB89fda4d621a8793), with direct security-configuration authority. Remote owners/Tempo role admin: 24h timelocks; local endpoint delegate Safes share the Ethereum Safe’s exact five owners and 3-of-5 threshold. Upgrades, issuer grants, or Tempo token replacement can impair canonical escrow backing."
