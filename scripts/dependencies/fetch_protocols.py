@@ -88,6 +88,8 @@ PROTOCOL_TOKENS: dict[str, str] = {
     "USCC": "Superstate",
     "STRC": "Strategy Inc.",
     "USDY": "Ondo",
+    # Delta-neutral synthetic dollars
+    "USDM": "Monetrix",
     # Wrapped BTC
     "LBTC": "Lombard",
     "tBTC": "Threshold",
@@ -856,6 +858,28 @@ def ondo_usdy_data() -> dict:
     }
 
 
+def monetrix_usdm_data() -> dict:
+    """Monetrix (USDM) dependency data from risk assessment report (Nov 2026).
+
+    USDM is minted 1:1 against native USDC on HyperEVM. Most backing sits on
+    HyperCore as HYPE and BTC spot hedged with perp shorts, partly financed
+    with borrowed USDC.
+    """
+    return {
+        "name": "Monetrix (USDM)",
+        "chain": "hyperevm",
+        "type": "stablecoin",
+        "address": "0xE2d2959f89B6389DeB624bF076Fe7D9E5401f377",
+        "report": "reports/report/monetrix-usdm.md",
+        "collateral": [
+            {"asset": "USDC", "address": "0xb88339CB7199b77E23DB6E890353E22632Ba630f"},
+            {"asset": "HYPE"},
+            {"asset": "BTC"},
+        ],
+        "infrastructure": ["Hyperliquid", "Circle CoreDepositWallet"],
+    }
+
+
 def saturn_data() -> dict:
     """Saturn (USDat) dependency data from risk assessment report (May 2026)."""
     return {
@@ -955,6 +979,7 @@ def main():
     data["protocols"]["superstate_ustb"] = superstate_ustb_data()
     data["protocols"]["saturn"] = saturn_data()
     data["protocols"]["ondo_usdy"] = ondo_usdy_data()
+    data["protocols"]["monetrix_usdm"] = monetrix_usdm_data()
 
     # Write YAML
     with open(OUTPUT_PATH, "w") as f:
