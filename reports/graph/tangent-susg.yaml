@@ -1,0 +1,464 @@
+slug: tangent-susg
+title: Tangent (sUSG) — Contract Dependency Graph
+chain: ethereum
+
+categories:
+  - id: vault
+    label: Vault / Token
+  - id: strategy
+    label: Strategy / Module
+  - id: governance
+    label: Governance
+  - id: infra
+    label: Protocol Infra
+  - id: dependency
+    label: External Dependency
+
+nodes:
+  # === Vault / token layer ===
+  - id: susg
+    label: sUSG (Savings USG)
+    address: "0xf17d6f98a5c6eaa99d149079984119e0a4ef6900"
+    category: vault
+    note: Immutable Yearn V3.0.4 vault clone; no strategies, 100% idle USG (1,107,772 USG); no accountant/fees
+  - id: usg
+    label: USG (Tangent USD)
+    address: "0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1"
+    category: vault
+    note: Non-upgradeable CDP stablecoin; 5.65M supply (3.0M idle in Peg Keepers); burnDebt can burn from any address; trades ~$0.9948
+
+  # === USG markets (minters/burners; collateral backing USG) ===
+  - id: mkt-fxusd-usdc
+    label: Market fxUSD/USDC (Convex FXN)
+    address: "0x849cf82e0ebcfeab8270cc5a3ea3b26cd481b754"
+    category: strategy
+    note: 707,520 USG debt (26.7%); 88.4% debt/collateral; LT 91.25%
+  - id: mkt-bold-usdc
+    label: Market BOLD/USDC (Stake DAO)
+    address: "0xc9c80e8481c2b6f979afc155bc3f979cfad19c56"
+    category: strategy
+    note: 499,748 USG debt (18.8%); 86.5% debt/collateral; LT 91.25%
+  - id: mkt-reusd-scrvusd
+    label: Market reUSD/scrvUSD (Stake DAO)
+    address: "0x161d6fa48b0e0152763c3929a3813bd177fc099f"
+    category: strategy
+    note: 354,263 USG debt (13.4%); 75.9% debt/collateral; LT 85%
+  - id: mkt-mseth-weth
+    label: Market msETH/WETH (Stake DAO)
+    address: "0x7b1b38cad63b0715a0adfeeb75e46431b48e73b6"
+    category: strategy
+    note: 244,693 USG debt (9.2%); 59.2% debt/collateral; LT 76%
+  - id: mkt-crvusd-usdt
+    label: Market USDT/crvUSD (Stake DAO)
+    address: "0xaed9bcae0831caf4a45739ec7910cedf2ac5d9a1"
+    category: strategy
+    note: 163,442 USG debt (6.2%); 77.1% debt/collateral; LT 85.25%
+  - id: mkt-pyusd-usdc
+    label: Market PYUSD/USDC (Curve gauge)
+    address: "0x4742a56668fbacbc11087f516c4b01ebc48f716f"
+    category: strategy
+    note: 139,913 USG debt (5.3%); 90.0% debt/collateral (at maxLTV); LT 91.5%
+  - id: mkt-rlusd-usdc
+    label: Market RLUSD/USDC (Curve gauge)
+    address: "0xbffbd9c9ac1645285d017a69885304831e8b9b71"
+    category: strategy
+    note: 117,021 USG debt (4.4%); 84.6% debt/collateral; LT 91.5%
+  - id: mkt-pyusd-crvusd
+    label: Market PYUSD/crvUSD (Stake DAO)
+    address: "0xf9fbb128d4569bfc6f97124e13ae32cd6fb6a48b"
+    category: strategy
+    note: 109,070 USG debt (4.1%); 78.8% debt/collateral; LT 85.25%
+  - id: mkt-reusd-sdola
+    label: Market reUSD/sDOLA (Stake DAO)
+    address: "0x244c24c94d5bbdba43c408b702ded98e436df721"
+    category: strategy
+    note: 97,356 USG debt (3.7%); 80.1% debt/collateral; LT 85%
+  - id: mkt-reusd-fxusd
+    label: Market reUSD/fxUSD (Convex FXN)
+    address: "0xa63ded87df22ee573567ad1dd87d0a71c8fcd380"
+    category: strategy
+    note: 94,766 USG debt (3.6%); 83.5% debt/collateral; LT 85%
+  - id: mkt-frxusd-sdola
+    label: Market frxUSD/sDOLA (Stake DAO)
+    address: "0xd3d29a8752fc40d64a20bbc043147077570c1785"
+    category: strategy
+    note: 85,868 USG debt (3.2%); 82.6% debt/collateral; LT 85.25%
+  - id: mkt-other
+    label: 10 smaller markets (<1% debt each)
+    category: strategy
+    note: >-
+      39,071 USG debt combined. frxUSD/sUSDS 0xd2c7257efe28a1b1446904a371e3d51e1c2f7e0e,
+      frxUSD/crvUSD 0xe1065be419cacaf05477ea77a32cb33e8bcbc7da, frxUSD/OUSD 0x56dbc69208044748af4d33392e25fc9336f11931,
+      CVX/ETH 0xe4622622bfb74dce6019d5d41150d8824b83bf9a, frxUSD/scrvUSD 0x5c996574270f439bfff5b7647ee92c1879d35a4b,
+      eUSD/USDC 0xa6069a4a53b564eb0a312e08f5af19ae2ba5d67e, msETH/OETH 0x2b2962931433fe137fd17cf62df4b9ec84a7de00,
+      cbBTC/WBTC 0x4903f0d3698ddc5ca66040b235de0a2126a41437, frxUSD/DUSD 0x420d2d75c69331df6ce4a1a74067d68e82670e13,
+      crvUSD/ETH/CRV 0xb4edf0dd81b2ad31703b61da098401d0c83607bf. All hold USG isMinter + isBurner.
+
+  # === Protocol infra ===
+  - id: control-tower
+    label: ControlTower
+    address: "0xf3f7669dceed2f985815011c19ed68f667267215"
+    category: infra
+    note: Registry for market creators, pausers, position migrators (none), fee treasury
+  - id: market-creator
+    label: MarketCreator
+    address: "0x214C8A1023B30032a2Eded109146658C6D6F2781"
+    category: infra
+    note: onlyOwner clone factory; initializeMarket grants USG isMinter + isBurner
+  - id: ir-calculator
+    label: IRCalculator
+    address: "0xB4e1d3bBd2843263d58B4D648C599512cea6e88b"
+    category: infra
+    note: isIRProducer; mintIR mints accrued interest to PRT Safe
+  - id: usg-oracle
+    label: USG Oracle (AggregatorStablePriceV3)
+    address: "0x970b2f2cec66f92de81dae6af363d1d135dd2f97"
+    category: infra
+    note: Blends the USG/USDC and USG/frxUSD EMAs; price() 0.994763; returns par when no source meets its liquidity floor
+  - id: pk-usdc
+    label: Peg Keeper V2 — USDC
+    address: "0xf89615f75c8161dc185c03020240905f6b66bad9"
+    category: infra
+    note: 1,500,000 idle USG; debt() = 0
+  - id: pk-frxusd
+    label: Peg Keeper V2 — frxUSD
+    address: "0x8a7f16508d1e8b48bdf36023f378cc04d9506d4e"
+    category: infra
+    note: 1,500,000 idle USG; debt() = 0
+  - id: pk-regulator
+    label: Peg Keeper Regulator
+    address: "0x887706612730b7a227f3bffd8c9a6e6c3cb3f19e"
+    category: infra
+  - id: pauser-proxy
+    label: PauserProxy
+    address: "0x10b1f36452e27f08b0b5747f577ff816b0e6b5fa"
+    category: infra
+    note: Pause-only (deposit/borrow/leverage); pauser and emergencyPauser are EOAs
+
+  # === Governance ===
+  - id: admin-safe
+    label: Tangent Admin Safe (3-of-5)
+    address: "0x461B62CB3A7e9Df8f800aE058AE92F855F2c27Ca"
+    category: governance
+    note: Owns every Tangent contract; no timelock; can grant USG minter/burner, swap market oracles, and is sUSG role_manager
+  - id: prt-safe
+    label: Protocol Revenues Treasury (2-of-3)
+    address: "0x536d4e9C0944dE2aC6657d610Aa99fA5e97Ce493"
+    category: governance
+    note: Fee treasury; sole funder of sUSG yield (weekly USG transfer + process_report); signers subset of Admin Safe
+  - id: pauser-eoa
+    label: Deployer / pauser EOA
+    address: "0xe08c2512F87cF63fb7D2325EDd08aEC7920aC2f6"
+    category: governance
+    note: ControlTower isPauser and PauserProxy pauser; pause-only
+  - id: emergency-pauser-eoa
+    label: Emergency pauser EOA
+    address: "0x433a2561E1A7c2bE3DA5bD8F853093Fc9e5C0F14"
+    category: governance
+    note: PauserProxy emergencyPauser; pause-only (unpause is owner-only)
+
+  # === External dependencies ===
+  - id: curve-usg-usdc
+    label: Curve USG/USDC pool
+    address: "0x97BA10115da528c113462EDE9C20D7adc806D93f"
+    category: dependency
+    note: 183,539 USDC / 537,489 USG; USG oracle and Peg Keeper pool; main USD exit
+  - id: curve-usg-frxusd
+    label: Curve USG/frxUSD pool
+    address: "0xEfc056790bb19702b2164ec6Ea6bA3AE01d81195"
+    category: dependency
+    note: 283,193 frxUSD / 829,473 USG; USG oracle and Peg Keeper pool
+  - id: curve-susg-reusd
+    label: Curve sUSG/reUSD pool
+    address: "0xc6ac08424ee6d1373f03611b96f5da849594b6d8"
+    category: dependency
+    note: Holds 65.5% of sUSG supply; LP staked via Convex and Stake DAO
+  - id: reusd
+    label: reUSD (Re Protocol)
+    address: "0x5086bf358635B81D8C47C66d1C8b9E567Db70c72"
+    category: dependency
+    note: sUSG/reUSD exit counterparty and underlying of 3 USG markets (20.6% of USG debt); Ethereum OFT paused and mint handler lacks MINTER_ROLE
+  - id: fxusd
+    label: fxUSD (f(x) Protocol)
+    address: "0x085780639CC2cACd35E474e71f4d000e2405d8f6"
+    category: dependency
+    note: Underlying of fxUSD/USDC and reUSD/fxUSD markets (30.2% of USG debt)
+  - id: fxusd-layerzero
+    label: fxUSD LayerZero escrow
+    address: "0xA07d8cc424421cC2bce0544a65481376f010A438"
+    category: dependency
+    note: Holds 39,678 fxUSD; Base to Ethereum release requires 3 mandatory DVNs plus 1 of 3 optional DVNs
+  - id: convex
+    label: Convex Finance (Curve + f(x) staking)
+    link: https://www.convexfinance.com/
+    category: dependency
+    note: Custodies collateral for Convex FXN markets
+  - id: stakedao
+    label: Stake DAO Vaults V2
+    link: https://www.stakedao.org/
+    category: dependency
+    note: Custodies collateral for Stake DAO markets
+  - id: curve-gauges
+    label: Curve gauges / LP tokens
+    link: https://curve.finance/
+    category: dependency
+    note: Collateral LPs for all markets; Curve gauge markets stake directly
+  - id: oracles
+    label: Chainlink / Redstone / Curve price_oracle
+    category: dependency
+    note: Wrapped by Tangent oracle contracts; Admin Safe can replace via setCollatOracle
+
+edges:
+  # === Capital flow ===
+  - from: susg
+    to: usg
+    kind: deposits-into
+    label: holds USG (100% idle)
+  - from: prt-safe
+    to: susg
+    kind: deposits-into
+    label: weekly USG yield top-ups (discretionary)
+  - from: mkt-fxusd-usdc
+    to: convex
+    kind: deposits-into
+    label: fxUSD/USDC LP
+  - from: mkt-reusd-fxusd
+    to: convex
+    kind: deposits-into
+    label: reUSD/fxUSD LP
+  - from: mkt-bold-usdc
+    to: stakedao
+    kind: deposits-into
+    label: BOLD/USDC LP
+  - from: mkt-reusd-scrvusd
+    to: stakedao
+    kind: deposits-into
+    label: reUSD/scrvUSD LP
+  - from: mkt-mseth-weth
+    to: stakedao
+    kind: deposits-into
+    label: msETH/WETH LP
+  - from: mkt-crvusd-usdt
+    to: stakedao
+    kind: deposits-into
+    label: USDT/crvUSD LP
+  - from: mkt-pyusd-crvusd
+    to: stakedao
+    kind: deposits-into
+    label: PYUSD/crvUSD LP
+  - from: mkt-reusd-sdola
+    to: stakedao
+    kind: deposits-into
+    label: reUSD/sDOLA LP
+  - from: mkt-frxusd-sdola
+    to: stakedao
+    kind: deposits-into
+    label: frxUSD/sDOLA LP
+  - from: mkt-other
+    to: stakedao
+    kind: deposits-into
+    label: various LPs
+  - from: mkt-pyusd-usdc
+    to: curve-gauges
+    kind: deposits-into
+    label: PYUSD/USDC LP
+  - from: mkt-rlusd-usdc
+    to: curve-gauges
+    kind: deposits-into
+    label: RLUSD/USDC LP
+  - from: convex
+    to: curve-gauges
+    kind: deposits-into
+    label: stakes LP
+  - from: stakedao
+    to: curve-gauges
+    kind: deposits-into
+    label: stakes LP
+  - from: mkt-reusd-scrvusd
+    to: reusd
+    kind: routes-through
+    label: collateral exposure
+  - from: mkt-reusd-sdola
+    to: reusd
+    kind: routes-through
+    label: collateral exposure
+  - from: mkt-reusd-fxusd
+    to: reusd
+    kind: routes-through
+    label: collateral exposure
+  - from: mkt-fxusd-usdc
+    to: fxusd
+    kind: routes-through
+    label: collateral exposure
+  - from: mkt-reusd-fxusd
+    to: fxusd
+    kind: routes-through
+    label: collateral exposure
+  - from: fxusd-layerzero
+    to: fxusd
+    kind: deposits-into
+    label: holds canonical fxUSD in escrow
+  - from: curve-susg-reusd
+    to: reusd
+    kind: routes-through
+    label: sUSG exit counterparty
+
+  # === USG mint authority ===
+  - from: mkt-fxusd-usdc
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-bold-usdc
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-reusd-scrvusd
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-mseth-weth
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-crvusd-usdt
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-pyusd-usdc
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-rlusd-usdc
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-pyusd-crvusd
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-reusd-sdola
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-reusd-fxusd
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-frxusd-sdola
+    to: usg
+    kind: mints
+    label: isMinter + isBurner
+  - from: mkt-other
+    to: usg
+    kind: mints
+    label: isMinter + isBurner (10 markets)
+  - from: ir-calculator
+    to: usg
+    kind: mints
+    label: isIRProducer (mintIR to PRT Safe)
+  - from: admin-safe
+    to: usg
+    kind: mints
+    label: owner mintPegKeeper (unbounded) + setIsMinter/setIsBurner
+
+  # === Governance / control ===
+  - from: admin-safe
+    to: susg
+    kind: holds-role
+    label: role_manager + DEPOSIT_LIMIT_MANAGER
+  - from: prt-safe
+    to: susg
+    kind: holds-role
+    label: REPORTING_MANAGER
+  - from: admin-safe
+    to: control-tower
+    kind: controls
+    label: owner
+  - from: admin-safe
+    to: market-creator
+    kind: controls
+    label: owner
+  - from: control-tower
+    to: market-creator
+    kind: manages
+    label: isMarketCreator
+  - from: market-creator
+    to: mkt-fxusd-usdc
+    kind: deploys
+    label: clone + initializeMarket
+  - from: admin-safe
+    to: mkt-fxusd-usdc
+    kind: controls
+    label: owner (setCollatOracle, LTV, debt cap) — same for all 21 markets
+  - from: admin-safe
+    to: ir-calculator
+    kind: controls
+    label: owner
+  - from: admin-safe
+    to: usg-oracle
+    kind: controls
+    label: admin (price pairs)
+  - from: admin-safe
+    to: pk-regulator
+    kind: controls
+    label: admin + emergency_admin
+  - from: admin-safe
+    to: pk-usdc
+    kind: controls
+    label: admin
+  - from: admin-safe
+    to: pk-frxusd
+    kind: controls
+    label: admin
+  - from: admin-safe
+    to: pauser-proxy
+    kind: controls
+    label: owner
+  - from: pauser-eoa
+    to: control-tower
+    kind: holds-role
+    label: isPauser (pause-only)
+  - from: pauser-eoa
+    to: pauser-proxy
+    kind: holds-role
+    label: pauser (pauseAll only)
+  - from: emergency-pauser-eoa
+    to: pauser-proxy
+    kind: holds-role
+    label: emergencyPauser (pauseAll only)
+  - from: pauser-proxy
+    to: control-tower
+    kind: holds-role
+    label: isPauser (pause-only)
+  - from: pk-regulator
+    to: pk-usdc
+    kind: manages
+    label: regulator
+  - from: pk-regulator
+    to: pk-frxusd
+    kind: manages
+    label: regulator
+  - from: pk-usdc
+    to: curve-usg-usdc
+    kind: deposits-into
+    label: USG provide/withdraw (debt 0)
+  - from: pk-frxusd
+    to: curve-usg-frxusd
+    kind: deposits-into
+    label: USG provide/withdraw (debt 0)
+  - from: usg-oracle
+    to: curve-usg-usdc
+    kind: routes-through
+    label: price_oracle EMA
+  - from: usg-oracle
+    to: curve-usg-frxusd
+    kind: routes-through
+    label: price_oracle EMA
+  - from: mkt-fxusd-usdc
+    to: oracles
+    kind: routes-through
+    label: collatOracle (all markets)
+  - from: mkt-fxusd-usdc
+    to: prt-safe
+    kind: routes-fees-to
+    label: fees, seized bad-debt collateral (feeTreasury)

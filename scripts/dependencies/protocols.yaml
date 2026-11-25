@@ -1035,3 +1035,25 @@ protocols:
     infrastructure:
     - LayerZero
     - Chainlink
+  tangent_susg:
+    name: Tangent (sUSG)
+    chain: ethereum
+    type: yield_vault
+    address: '0xf17d6f98a5c6eaa99d149079984119e0a4ef6900'
+    report: reports/report/tangent-susg.md
+    collateral:
+    - asset: USG
+      address: '0xb1c2db5d6ca03fce73dbd304d320bf76c55ae1b1'
+    yield_sources:
+    - protocol: tangent
+      assets:
+      - USG
+      label: Discretionary weekly USG top-ups from Tangent revenue Safe (USG CDP markets on Curve/Convex/Stake DAO LP collateral)
+    infrastructure:
+    - Yearn V3
+    - Curve
+    - Convex
+    - Stake DAO
+    - Chainlink
+    - Redstone
+    - LayerZero
