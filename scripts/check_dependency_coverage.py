@@ -50,6 +50,7 @@ UPSTREAM_PROTOCOLS = {
 # are the roots of the exposure graph, not dependencies within it.
 REPORTS_WITHOUT_PROTOCOL = {
     "yearn-yvdai",
+    "yearn-yvflexweth",
     "yearn-yvusd",
     "yearn-yvusdc",
     "yearn-yvusds",
