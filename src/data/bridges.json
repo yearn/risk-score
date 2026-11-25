@@ -218,6 +218,14 @@
           "model": "transport",
           "integration": "Nested dgnHYPE strategy routes USDC to HyperCore via CCTP",
           "detail": "dgnHYPE operational EOAs [`0x0C68…82d0`](https://arbiscan.io/address/0x0C684f333A7e120bce61383DA670bbB0157e82d0) and [`0x11A6…006A`](https://arbiscan.io/address/0x11A691612BD108e57cC04ea42B006C9CB1ff006A) deposit USDC into the Circle HyperCore CCTP extension [`0xA95d…4fcE`](https://arbiscan.io/address/0xA95d9c1F655341597C94393fDdc30cf3c08E4fcE) (2.599M USDC on Oct 12, 2026); withdrawals return as CCTP V2 mints via [`0x81D4…4B64`](https://arbiscan.io/address/0x81D40F21F12A8F0E3252Bccb954D722d4c464B64) to operational EOAs including [`0x4c3d…17fc`](https://arbiscan.io/address/0x4c3d48cbe2186beeafecc6723630ab8eda4117fc)"
+        },
+        {
+          "slug": "sky-usds",
+          "name": "Sky USDS",
+          "kind": "indirect",
+          "model": "transport",
+          "integration": "Prime allocator ALM controllers (`transferUSDCToCCTP`)",
+          "detail": "USDS backing, not USDS itself: Prime ALMs move USDC over CCTP to fund L2 positions (~$1.2B of Observatory backing on Base, Arbitrum and Avalanche), bounded per destination domain by governance-set `LIMIT_USDC_TO_DOMAIN` rate limits. Spark set its routes to domains 1, 2 and 10 to zero on November 23, 2026 ([Spark RateLimits](https://etherscan.io/address/0x7A5FD5cf045e010e62147F065cEAe59e5344b188))"
         }
       ]
     },
@@ -244,6 +252,32 @@
           "model": "mint",
           "integration": "Free Tunnel (TunnelContract; 3-of-4 executors)",
           "detail": "Tunnel proxy [`0x70aF…d21C`](https://etherscan.io/address/0x70aF4743F85E5E74E3b6dDFa38926c0a762Ad21C) holds `MINTER_ROLE` on uniBTC; mints require 3-of-4 executor signatures (`getActiveExecutors()`), admin is EOA [`0x0014…c53C`](https://etherscan.io/address/0x0014Eb4Ac6Dd1473b258d088E6EF214b2BCdc53C). The admin can call `upgradeTunnel` only for the implementation published by the Free Tunnel hub [`0x6903…53aB`](https://etherscan.io/address/0x690357e684F7661911CED0f857a5920E983853aB), whose owner is a 3-of-4 multisig [`0xb58F…DcBA`](https://etherscan.io/address/0xb58F7aC2d503cEa14B3582C21d72e9817839DcBA). No Tunnel events occurred in the 30 days to the snapshot. Not mentioned in Bedrock's uniBTC bridge documentation. The same contract also holds `MINTER_ROLE` on Bedrock brBTC. Verified at Ethereum block [25,981,132](https://etherscan.io/block/25981132), September 15, 2026."
+        }
+      ]
+    },
+    {
+      "id": "gnosis-xdai-bridge",
+      "name": "Gnosis xDAI Bridge",
+      "type": "Validator-multisig lock bridge (USDS-backed native xDAI)",
+      "url": "https://docs.gnosischain.com/bridges/About%20Token%20Bridges/xdai-bridge",
+      "finality": "Ethereum→Gnosis: xDAI is minted after the 4-of-7 validator confirmation; Gnosis→Ethereum: release after validator signatures, executed by anyone via `executeSignatures`.",
+      "admin": "8-of-15 Gnosis bridge-governance Safe [`0x42F3…A3F6`](https://etherscan.io/address/0x42F38ec5A75acCEc50054671233dfAC9C0E7A3F6) owns and can upgrade the Ethereum-side `XDaiForeignBridge` proxy; no timelock documented.",
+      "description": "Gnosis Chain's native-token bridge. USDS deposited on Ethereum is locked in the `XDaiForeignBridge` and xDAI is minted on Gnosis; withdrawals release USDS after a 4-of-7 validator quorum. Idle USDS above a cash threshold is invested in sUSDS.",
+      "keywords": [
+        "xDAI bridge",
+        "xDai bridge",
+        "Gnosis xDAI"
+      ],
+      "ignore": [],
+      "dependencies": [
+        {
+          "slug": "sky-usds",
+          "name": "Sky USDS",
+          "kind": "direct",
+          "model": "lock",
+          "integration": "XDaiForeignBridge (USDS backing for native xDAI)",
+          "detail": "Third-party route not governed by Sky: [`0x4aa4…5016`](https://etherscan.io/address/0x4aa42145Aa6Ebf72e164C9bBC74fbD3788045016) holds ~1.0M USDS + ~36.1M sUSDS (~$41.3M, ~1.3% of mainnet USDS supply) at block 26487462, secured by a 4-of-7 validator set [`0xe157…201E`](https://etherscan.io/address/0xe1579dEbdD2DF16Ebdb9db8694391fa74EeA201E) with `executionDailyLimit` = 15M USDS. Holds no `wards` on USDS or sUSDS, so it cannot create mainnet USDS",
+          "owner": "8-of-15 Gnosis governance Safe [`0x42F3…A3F6`](https://etherscan.io/address/0x42F38ec5A75acCEc50054671233dfAC9C0E7A3F6)."
         }
       ]
     },
@@ -415,7 +449,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "LayerZero V2 OFT Adapter (Solana + Avalanche only)",
-          "detail": "Minor route: LayerZero handles only Solana + Avalanche (~48.7M locked, <0.7% of mainnet USDS supply) and does not hold `wards` on USDS. The bulk of USDS/sUSDS bridges via native rollup bridges — see the Native Rollup Bridges row",
+          "detail": "Minor route: LayerZero handles only Solana + Avalanche (~4.18M locked, ~0.13% of mainnet USDS supply) and does not hold `wards` on USDS. The bulk of USDS/sUSDS bridges via native rollup bridges — see the Native Rollup Bridges row",
           "security": {
             "label": "2-of-2",
             "confirmations": 12,
@@ -425,7 +459,7 @@
             ],
             "route": "Avalanche→Ethereum (inbound; Solana route also 2-of-2)",
             "weak": false,
-            "verifiedAt": "2026-07-16",
+            "verifiedAt": "2026-11-24",
             "link": "https://etherscan.io/address/0x1e1D42781FC170EF9da004Fb735f56F0276d01B8"
           },
           "owner": "Adapter owner: Sky PauseProxy [`0xBE8E…98FB`](https://etherscan.io/address/0xBE8E3e3618f7474F8cB1d074A26afFef007E98FB) (Chief + 48h GSM)."
@@ -642,7 +676,7 @@
           "kind": "direct",
           "model": "lock",
           "integration": "OP Stack + Arbitrum Nitro canonical bridges (SkyLink)",
-          "detail": "Primary USDS/sUSDS cross-chain route: ~$0.45B USDS + ~812M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro). No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (<0.7% of mainnet USDS supply)"
+          "detail": "Primary USDS/sUSDS cross-chain route: ~4.5M USDS + ~443M sUSDS escrowed on L1 and minted 1:1 on Base, Optimism, Unichain (OP Stack) and Arbitrum (Nitro), with ~96.5% of the sUSDS in the Arbitrum escrow after the July and October 2026 Spark Liquidity Layer repatriations. No bridge holds `wards` on USDS. LayerZero carries only Solana + Avalanche (~0.13% of mainnet USDS supply)"
         }
       ]
     },
