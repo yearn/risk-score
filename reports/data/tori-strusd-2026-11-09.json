@@ -1,0 +1,305 @@
+{
+  "snapshot": {
+    "chain_id": 1,
+    "number": 26340122,
+    "hash": "0x9436fc1d4978c0f9d964a2890475c895be97898e6ee43c8295c4300cce7de8f8",
+    "timestamp": "2026-11-04T08:01:59Z"
+  },
+  "verification_date": "2026-11-09",
+  "method": {
+    "ethereum_arbitrum": "cast call/storage/code against configured RPCs at the listed blocks; endpoints omitted",
+    "monad": "Etherscan v2 (chainid 143) with the configured key. Etherscan proxy eth_call ignores the block tag on this chain (three tags returned identical supply) and returned post-snapshot state on Arbitrum, so Monad state reads are labelled current_state with the read block; pinned Monad supply is derived from zero-address Transfer logs through the snapshot block",
+    "not_read": "Pharos, Solana and Canton: no configured RPC or Etherscan support",
+    "safe_owner_policy": "Owner addresses are compared across chains; individual addresses are not retained here"
+  },
+  "operator_activity": {
+    "address": "0xA2ADCD948DCFB8AF6dB60c43C1c1B841e6d7F006",
+    "through_block": 26340122,
+    "outgoing_transactions": 375,
+    "failed": 0,
+    "by_function": {
+      "Distributor.transferInRewards(uint256)": 375,
+      "Distributor.reportLoss": 0
+    },
+    "median_gap_seconds": 28920,
+    "min_gap_seconds": 28848,
+    "max_gap_seconds": 48780,
+    "first_tx_utc": "2026-07-01T10:27:11Z",
+    "last_tx_utc": "2026-11-04T02:28:11Z",
+    "interpretation": "Regular ~8h02m cadence is consistent with an automated signing path rather than per-transaction manual approval. Whether the undisclosed API rule covers reportLoss is not established."
+  },
+  "remote_supply": {
+    "ethereum_lockbox": {
+      "block": 26340122,
+      "strUSD_raw": "13234354194938488896058044",
+      "trUSD_raw": "680750373538431091430188"
+    },
+    "monad": {
+      "block": 119273951,
+      "hash": "0x022589127fe55ba4ef44478c0bd9d80a20c59dfa4b64cf3eefcff139c41bdf0d",
+      "timestamp": 1793779319,
+      "method": "sum of Transfer from/to zero through block",
+      "strUSD_raw": "12328052021254025391684177",
+      "trUSD_raw": "680647201693782772474783",
+      "log_counts": {
+        "strUSD_mints": 101,
+        "strUSD_burns": 43,
+        "trUSD_mints": 33,
+        "trUSD_burns": 13
+      }
+    },
+    "arbitrum": {
+      "block": 521117081,
+      "hash": "0x8a5163cd1a130e74bfc070d7b42397032b5cae8647df89559470233b121bbff9",
+      "timestamp": 1793779319,
+      "method": "archive RPC totalSupply",
+      "strUSD_raw": "96165253625160913",
+      "trUSD_raw": "221146525140322349"
+    },
+    "remainder_for_pharos_solana_canton": {
+      "strUSD_raw": "906302077519209879212954",
+      "strUSD": 906302.0775192098,
+      "trUSD_raw": "102950698123178633056",
+      "trUSD": 102.95069812317864
+    },
+    "prior_unretained_observation": {
+      "pharos_strUSD": "~906.2k",
+      "pharos_trUSD": "~2.81",
+      "solana_strUSD": "0",
+      "solana_trUSD": "~0.14"
+    },
+    "note": "Against the prior Pharos and Solana figures, the remainder leaves ~100 trUSD and ~102 strUSD (rounded input) unexplained. Canton supply is unread, so this is an open reconciliation item, not a measured shortfall."
+  },
+  "remote_controls": {
+    "monad": {
+      "state": "current_state",
+      "read_block": 120700354,
+      "read_date": "2026-11-09",
+      "chain_id": 143,
+      "safe": {
+        "address": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "code_bytes": 171,
+        "threshold": 3,
+        "owner_count": 5,
+        "owners_match_ethereum": true,
+        "modules": [],
+        "guard_slot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "token_admin_registry": "0x11acd984dd680363117b310f6ebdf78fd6c0195f",
+      "strUSD": {
+        "token": "0x683fb58ee77172626d5b49087ddac71ef7825d20",
+        "contract": "StakedTrUSDL2",
+        "verified": true,
+        "owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "ccip_admin": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "minters": [
+          "0x52e34c46CE7CE0CBDB8864D7A02Fb0A9AE9b3012"
+        ],
+        "burners": [
+          "0x52e34c46CE7CE0CBDB8864D7A02Fb0A9AE9b3012"
+        ],
+        "max_supply": 0,
+        "blacklister": "0xb1e50B7A19B8F650A6eE77Dc0AC52b88059fA169",
+        "pool": "0x52e34c46ce7ce0cbdb8864d7a02fb0a9ae9b3012",
+        "pool_version": "BurnMintTokenPool 2.0.0",
+        "pool_owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "rate_limit_admin": "0x5A54bbAe78a3F043a1A41D6f9EB39FB2a1f766c7",
+        "registry_administrator": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "registry_pool": "0x52e34c46CE7CE0CBDB8864D7A02Fb0A9AE9b3012"
+      },
+      "trUSD": {
+        "token": "0x770a579ea200784723b31b8668b0773ba80393c9",
+        "contract": "FactoryBurnMintERC20",
+        "verified": true,
+        "owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "ccip_admin": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "minters": [
+          "0x6f6818C72A7Ffc72B2ED90Fd7E8df1d17C18B195"
+        ],
+        "burners": [
+          "0x6f6818C72A7Ffc72B2ED90Fd7E8df1d17C18B195"
+        ],
+        "max_supply": 0,
+        "pool": "0x6f6818c72a7ffc72b2ed90fd7e8df1d17c18b195",
+        "pool_version": "BurnMintTokenPool 2.0.0",
+        "pool_owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "rate_limit_admin": "0x5A54bbAe78a3F043a1A41D6f9EB39FB2a1f766c7",
+        "registry_administrator": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "registry_pool": "0x6f6818C72A7Ffc72B2ED90Fd7E8df1d17C18B195"
+      },
+      "lanes": [
+        "ethereum-mainnet",
+        "pharos-mainnet",
+        "arbitrum-mainnet",
+        "solana-mainnet"
+      ],
+      "ethereum_lane_rate_limit": {
+        "capacity_tokens": 1500000,
+        "rate_tokens_per_second": 69.44444444444444,
+        "enabled_inbound": true,
+        "enabled_outbound": true
+      },
+      "role_functions": "Token owner can call grantMintAndBurnRoles / grantMintRole / grantBurnRole with no timelock"
+    },
+    "arbitrum": {
+      "state": "pinned",
+      "block": 521117081,
+      "chain_id": 42161,
+      "safe": {
+        "address": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "code_bytes": 171,
+        "threshold": 3,
+        "owner_count": 5,
+        "owners_match_ethereum": true,
+        "modules": [],
+        "guard_slot": "0x0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "token_admin_registry": "0x39ae1032cf4b334a1ed41cdd0833bdd7c7e7751e",
+      "strUSD": {
+        "token": "0x2f0ef93ce562bd192f13db1acb32d3a8aa324974",
+        "verified": false,
+        "bytecode_identical_to_monad_verified_StakedTrUSDL2": true,
+        "eip1967_implementation_slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "ccip_admin": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "minters": [
+          "0xD87D9D4Fb4aE0Dd438404561F58e99C16Dc437F1"
+        ],
+        "burners": [
+          "0xD87D9D4Fb4aE0Dd438404561F58e99C16Dc437F1"
+        ],
+        "max_supply": 0,
+        "blacklister": "0xb1e50B7A19B8F650A6eE77Dc0AC52b88059fA169",
+        "pool": "0xd87d9d4fb4ae0dd438404561f58e99c16dc437f1",
+        "pool_owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "rate_limit_admin": "0x5A54bbAe78a3F043a1A41D6f9EB39FB2a1f766c7",
+        "fee_admin": "0x0000000000000000000000000000000000000000",
+        "registry_administrator": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "registry_pool": "0xD87D9D4Fb4aE0Dd438404561F58e99C16Dc437F1"
+      },
+      "trUSD": {
+        "token": "0xdbec7b2f9435d4fcbdf9cfcab626a6eb88b5d0d1",
+        "contract": "CrossChainToken",
+        "verified": true,
+        "owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "default_admin": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "default_admin_delay_seconds": 0,
+        "minter_role_holders": [
+          "0x7408e795335952B59086e90f673c28D841989b5C"
+        ],
+        "burner_role_holders": [
+          "0x7408e795335952B59086e90f673c28D841989b5C"
+        ],
+        "max_supply": 0,
+        "pool": "0x7408e795335952b59086e90f673c28d841989b5c",
+        "pool_owner": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "rate_limit_admin": "0x5A54bbAe78a3F043a1A41D6f9EB39FB2a1f766c7",
+        "registry_administrator": "0x0C6Bbfd2d5666d44bf28580eDEec0263692C8316",
+        "registry_pool": "0x7408e795335952B59086e90f673c28D841989b5C"
+      },
+      "lanes": [
+        "ethereum-mainnet",
+        "monad-mainnet",
+        "pharos-mainnet",
+        "solana-mainnet"
+      ],
+      "ethereum_lane_rate_limit": {
+        "capacity_tokens": 1500000,
+        "rate_tokens_per_second": 69.44444444444444,
+        "enabled_inbound": true,
+        "enabled_outbound": true
+      }
+    }
+  },
+  "reserve_loan_attribution": {
+    "wallet": "0xD07d31698E9689Af5954698b08e0c963ad9c00eb",
+    "wallet_source": "Accountable policy_attestation name: DeFi Operator",
+    "ethereum": {
+      "block": 26353280,
+      "feed_timestamp": "2026-11-06T04:01:02.208Z",
+      "feed_usd": 126199.48,
+      "attributed_usdc": 126028.59,
+      "unattributed_usd": 170.89,
+      "positions": [
+        {
+          "market": "0x975c6e8b71073a82216ae464bc44f67d71988450d2542d635d88bc78fca344b1",
+          "collateral": "strUSD",
+          "supply_usdc": 90728.78
+        },
+        {
+          "market": "0xd21bbc238918855461d943753ac4c90d103888e5661fd78f3378294c45f7d8df",
+          "collateral": "PT-trUSD-26NOV2026",
+          "collateral_address": "0x7191878f1fe834b28F4d0CEAd0E4375B814C4aBb",
+          "supply_usdc": 25221.24
+        },
+        {
+          "market": "0xf062a110320da27e0e7e7d9e1bdf458dd51e2d2089e55f63ff9fd54f415ce35d",
+          "collateral": "PT-strUSD-26NOV2026",
+          "collateral_address": "0x74299580811E1c3c1A2831dB079bA0a8F513998f",
+          "supply_usdc": 5040.1
+        },
+        {
+          "market": "0xff836cc9796e2889ebf73b26c2de2de74b35f985bb83e9d79380deb4229e365b",
+          "collateral": "etrUSD",
+          "collateral_address": "0x6f20aE2C98c2D34e6A57f3411f2C5Af92E32592d",
+          "supply_usdc": 5038.47
+        }
+      ]
+    },
+    "monad": {
+      "feed_usd": 3312168.91,
+      "state": "current_state",
+      "read_block": 120700354,
+      "read_date": "2026-11-09",
+      "direct": {
+        "morpho": "0xD5D960E8C380B724a48AC59E2DfF1b2CB4a1eAee",
+        "market": "0x58532a6ef16789d5e93f6728e1f53db9ee9a1e4163059c9515684d10b49af464",
+        "collateral": "strUSD",
+        "loan": "AUSD",
+        "lltv": 0.86,
+        "supply_ausd": 1001197.43
+      },
+      "vault": {
+        "address": "0x790e4f829fe865d432c4ea83b8b15f8871415b6c",
+        "name": "SharpByte AUSD Tori Ecosystem",
+        "type": "Morpho VaultV2",
+        "adapter": "0xE0d9069A559194D43F487d1ced6b329ceEDcF9cc",
+        "total_assets_ausd": 7059203.4,
+        "adapter_supply_usd_morpho_api": 6701112.89,
+        "operator_shares_at_feed_block": 2295620.5818682173,
+        "feed_block": 119794647,
+        "operator_shares_at_snapshot": 2290853.556817163,
+        "share_price_ausd_current": 1.0091748,
+        "operator_value_ausd_at_feed_shares": 2316682.5
+      },
+      "attributed_ausd": 3317879.93,
+      "variance_vs_feed_pct": 0.17,
+      "limit": "Monad reads are Nov 9 current state, not time-matched to the Nov 6 feed; variance is consistent with interest accrued and share changes."
+    }
+  },
+  "exit_liquidity_concentration": {
+    "holder": "0xa8a697f7fec0e99c1e6d82add6c80aafb07da60e",
+    "code_bytes": 0,
+    "block": 26340122,
+    "affiliation": "TODO: name and affiliation not published; not listed in the Accountable feed",
+    "fluid": {
+      "dex": "0x97f32e5091d0e6aee24beb398e6592ae111dee9c",
+      "sole_whitelisted_dex_supplier": "0x2241757fb95d970646b2e8cfef02af9436fb1ace",
+      "wrapper_contract": "FluidSmartLending",
+      "wrapper_total_supply_raw": "1035882219717925214958286",
+      "holder_balance_raw": "1031776041450270148721643",
+      "holder_share_pct": 99.6,
+      "method": "Transfer log reconciliation through block matched to totalSupply; balanceOf verified at block"
+    },
+    "curve": "See reports/data/tori-strusd-2026-11-08.json curve_lp: 100.00% and 99.07% of the two gauges",
+    "minting_relationship": {
+      "whitelisted_at_minting": true,
+      "cumulative_trusd_minted_to_holder": 56104696,
+      "cumulative_usdc_to_custodian": 38066393,
+      "cumulative_usdt_to_custodian": 18131145,
+      "cumulative_trusd_deposited_to_strusd": 27819104,
+      "strusd_balance_raw": "529790757209761968587611",
+      "note": "Canonical token contracts only; 67 lookalike token flows excluded"
+    }
+  }
+}
